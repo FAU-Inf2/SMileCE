@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="navigationValues">
+        <item>@string/first_element</item>
+        <item>@string/second_element</item>
+        <item>@string/third_element</item>
+    </string-array>
+
+</resources>

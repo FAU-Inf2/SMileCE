@@ -4,5 +4,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="key_management">SMile key management</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="first_element">First element</string>
+    <string name="second_element">Second element</string>
+    <string name="third_element">Third element</string>
 
 </resources>
