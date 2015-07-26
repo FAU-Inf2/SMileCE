@@ -2,7 +2,7 @@
 xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
-android:background="#5c6bc0"
+android:background="#b0bec5"
 android:choiceMode="singleChoice"
 android:divider="@android:color/transparent"
 android:dividerHeight="0dp"
