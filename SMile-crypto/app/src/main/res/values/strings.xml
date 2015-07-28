@@ -26,5 +26,6 @@
     <string name="title_activity_info">InfoActivity</string>
     <string name="title_activity_help">HelpActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="import_certificate_todo">…import certificate…</string>
 
 </resources>

@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
@@ -50,6 +51,14 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.currentFragment, new DefaultFragment());
         ft.commit();
+
+        ImageButton fab = (ImageButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, R.string.import_certificate_todo, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
