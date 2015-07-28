@@ -1,123 +1,165 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Toast;
 
+public class MainActivity extends ActionBarActivity {
 
-public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+    // Name and email in HeaderView -- TODO: for SMile-UI -> get from resources
+    String mName = "FAU is MAD!";
+    String mEmail = "fixmymail@gmx.de";
 
-    private static final String STATE_SECTION = "section";
+    //titles and icons for ListView
+    int mIcons[] = {R.drawable.ic_search_black_24dp, R.drawable.ic_info_black_24dp,
+            R.drawable.ic_settings_applications_black_24dp, R.drawable.ic_help_black_24dp};
+    String mTitles[];
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    private CharSequence mTitle;
-
-    private int mSection = -1;
+    private Toolbar toolbar;
+    RecyclerView mRecyclerView;
+    RecyclerView.Adapter mAdapter;
+    RecyclerView.LayoutManager mLayoutManager;
+    DrawerLayout mDrawer;
+    ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (savedInstanceState != null) {
-            mSection = savedInstanceState.getInt(STATE_SECTION, 0);
-        }
         setContentView(R.layout.activity_main);
-        onSectionAttached(mSection);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-    }
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(STATE_SECTION, mSection);
-        // TODO
-    }
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.currentFragment, new DefaultFragment());
+        ft.commit();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // TODO
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
+        mRecyclerView.setHasFixedSize(true);
+
+        mTitles = new String[4];
+        mTitles[0] = getResources().getString(R.string.navigation_drawer_search);
+        mTitles[1] = getResources().getString(R.string.navigation_drawer_info);
+        mTitles[2] = getResources().getString(R.string.navigation_drawer_settings);
+        mTitles[3] = getResources().getString(R.string.navigation_drawer_help);
+        mAdapter = new RecyclerViewAdapter(mTitles, mIcons, mName, mEmail);
+        mRecyclerView.setAdapter(mAdapter);
+
+        final GestureDetector mGestureDetector = new GestureDetector(MainActivity.this,
+                new GestureDetector.SimpleOnGestureListener() {
+            @Override public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+        });
+
+        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+
+                if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
+                    mDrawer.closeDrawers();
+
+                    int position = recyclerView.getChildPosition(child);
+                    String title;
+                    if (position == 0)
+                        title = getResources().getString(R.string.toolbar_default_title);
+                    else
+                        title = mTitles[position - 1];
+                    toolbar.setTitle(title);
+
+                    // TODO: remove after testing
+                    Toast.makeText(MainActivity.this, "Item " + position + ": " + title,
+                            Toast.LENGTH_SHORT).show();
+
+                    FragmentManager fm = getSupportFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    //switch not possible here :-(
+                    if(title.equals(getResources().getString(R.string.toolbar_default_title))) {
+                        DefaultFragment defaultFragment = new DefaultFragment();
+                        ft.replace(R.id.currentFragment, defaultFragment);
+                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_settings))){
+                        SettingsFragment settingsFragment = new SettingsFragment();
+                        ft.replace(R.id.currentFragment, settingsFragment);
+                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_help))) {
+                        HelpFragment helpFragment = new HelpFragment();
+                        ft.replace(R.id.currentFragment, helpFragment);
+                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_info))){
+                        InfoFragment infoFragment = new InfoFragment();
+                        ft.replace(R.id.currentFragment, infoFragment);
+                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_search))){
+                        SearchFragment searchFragment = new SearchFragment();
+                        ft.replace(R.id.currentFragment, searchFragment);
+                    }
+                    ft.commit();
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+            }
+        });
+
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.hello_world,
+                R.string.hello_world){ //TODO: set correct strings
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+            }
+        };
+        mDrawer.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            getMenuInflater().inflate(R.menu.menu_main, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Items in Toolbar/ActionBar
         int id = item.getItemId();
-        // TODO
+
+        // TODO: remove toasts after testing
+        if (id == R.id.action_settings) {
+            Toast.makeText(this, R.string.navigation_drawer_settings,
+                    Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.action_search) {
+            Toast.makeText(this, R.string.navigation_drawer_search,
+                    Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag("tag_fragment_" + position);
-        if (fragment == null) {
-            switch (position) {
-                case 0:
-                    fragment = PlaceholderFragment.newInstance(position + 1);
-                    break;
-                case 1:
-                    fragment = PlaceholderFragment.newInstance(position + 1);
-                    break;
-                case 2:
-                    fragment = PlaceholderFragment.newInstance(position + 1);
-                    break;
-                default:
-                    fragment = PlaceholderFragment.newInstance(position + 1);
-                    break;
-            }
-        }
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, fragment, "tag_fragment_" + position)
-                .commit();
-    }
-
-    public void onSectionAttached(int number) {
-        mSection = number;
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.key_management); // this is displayed as title in the ActionBar
-                break;
-            case 2:
-                mTitle = getString(R.string.second_element);
-                break;
-            case 3:
-                mTitle = getString(R.string.hello_world);
-                break;
-            default:
-                mTitle = getTitle();
-                break;
-        }
-    }
-
-    void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
     }
 }
