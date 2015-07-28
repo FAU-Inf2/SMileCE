@@ -123,6 +123,7 @@ public class MainActivity extends ActionBarActivity {
                         FragmentTransaction ft = fm.beginTransaction();
                         DefaultFragment defaultFragment = new DefaultFragment();
                         ft.replace(R.id.currentFragment, defaultFragment);
+                        ft.commit();
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
