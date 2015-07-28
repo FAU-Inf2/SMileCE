@@ -28,7 +28,7 @@ public class MainActivity extends ActionBarActivity {
 
     //titles and icons for ListView
     int mIcons[] = {R.drawable.ic_search_black_24dp, R.drawable.ic_info_black_24dp,
-            R.drawable.ic_settings_applications_black_24dp, R.drawable.ic_help_black_24dp};
+            R.drawable.ic_settings_black_24dp, R.drawable.ic_help_black_24dp};
     String mTitles[];
 
     private Toolbar toolbar;
@@ -62,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources()));
 
         mTitles = new String[4];
         mTitles[0] = getResources().getString(R.string.navigation_drawer_search);
