@@ -1,5 +1,6 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
@@ -82,32 +83,37 @@ public class MainActivity extends ActionBarActivity {
                         title = getResources().getString(R.string.toolbar_default_title);
                     else
                         title = mTitles[position - 1];
+
+                    //switch not possible here :-(
+                    if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
+                        FragmentManager fm = getSupportFragmentManager();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        DefaultFragment defaultFragment = new DefaultFragment();
+                        ft.replace(R.id.currentFragment, defaultFragment);
+                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
+                        Intent i = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(i);
+                        return true;
+                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_help))) {
+                        Intent i = new Intent(MainActivity.this, HelpActivity.class);
+                        startActivity(i);
+                        return true;
+                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_info))) {
+                        Intent i = new Intent(MainActivity.this, InfoActivity.class);
+                        startActivity(i);
+                        return true;
+                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
+                        FragmentManager fm = getSupportFragmentManager();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        SearchFragment searchFragment = new SearchFragment();
+                        ft.replace(R.id.currentFragment, searchFragment);
+                        ft.commit();
+                    }
                     toolbar.setTitle(title);
 
                     // TODO: remove after testing
                     Toast.makeText(MainActivity.this, "Item " + position + ": " + title,
                             Toast.LENGTH_SHORT).show();
-
-                    FragmentManager fm = getSupportFragmentManager();
-                    FragmentTransaction ft = fm.beginTransaction();
-                    //switch not possible here :-(
-                    if(title.equals(getResources().getString(R.string.toolbar_default_title))) {
-                        DefaultFragment defaultFragment = new DefaultFragment();
-                        ft.replace(R.id.currentFragment, defaultFragment);
-                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_settings))){
-                        SettingsFragment settingsFragment = new SettingsFragment();
-                        ft.replace(R.id.currentFragment, settingsFragment);
-                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_help))) {
-                        HelpFragment helpFragment = new HelpFragment();
-                        ft.replace(R.id.currentFragment, helpFragment);
-                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_info))){
-                        InfoFragment infoFragment = new InfoFragment();
-                        ft.replace(R.id.currentFragment, infoFragment);
-                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_search))){
-                        SearchFragment searchFragment = new SearchFragment();
-                        ft.replace(R.id.currentFragment, searchFragment);
-                    }
-                    ft.commit();
                     return true;
                 }
                 return false;
@@ -149,12 +155,12 @@ public class MainActivity extends ActionBarActivity {
         // Items in Toolbar/ActionBar
         int id = item.getItemId();
 
-        // TODO: remove toasts after testing
         if (id == R.id.action_settings) {
-            Toast.makeText(this, R.string.navigation_drawer_settings,
-                    Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(i);
             return true;
         } else if (id == R.id.action_search) {
+            // TODO
             Toast.makeText(this, R.string.navigation_drawer_search,
                     Toast.LENGTH_SHORT).show();
             return true;

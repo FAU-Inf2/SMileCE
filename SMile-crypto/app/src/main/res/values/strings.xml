@@ -23,5 +23,8 @@
     <string name="first_element">First element</string>
     <string name="second_element">Second element</string>
     <string name="third_element">Third element</string>
+    <string name="title_activity_info">InfoActivity</string>
+    <string name="title_activity_help">HelpActivity</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 
 </resources>
