@@ -2,6 +2,7 @@ package de.fau.cs.mad.smile_crypto;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -19,13 +20,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import java.io.File;
 
 public class MainActivity extends ActionBarActivity {
 
     // Name and email in HeaderView -- TODO: for SMile-UI -> get from resources
-    String mName = "FAU is MAD!";
-    String mEmail = "fixmymail@gmx.de";
-
+    String mName;
+    String mEmail;
     //titles and icons for ListView
     int mIcons[] = {R.drawable.ic_search_black_24dp, R.drawable.ic_info_black_24dp,
             R.drawable.ic_settings_black_24dp, R.drawable.ic_help_black_24dp};
@@ -37,6 +38,7 @@ public class MainActivity extends ActionBarActivity {
     RecyclerView.LayoutManager mLayoutManager;
     DrawerLayout mDrawer;
     ActionBarDrawerToggle mDrawerToggle;
+    protected final int FAB_FILE_CHOOSER_REQUEST_CODE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,25 @@ public class MainActivity extends ActionBarActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, R.string.import_certificate_todo, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, R.string.import_certificate_todo, Toast.LENGTH_SHORT).show();
+                showFileChooser();
+            }
+
+            private void showFileChooser() {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*"); //TODO: only relevant file types
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                try {
+                    startActivityForResult(Intent.createChooser(intent,
+                                    getResources().getString(R.string.fab_select_import_certificate)),
+                            FAB_FILE_CHOOSER_REQUEST_CODE);
+
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    Toast.makeText(MainActivity.this,
+                            getResources().getString(R.string.no_file_manager),
+                            Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -69,6 +89,9 @@ public class MainActivity extends ActionBarActivity {
         mTitles[1] = getResources().getString(R.string.navigation_drawer_info);
         mTitles[2] = getResources().getString(R.string.navigation_drawer_settings);
         mTitles[3] = getResources().getString(R.string.navigation_drawer_help);
+        mName = getResources().getString(R.string.navigation_drawer_header_name);
+        mEmail = getResources().getString(R.string.navigation_drawer_header_email_address);
+
         mAdapter = new RecyclerViewAdapter(mTitles, mIcons, mName, mEmail);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -139,7 +162,6 @@ public class MainActivity extends ActionBarActivity {
         mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.hello_world,
                 R.string.hello_world){ //TODO: set correct strings
-
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -152,6 +174,24 @@ public class MainActivity extends ActionBarActivity {
         };
         mDrawer.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FAB_FILE_CHOOSER_REQUEST_CODE:
+                //receive result from file manager (--> uri of certificate)
+                if (resultCode == RESULT_OK) {
+                    // Get the Uri of the selected file
+                    Uri uri = data.getData();
+                    File myFile = new File(uri.getPath());
+                    //TODO: remove toast
+                    Toast.makeText(this, myFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    //TODO: store/import...
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

@@ -27,5 +27,7 @@
     <string name="title_activity_help">HelpActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="import_certificate_todo">…import certificate…</string>
+    <string name="fab_select_import_certificate">Select a certificate to import</string>
+    <string name="no_file_manager">Please install a file manager.</string>
 
 </resources>
