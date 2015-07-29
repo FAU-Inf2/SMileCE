@@ -38,7 +38,6 @@ public class SettingsActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
