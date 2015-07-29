@@ -14,7 +14,9 @@
     <string name="app_info">Created in "Mobile Application Development" 2015.\n
         Licensed under Apache 2.0 License.\n
         More information on https://mad.cs.fau.de/ \n
-        Image credits: http://blog.spoongraphics.co.uk</string>
+        Image credits: http://blog.spoongraphics.co.uk\n
+        Material Design Icons: https://www.google.com/design/icons/
+    </string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

@@ -26,8 +26,9 @@ public class MainActivity extends ActionBarActivity {
     String mName;
     String mEmail;
     //titles and icons for ListView
-    int mIcons[] = {R.drawable.ic_search_black_24dp, R.drawable.ic_info_black_24dp,
-            R.drawable.ic_settings_black_24dp, R.drawable.ic_help_black_24dp};
+    int mIcons[] = {R.drawable.ic_add_black_24dp, R.drawable.ic_search_black_24dp,
+            R.drawable.ic_info_black_24dp, R.drawable.ic_settings_black_24dp,
+            R.drawable.ic_help_black_24dp};
     String mTitles[];
 
     private Toolbar toolbar;
@@ -62,11 +63,12 @@ public class MainActivity extends ActionBarActivity {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources()));
 
-        mTitles = new String[4];
-        mTitles[0] = getResources().getString(R.string.navigation_drawer_search);
-        mTitles[1] = getResources().getString(R.string.navigation_drawer_info);
-        mTitles[2] = getResources().getString(R.string.navigation_drawer_settings);
-        mTitles[3] = getResources().getString(R.string.navigation_drawer_help);
+        mTitles = new String[5];
+        mTitles[0] = getResources().getString(R.string.navigation_drawer_import_certificate);
+        mTitles[1] = getResources().getString(R.string.navigation_drawer_search);
+        mTitles[2] = getResources().getString(R.string.navigation_drawer_info);
+        mTitles[3] = getResources().getString(R.string.navigation_drawer_settings);
+        mTitles[4] = getResources().getString(R.string.navigation_drawer_help);
         mName = getResources().getString(R.string.navigation_drawer_header_name);
         mEmail = getResources().getString(R.string.navigation_drawer_header_email_address);
 
@@ -99,6 +101,9 @@ public class MainActivity extends ActionBarActivity {
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
                         getSupportFragmentManager().beginTransaction().
                                 replace(R.id.currentFragment, new DefaultFragment()).commit();
+                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
+                        Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+                        startActivity(i);
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
