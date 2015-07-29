@@ -2,7 +2,6 @@ package de.fau.cs.mad.smile_crypto;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -20,7 +19,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import java.io.File;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -48,10 +46,8 @@ public class MainActivity extends ActionBarActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.currentFragment, new DefaultFragment());
-        ft.commit();
+        getSupportFragmentManager().beginTransaction().
+                replace(R.id.currentFragment, new DefaultFragment()).commit();
 
         ImageButton fab = (ImageButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -101,11 +97,8 @@ public class MainActivity extends ActionBarActivity {
 
                     //switch not possible here :-(
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
-                        FragmentManager fm = getSupportFragmentManager();
-                        FragmentTransaction ft = fm.beginTransaction();
-                        DefaultFragment defaultFragment = new DefaultFragment();
-                        ft.replace(R.id.currentFragment, defaultFragment);
-                        ft.commit();
+                        getSupportFragmentManager().beginTransaction().
+                                replace(R.id.currentFragment, new DefaultFragment()).commit();
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
@@ -119,11 +112,8 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(i);
                         return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
-                        FragmentManager fm = getSupportFragmentManager();
-                        FragmentTransaction ft = fm.beginTransaction();
-                        SearchFragment searchFragment = new SearchFragment();
-                        ft.replace(R.id.currentFragment, searchFragment);
-                        ft.commit();
+                        getSupportFragmentManager().beginTransaction().
+                                replace(R.id.currentFragment, new SearchFragment()).commit();
                     }
                     toolbar.setTitle(title);
 
@@ -180,7 +170,6 @@ public class MainActivity extends ActionBarActivity {
                     Toast.LENGTH_SHORT).show();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }

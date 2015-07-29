@@ -28,11 +28,8 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        ImportCertificateFragment icFragment = new ImportCertificateFragment();
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.currentFragment, icFragment);
-        ft.commit();
+        getSupportFragmentManager().beginTransaction().
+                replace(R.id.currentFragment, new ImportCertificateFragment()).commit();
 
         //Toast.makeText(MainActivity.this, R.string.import_certificate_todo, Toast.LENGTH_SHORT).show();
         showFileChooser();
