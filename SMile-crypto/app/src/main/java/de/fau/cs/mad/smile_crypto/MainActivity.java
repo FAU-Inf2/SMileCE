@@ -38,7 +38,6 @@ public class MainActivity extends ActionBarActivity {
     RecyclerView.LayoutManager mLayoutManager;
     DrawerLayout mDrawer;
     ActionBarDrawerToggle mDrawerToggle;
-    protected final int FAB_FILE_CHOOSER_REQUEST_CODE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,25 +57,8 @@ public class MainActivity extends ActionBarActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(MainActivity.this, R.string.import_certificate_todo, Toast.LENGTH_SHORT).show();
-                showFileChooser();
-            }
-
-            private void showFileChooser() {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*"); //TODO: only relevant file types
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-                try {
-                    startActivityForResult(Intent.createChooser(intent,
-                                    getResources().getString(R.string.fab_select_import_certificate)),
-                            FAB_FILE_CHOOSER_REQUEST_CODE);
-
-                } catch (android.content.ActivityNotFoundException anfe) {
-                    Toast.makeText(MainActivity.this,
-                            getResources().getString(R.string.no_file_manager),
-                            Toast.LENGTH_SHORT).show();
-                }
+                Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+                startActivity(i);
             }
         });
 
@@ -175,24 +157,6 @@ public class MainActivity extends ActionBarActivity {
         };
         mDrawer.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FAB_FILE_CHOOSER_REQUEST_CODE:
-                //receive result from file manager (--> uri of certificate)
-                if (resultCode == RESULT_OK) {
-                    // Get the Uri of the selected file
-                    Uri uri = data.getData();
-                    File myFile = new File(uri.getPath());
-                    //TODO: remove toast
-                    Toast.makeText(this, myFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
-                    //TODO: store/import...
-                }
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
