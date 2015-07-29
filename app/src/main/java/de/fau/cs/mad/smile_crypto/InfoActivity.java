@@ -1,8 +1,6 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -22,11 +20,8 @@ public class InfoActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        InfoFragment infoFragment = new InfoFragment();
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.currentFragment, infoFragment);
-        ft.commit();
+        getSupportFragmentManager().beginTransaction().
+                replace(R.id.currentFragment, new InfoFragment()).commit();
     }
 
     @Override

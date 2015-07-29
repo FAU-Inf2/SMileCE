@@ -51,7 +51,6 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
@@ -71,7 +70,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
                     getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
                             ImportCertificateFragment.newInstance(path)).commitAllowingStateLoss();
-                    addCertificateToKeystore(uri, path);
+                    addCertificateToKeyChain(path);
                 }
                 break;
         }
@@ -97,7 +96,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
     }
 
-    private void addCertificateToKeystore(Uri uri, String pathToFile) {
+    private void addCertificateToKeyChain(String pathToFile) {
         try {
             File file = new File(pathToFile);
             byte[] p12 = new byte[(int) file.length()];
@@ -109,6 +108,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
             Intent importKey = KeyChain.createInstallIntent();
             importKey.putExtra(KeyChain.EXTRA_PKCS12, p12);
             startActivity(importKey);
+
         } catch (Exception e){
             Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
             Toast.makeText(this, R.string.error + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -117,7 +117,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
     /*The following methods are from FileUtils.java at https://github.com/iPaulPro/aFileChooser
     *
-    * Project is under Apache Licence 2.0
+    * Project is under Apache License 2.0
     *
     * found on http://stackoverflow.com/a/20559175/2319481
     *
@@ -250,4 +250,5 @@ public class ImportCertificateActivity extends ActionBarActivity {
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
 }

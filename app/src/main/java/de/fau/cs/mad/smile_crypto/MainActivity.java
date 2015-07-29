@@ -174,6 +174,11 @@ public class MainActivity extends ActionBarActivity {
             Toast.makeText(this, R.string.navigation_drawer_search,
                     Toast.LENGTH_SHORT).show();
             return true;
+        } else if (id == R.id.go_to_list_key_chain) {
+            //TODO: just a workaround
+            Intent i = new Intent(MainActivity.this, KeyChainActivity.class);
+            startActivity(i);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

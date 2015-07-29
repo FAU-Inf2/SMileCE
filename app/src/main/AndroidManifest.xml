@@ -34,6 +34,10 @@
             android:name=".ImportCertificateActivity"
             android:label="@string/title_activity_import_certificate" >
         </activity>
+        <activity
+            android:name=".KeyChainActivity"
+            android:label="@string/title_activity_key_chain" >
+        </activity>
     </application>
 
 </manifest>
