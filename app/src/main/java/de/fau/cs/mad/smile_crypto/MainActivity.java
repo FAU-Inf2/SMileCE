@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -96,6 +97,9 @@ public class MainActivity extends ActionBarActivity {
                     else
                         title = mTitles[position - 1];
 
+                    Log.d(SMileCrypto.LOG_TAG, "Clicked on NavigationDrawerItem " + position + ": "
+                            + title);
+
                     //switch not possible here :-(
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
                         getSupportFragmentManager().beginTransaction().
@@ -121,10 +125,6 @@ public class MainActivity extends ActionBarActivity {
                                 replace(R.id.currentFragment, new SearchFragment()).commit();
                     }
                     toolbar.setTitle(title);
-
-                    // TODO: remove after testing
-                    Toast.makeText(MainActivity.this, "Item " + position + ": " + title,
-                            Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 return false;

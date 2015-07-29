@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.security.KeyChain;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -38,7 +39,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         getSupportFragmentManager().beginTransaction().
                 replace(R.id.currentFragment, new ImportCertificateFragment()).commit();
 
-        //Toast.makeText(MainActivity.this, R.string.import_certificate_todo, Toast.LENGTH_SHORT).show();
+        Log.d(SMileCrypto.LOG_TAG, "Started ImportCertificateActivity.");
         showFileChooser();
     }
 
@@ -67,8 +68,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
                     String path = getPath(this, uri);
-                    //TODO: remove toast
-                    Toast.makeText(this, path, Toast.LENGTH_LONG).show();
+                    Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
                     getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
                             ImportCertificateFragment.newInstance(path)).commitAllowingStateLoss();
                     addCertificateToKeystore(uri, path);
@@ -84,11 +84,13 @@ public class ImportCertificateActivity extends ActionBarActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
 
         try {
+            Log.d(SMileCrypto.LOG_TAG, "Call file manager to choose certificate file.");
             startActivityForResult(Intent.createChooser(intent,
                             getResources().getString(R.string.fab_select_import_certificate)),
                     FAB_FILE_CHOOSER_REQUEST_CODE);
 
         } catch (android.content.ActivityNotFoundException anfe) {
+            Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
             Toast.makeText(this,
                     getResources().getString(R.string.no_file_manager),
                     Toast.LENGTH_SHORT).show();
@@ -103,13 +105,14 @@ public class ImportCertificateActivity extends ActionBarActivity {
             fileInputStream.read(p12);
             fileInputStream.close();
 
+            Log.d(SMileCrypto.LOG_TAG, "Import certificate to keychain.");
             Intent importKey = KeyChain.createInstallIntent();
             importKey.putExtra(KeyChain.EXTRA_PKCS12, p12);
             startActivity(importKey);
         } catch (Exception e){
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
+            Toast.makeText(this, R.string.error + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
     }
 
     /*The following methods are from FileUtils.java at https://github.com/iPaulPro/aFileChooser
