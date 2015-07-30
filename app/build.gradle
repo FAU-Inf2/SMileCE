@@ -26,13 +26,18 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support:recyclerview-v7:22.0.0'
-    compile 'com.madgag.spongycastle:core:1.52.0.0'
+    compile 'com.madgag:scmail-jdk15on:1.47.0.3'
 }
 
 allprojects {

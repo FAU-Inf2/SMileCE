@@ -50,13 +50,20 @@ public class ListOwnCertificatesFragment extends Fragment {
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 if (entry instanceof KeyStore.PrivateKeyEntry) {
+                    ((KeyStore.PrivateKeyEntry) entry).getPrivateKey();
                     result += "\n\t · Alias: " + alias;
                     Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
                     result += "\n\t\t – Type: " + c.getType();
                     result += "\n\t\t – HashCode: " + c.hashCode();
+
+                    /* TODO: just a workaround for testing -- but app will crash at the moment
+                    DecryptMail dM = new DecryptMail();
+                    dM.decryptMail(alias);*/
                 } else {
                     //--> no private key available for this certificate
+                    //currently there are no such entries because yet we cannot import the certs of
+                    //others, e.g. by using their signature.
                     Log.d(SMileCrypto.LOG_TAG, "Not an instance of a PrivateKeyEntry");
                     Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
