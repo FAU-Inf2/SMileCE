@@ -10,10 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
-import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
 
@@ -50,9 +47,9 @@ public class ListOwnCertificatesFragment extends Fragment {
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                 Certificate c = ks.getCertificate(alias);
                 Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
-                Log.d(SMileCrypto.LOG_TAG, "· PubKey: " + c.getPublicKey());
+                Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
                 result += "\n\t · Type: " + c.getType();
-                result += "\n\t · PubKey: " + c.getPublicKey();
+                result += "\n\t · HashCode: " + c.hashCode();
             }
             return result;
         } catch (Exception e){
