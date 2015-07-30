@@ -1,7 +1,16 @@
 <resources>
     <string name="app_name">SMile-crypto</string>
 
+    <string name="hello_world">Hello world!</string>
+    <string name="error">Error</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
+    <string name="go">Go</string>
+    <string name="try_again">Please try again.</string>
+    <string name="action_settings">Settings</string>
+
     <string name="toolbar_default_title">SMile-crypto!</string>
+
     <string name="navigation_drawer_search">Search</string>
     <string name="navigation_drawer_info">Info</string>
     <string name="navigation_drawer_help">Help</string>
@@ -19,23 +28,25 @@
         Material Design Icons: https://www.google.com/design/icons/
     </string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="error">Error</string>
-    <string name="action_settings">Settings</string>
     <string name="key_management">SMile key management</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="first_element">First element</string>
     <string name="second_element">Second element</string>
     <string name="third_element">Third element</string>
+
     <string name="title_activity_info">InfoActivity</string>
     <string name="title_activity_help">HelpActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_import_certificate">ImportCertificateActivity</string>
+    <string name="title_activity_key_chain">KeyChainActivity</string>
+
     <string name="import_certificate_todo">…import certificate…</string>
     <string name="fab_select_import_certificate">Select a certificate to import</string>
     <string name="no_file_manager">Please install a file manager.</string>
     <string name="import_certificate_show_path">Your selected file was:&#160;</string>
-    <string name="title_activity_key_chain">KeyChainActivity</string>
+    <string name="import_certificate_successful">Importing your certificate was successful.</string>
 
+    <string name="enter_passphrase">Please enter the passphrase to unlock:</string>
+    <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
 </resources>

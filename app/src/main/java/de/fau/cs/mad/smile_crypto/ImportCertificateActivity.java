@@ -1,7 +1,9 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,12 +15,23 @@ import android.provider.MediaStore;
 import android.security.KeyChain;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.Principal;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
 public class ImportCertificateActivity extends ActionBarActivity {
 
@@ -70,7 +83,8 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
                     getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
                             ImportCertificateFragment.newInstance(path)).commitAllowingStateLoss();
-                    addCertificateToKeyChain(path);
+                    //addCertificateToKeyChain(path);
+                    showPassphrasePrompt(path);
                 }
                 break;
         }
@@ -93,6 +107,83 @@ public class ImportCertificateActivity extends ActionBarActivity {
             Toast.makeText(this,
                     getResources().getString(R.string.no_file_manager),
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void showPassphrasePrompt(final String pathToFile) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View passphrasePromptView = layoutInflater.inflate(R.layout.passphrase_prompt, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(passphrasePromptView);
+
+        final EditText passphraseUserInput = (EditText) passphrasePromptView.
+                findViewById(R.id.passphraseUserInput);
+        passphraseUserInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        passphraseUserInput.setTransformationMethod(new PasswordTransformationMethod());
+
+        alertDialogBuilder.setCancelable(false).setNegativeButton(getResources().getString(R.string.go),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String passphrase = passphraseUserInput.getText().toString();
+                        if (!checkPassphraseAddCertificates(pathToFile, passphrase)) {
+                            Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+                            builder.setTitle(getResources().getString(R.string.error));
+                            builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
+                                    "\n" + getResources().getString(R.string.try_again));
+
+                            builder.setPositiveButton(R.string.cancel, null);
+                            builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    showPassphrasePrompt(pathToFile);
+                                }
+                            });
+                            builder.create().show();
+                        }
+                    }
+                })
+                .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        }
+                );
+        alertDialogBuilder.create().show();
+    }
+
+    private Boolean checkPassphraseAddCertificates(String pathToFile, String passphrase) {
+        try {
+            KeyStore p12 = KeyStore.getInstance("pkcs12");
+            p12.load(new FileInputStream(pathToFile), passphrase.toCharArray());
+            Enumeration e = p12.aliases();
+            while (e.hasMoreElements()) {
+                String alias = (String) e.nextElement();
+                X509Certificate c = (X509Certificate) p12.getCertificate(alias);
+                Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
+                Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + c.getSubjectDN().getName());
+                Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + c.getIssuerDN().getName());
+                addCertificateToKeyStore(c);
+            }
+            return true;
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error while loading keyStore: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void addCertificateToKeyStore(X509Certificate c) {
+        try {
+            Log.d(SMileCrypto.LOG_TAG, "Import certificate to keyStore.");
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            ks.setCertificateEntry("myCertAlias", c); //TODO: set alias
+
+            Toast.makeText(this, R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
+        } catch (Exception e){
+            Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
+            Toast.makeText(this, R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
