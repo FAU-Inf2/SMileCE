@@ -48,7 +48,7 @@ public class MainActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
 
         getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new DefaultFragment()).commit();
+                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
 
         ImageButton fab = (ImageButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -158,6 +158,13 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public void onResume() {
+        getSupportFragmentManager().beginTransaction().
+                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
+        super.onResume();
     }
 
     @Override

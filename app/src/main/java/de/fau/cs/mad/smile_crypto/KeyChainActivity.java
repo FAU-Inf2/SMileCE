@@ -13,6 +13,8 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 
+/*depreciated -- can be deleted later (stays here to see how KeyChain works*/
+@Deprecated
 public class KeyChainActivity extends ActionBarActivity implements
         KeyChainAliasCallback {
     private Toolbar toolbar;

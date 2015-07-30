@@ -28,7 +28,6 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
-import java.security.Principal;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -85,6 +84,10 @@ public class ImportCertificateActivity extends ActionBarActivity {
                             ImportCertificateFragment.newInstance(path)).commitAllowingStateLoss();
                     //addCertificateToKeyChain(path);
                     showPassphrasePrompt(path);
+                } else {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
+                            ImportCertificateFragment.newInstance(getResources().
+                                    getString(R.string.import_certificate_no_file))).commitAllowingStateLoss();
                 }
                 break;
         }
@@ -178,7 +181,9 @@ public class ImportCertificateActivity extends ActionBarActivity {
             Log.d(SMileCrypto.LOG_TAG, "Import certificate to keyStore.");
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
-            ks.setCertificateEntry("myCertAlias", c); //TODO: set alias
+            long importTime = System.currentTimeMillis();
+            String alias = "SMile_crypto_" + Long.toString(importTime); //TODO: other alias?
+            ks.setCertificateEntry(alias, c);
 
             Toast.makeText(this, R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
         } catch (Exception e){
@@ -187,6 +192,8 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
     }
 
+    /*depreciated -- can be deleted later (stays here to see how KeyChain works*/
+    @Deprecated
     private void addCertificateToKeyChain(String pathToFile) {
         try {
             File file = new File(pathToFile);

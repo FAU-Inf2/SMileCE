@@ -46,6 +46,7 @@
     <string name="no_file_manager">Please install a file manager.</string>
     <string name="import_certificate_show_path">Your selected file was:&#160;</string>
     <string name="import_certificate_successful">Importing your certificate was successful.</string>
+    <string name="import_certificate_no_file">No file to import was selected.</string>
 
     <string name="enter_passphrase">Please enter the passphrase to unlock:</string>
     <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
