@@ -11,4 +11,4 @@ before_install:
   -in keys.tar.enc -out keys.tar -d
 - tar xvf keys.tar
 - mv madfau.keystore app/
-script: "./gradlew assembleDebug"
+script: "./gradlew assemble"
