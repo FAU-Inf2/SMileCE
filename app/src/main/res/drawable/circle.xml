@@ -90,16 +90,11 @@
                         />
                 </shape>
             </item>
-        </layer-list>
-    </item>
-    <item>
-        <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-            android:color="?android:colorControlHighlight">
             <item>
                 <shape android:shape="oval">
                     <solid android:color="@color/ColorPrimary" />
                 </shape>
             </item>
-        </ripple>
+        </layer-list>
     </item>
 </layer-list>
