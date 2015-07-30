@@ -36,22 +36,36 @@ public class ListOwnCertificatesFragment extends Fragment {
 
     private String findCerts() {
         try {
-            String result = "All Certificates: ";
+            /*TODO: This lists own certs and certs from other people. Needs to be splitted into
+             * part for own and a part for other certs. */
+            String result = "My Certificates: ";
+            String result_other = "\n Other Certificates: ";
             Log.d(SMileCrypto.LOG_TAG, "Find certs…");
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             Enumeration e = ks.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
-                result += "\n Alias: " + alias;
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                 Certificate c = ks.getCertificate(alias);
-                Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
-                Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                result += "\n\t · Type: " + c.getType();
-                result += "\n\t · HashCode: " + c.hashCode();
+                KeyStore.Entry entry = ks.getEntry(alias, null);
+                if (entry instanceof KeyStore.PrivateKeyEntry) {
+                    result += "\n\t · Alias: " + alias;
+                    Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
+                    Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
+                    result += "\n\t\t – Type: " + c.getType();
+                    result += "\n\t\t – HashCode: " + c.hashCode();
+                } else {
+                    //--> no private key available for this certificate
+                    Log.d(SMileCrypto.LOG_TAG, "Not an instance of a PrivateKeyEntry");
+                    Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
+                    Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
+                    result_other += "\n\t · Alias: " + alias;
+                    result_other += "\n\t\t – Type: " + c.getType();
+                    result_other += "\n\t\t – HashCode: " + c.hashCode();
+                }
             }
-            return result;
+            return result + result_other;
         } catch (Exception e){
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
             return null;
