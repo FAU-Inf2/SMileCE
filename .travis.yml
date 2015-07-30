@@ -6,9 +6,18 @@ android:
   - extra-android-support
   - extra-android-m2repository
   - extra-google-m2repository
+env:
+  global:
+  - secure: KUzIDDGdymXq7GSRuuFTeyEdckQjqVaRkz0emM3DvBy2l3Oa5e4e8veYoxX7lKyFZQuQbV3szytmBveOCjq0+4G7ykhiR1Ds5Kz9cCVeGLfOC4xzIaw7MHmfhUezDHmJq38IUNobl/u3DwQZzCWSl1oupzX44Kr+Yjs8ShxsN+55OfERP5v8YPuuGsVqaQqkm+DPyCinZ0KPXwTfsjseLJCCXg+o6Qj3r3srzKLpnDhbK3t42iqrp5C9shyPL4uKegrBPvxK3a2tpQozQoFhpPbw32pOitism+GBCP3rfIEVmaaEtLwndbe8S6EBPU+4WYkuWaNrJ+2G/2Vr5M/m2+NArmu5gBnGbFOnw9apchB9ry7qAiClpiI2MRzk5aN8ldd9c+PTdd0LqZeE2Kbq81yndPGxO0RPFUburtT1UuaFHbEe9pP+SuGYKexBSEBFLvyUJq6rj0ISAhAeFu+PqGmqVX7iwLthTP0kZPgVIqVQj2ItNpAkrSv3hn+fSO+nd1DTZAlCuZAcQTiNanMczVjQ2i+fOcxKrxazLbok2feYQr3cGlB1fRVYcVbT/GMJh5XjGgG5LsDg3IDIUSsG8KMOfz6GsYiOJkOrewT7sXLlgHpQ3fd5TRDniEJHPSrf/hsPYvtD/T2vik8XZyT2eEhYTCKkgxRb1ra1MKiHy1M=
+  - secure: c8Z9ygVQjR2RMgvRFcNFSjn3FzK3R8F3gR8Jl53/PvzJVVYh9qhnQzYQh+MOzLUWDYEO4FkoYLulmeclh8jqutTknWq3vNA7kJhi5Hz2qsekk5j5VR5CDU4g9nYu5MA5RgNC8Da/Yc88u6D2INL+fLAOCVOhzZ2XlG/8of830NJbWBN+FX3VoCcDAvzFpiUXmGWZ2VWS4EJMXoNhAvZvhDJ7fVowjb87ylkQbOTNU452ZimPk09qPoxRoKv7EaZZaHMEMYxKS+Pud4qw9/2KlYQKCkA8hESkrjjTt+nkw/rrdubrS3iwXqoEYqXhXi1govHBzv+H2fenLeJ/v7q2p04KupFvwvrZI1OKM/2MO+apl8hlSczvFUvJfb2jhWvIyo1aPrkmtAIbEnhDgsVcp5PhO4hI3FL8nNgzce4bdV9DqPDlyFdetjmIkD1uv/F68EF+DFC+tPEnYd928RweIco4O1R44X+kZyjoBEJicnpkODnoNWK7r8EV+ZXGJmXyAYtwn7wAPYBs6ZQpCCmPHwIantiJCz2xA05XEL6iqrV3SFcEmEoElrehqGQqv5zWglslztcgXCZrTyOVmgij3vy1hXuhyO5KMKzCepOQ/jTlFOuVzkNFNhr2/vwIEfwSRHfhTAdGWD26jaLJjnfzKfscPWIxniSQkKS0eo3ns9U=
 before_install:
 - openssl aes-256-cbc -K $encrypted_b5b10b36994f_key -iv $encrypted_b5b10b36994f_iv
   -in keys.tar.enc -out keys.tar -d
 - tar xvf keys.tar
 - mv madfau.keystore app/
 script: "./gradlew assemble"
+after_success:
+- mv app/build/outputs/apk/app-release.apk smile-crypto-$TRAVIS_BRANCH-`git rev-parse
+  HEAD`.apk
+- curl -u $LOGIN -F "apk=@smile-crypto-$TRAVIS_BRANCH-`git rev-parse HEAD`.apk"
+  -F "project=smile-crypto" $URL
