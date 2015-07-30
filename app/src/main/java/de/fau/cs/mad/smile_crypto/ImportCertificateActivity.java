@@ -28,6 +28,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -167,7 +168,9 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                 Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + c.getSubjectDN().getName());
                 Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + c.getIssuerDN().getName());
-                addCertificateToKeyStore(c);
+
+                PrivateKey key = (PrivateKey) p12.getKey(alias, passphrase.toCharArray());
+                addCertificateToKeyStore(key, c);
             }
             return true;
         } catch (Exception e) {
@@ -176,14 +179,14 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
     }
 
-    private void addCertificateToKeyStore(X509Certificate c) {
+    private void addCertificateToKeyStore(PrivateKey key, X509Certificate c) {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Import certificate to keyStore.");
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             long importTime = System.currentTimeMillis();
             String alias = "SMile_crypto_" + Long.toString(importTime); //TODO: other alias?
-            ks.setCertificateEntry(alias, c);
+            ks.setKeyEntry(alias, key, null, new Certificate[] { c });
 
             Toast.makeText(this, R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
         } catch (Exception e){

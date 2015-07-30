@@ -103,7 +103,7 @@ public class MainActivity extends ActionBarActivity {
                     //switch not possible here :-(
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
                         getSupportFragmentManager().beginTransaction().
-                                replace(R.id.currentFragment, new DefaultFragment()).commit();
+                                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
                     } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
