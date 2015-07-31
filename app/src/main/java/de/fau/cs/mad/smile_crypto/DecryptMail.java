@@ -33,6 +33,8 @@ public class DecryptMail {
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
 
+            Log.d(SMileCrypto.LOG_TAG, "Alias is: " + alias);
+
             X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
             RecipientId recId = new JceKeyTransRecipientId(cert);
 
@@ -49,13 +51,14 @@ public class DecryptMail {
 
             byte[] content = recipient.getContent(new JceKeyTransEnvelopedRecipient(
                     ((KeyStore.PrivateKeyEntry) ks.getEntry(alias, null)).getPrivateKey()).setProvider("SC"));
+
             MimeBodyPart res = SMIMEUtil.toMimeBodyPart(content);
 
             Log.d(SMileCrypto.LOG_TAG, "Decrypted Message:\n");
             Log.d(SMileCrypto.LOG_TAG, res.getContent().toString());
 
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+            Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
         }
     }
 }

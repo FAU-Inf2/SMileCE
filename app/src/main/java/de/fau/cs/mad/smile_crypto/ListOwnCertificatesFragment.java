@@ -57,9 +57,9 @@ public class ListOwnCertificatesFragment extends Fragment {
                     result += "\n\t\t – Type: " + c.getType();
                     result += "\n\t\t – HashCode: " + c.hashCode();
 
-                    /* TODO: just a workaround for testing -- but app will crash at the moment
+                    /* TODO: just a workaround for testing -- will throw an error
                     DecryptMail dM = new DecryptMail();
-                    dM.decryptMail(alias);*/
+                    dM.decryptMail(alias); */
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
