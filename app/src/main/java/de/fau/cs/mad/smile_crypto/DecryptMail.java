@@ -2,7 +2,10 @@ package de.fau.cs.mad.smile_crypto;
 
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -37,20 +40,41 @@ public class DecryptMail {
 
             X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
             RecipientId recId = new JceKeyTransRecipientId(cert);
+            Log.d(SMileCrypto.LOG_TAG, "Got recId");
 
             //
             // Get a Session object with the default properties.
             //
             Properties props = System.getProperties();
             Session session = Session.getDefaultInstance(props, null);
+            if (session == null) {
+                Log.d(SMileCrypto.LOG_TAG, "Session is null.");
+                return;
+            }
+            Log.d(SMileCrypto.LOG_TAG, "Got session.");
 
-            MimeMessage msg = new MimeMessage(session, new FileInputStream("/storage/emulated/0/smime.p7m")); //just for testing
-            SMIMEEnveloped m = new SMIMEEnveloped(msg);
+            File file = new File("/storage/emulated/0/smime.p7m"); //hardcoded just for testing
+            MimeMessage msg = new MimeMessage(session, new FileInputStream(file));
+            SMIMEEnveloped m = new SMIMEEnveloped(msg); // <-- TODO: Fails here
+            Log.d(SMileCrypto.LOG_TAG, "...never shown...");
+
             RecipientInformationStore recipients = m.getRecipientInfos();
             RecipientInformation recipient = recipients.get(recId);
 
+            if(recipient == null) {
+                Log.d(SMileCrypto.LOG_TAG, "Recipient is null");
+                return;
+            }
+            Log.d(SMileCrypto.LOG_TAG, "Recipient OKAY");
+
             byte[] content = recipient.getContent(new JceKeyTransEnvelopedRecipient(
                     ((KeyStore.PrivateKeyEntry) ks.getEntry(alias, null)).getPrivateKey()).setProvider("SC"));
+
+            if(content == null) {
+                Log.d(SMileCrypto.LOG_TAG, "Content is null");
+                return;
+            }
+            Log.d(SMileCrypto.LOG_TAG, "Content OKAY");
 
             MimeBodyPart res = SMIMEUtil.toMimeBodyPart(content);
 
@@ -59,6 +83,7 @@ public class DecryptMail {
 
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
