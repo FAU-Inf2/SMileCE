@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,7 +18,9 @@ import org.spongycastle.cms.RecipientInformationStore;
 import org.spongycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.spongycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.spongycastle.mail.smime.SMIMEEnveloped;
+import org.spongycastle.mail.smime.SMIMEEnvelopedParser;
 import org.spongycastle.mail.smime.SMIMEUtil;
+import org.spongycastle.mail.smime.util.SharedFileInputStream;
 
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
@@ -31,7 +34,7 @@ public class DecryptMail {
     public DecryptMail() {
     }
 
-    public void decryptMail(String alias) {
+    public MimeBodyPart decryptMail(String alias, MimeMessage msg) {
         try {
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
@@ -49,13 +52,14 @@ public class DecryptMail {
             Session session = Session.getDefaultInstance(props, null);
             if (session == null) {
                 Log.d(SMileCrypto.LOG_TAG, "Session is null.");
-                return;
+                return null;
             }
             Log.d(SMileCrypto.LOG_TAG, "Got session.");
 
-            File file = new File("/storage/emulated/0/smime.p7m"); //hardcoded just for testing
-            MimeMessage msg = new MimeMessage(session, new FileInputStream(file));
-            SMIMEEnveloped m = new SMIMEEnveloped(msg); // <-- TODO: Fails here
+            //File file = new File("/storage/emulated/0/smime.p7m"); //hardcoded just for testing
+            //MimeMessage msg = new MimeMessage(session, new FileInputStream(file));
+            //MimeBodyPart msg = new MimeBodyPart(new SharedFileInputStream("/storage/emulated/0/smime.p7m"));
+            SMIMEEnvelopedParser m = new SMIMEEnvelopedParser(msg); // <-- TODO: Fails here
             Log.d(SMileCrypto.LOG_TAG, "...never shown...");
 
             RecipientInformationStore recipients = m.getRecipientInfos();
@@ -63,7 +67,7 @@ public class DecryptMail {
 
             if(recipient == null) {
                 Log.d(SMileCrypto.LOG_TAG, "Recipient is null");
-                return;
+                return null;
             }
             Log.d(SMileCrypto.LOG_TAG, "Recipient OKAY");
 
@@ -72,7 +76,7 @@ public class DecryptMail {
 
             if(content == null) {
                 Log.d(SMileCrypto.LOG_TAG, "Content is null");
-                return;
+                return null;
             }
             Log.d(SMileCrypto.LOG_TAG, "Content OKAY");
 
@@ -81,9 +85,12 @@ public class DecryptMail {
             Log.d(SMileCrypto.LOG_TAG, "Decrypted Message:\n");
             Log.d(SMileCrypto.LOG_TAG, res.getContent().toString());
 
+            return res;
+
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             e.printStackTrace();
         }
+        return null;
     }
 }

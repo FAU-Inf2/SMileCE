@@ -13,6 +13,15 @@ import android.widget.TextView;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
+import java.util.Properties;
+
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 public class ListOwnCertificatesFragment extends Fragment {
     public ListOwnCertificatesFragment() {
@@ -56,10 +65,34 @@ public class ListOwnCertificatesFragment extends Fragment {
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
                     result += "\n\t\t – Type: " + c.getType();
                     result += "\n\t\t – HashCode: " + c.hashCode();
+                    /*try {
+                        // TODO: just a workaround for testing -- will throw an error
+                        DecryptMail dM = new DecryptMail();
+                        EncryptMail eM = new EncryptMail();
+                        Properties props = System.getProperties();
+                        Session session = Session.getDefaultInstance(props, null);
 
-                    /* TODO: just a workaround for testing -- will throw an error
-                    DecryptMail dM = new DecryptMail();
-                    dM.decryptMail(alias); */
+                        Address fromUser = new InternetAddress("\"Eric H. Echidna\"<eric@spongycastle.org>");
+                        Address toUser = new InternetAddress("example@spongycastle.org");
+
+                        MimeMessage body = new MimeMessage(session);
+                        body.setFrom(fromUser);
+                        body.setRecipient(Message.RecipientType.TO, toUser);
+                        body.setSubject("example encrypted message");
+                        MimeBodyPart messagePart = new MimeBodyPart();
+                        MimeMultipart multipart = new MimeMultipart();
+                        messagePart.setText("You message's string content goes here.", "utf-8");
+                        multipart.addBodyPart(messagePart);
+                        body.setContent(multipart);
+                        Log.e(SMileCrypto.LOG_TAG, "Testmail: " + body.getContent().toString());
+                        MimeMessage enc = eM.encrypt(alias, body);
+                        Log.e(SMileCrypto.LOG_TAG, "Testmail enc: " + enc.getContent().toString());
+                        MimeBodyPart dec = dM.decryptMail(alias, enc);
+                        Log.e(SMileCrypto.LOG_TAG, "Testmail dec: " + dec.getContent().toString());
+                    } catch (Exception ex) {
+                        Log.e(SMileCrypto.LOG_TAG, "Error while encryspting/decrypting mail: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }*/
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
