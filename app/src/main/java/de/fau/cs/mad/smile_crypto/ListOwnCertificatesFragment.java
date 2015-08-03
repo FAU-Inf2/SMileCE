@@ -72,7 +72,7 @@ public class ListOwnCertificatesFragment extends Fragment {
                     try {
                         //TODO: just for testing -- uses AsyncTask -- fails because of java.lang.NoClassDefFoundError: Failed resolution of: [Ljava/awt/datatransfer/DataFlavor;
                         //DecryptMail dM = new DecryptMail();
-                        //dM.startEncDecMail();
+                        //dM.startEncDecMail(alias);
 
                         // TODO: just a workaround for testing -- will throw an error (Network on main thread)
                         /* DecryptMail dM = new DecryptMail();

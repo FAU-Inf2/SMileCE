@@ -40,7 +40,7 @@ public class DecryptMail {
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
-    final String global_alias = "SMile_crypto_1438271102196"; //hardcoded just for testing
+    String global_alias;
 
     public DecryptMail() {
     }
@@ -105,7 +105,8 @@ public class DecryptMail {
         return null;
     }
 
-    public void startEncDecMail() {
+    public void startEncDecMail(String alias) {
+        this.global_alias = alias;
         new AsyncEncDecMail().execute();
     }
 
