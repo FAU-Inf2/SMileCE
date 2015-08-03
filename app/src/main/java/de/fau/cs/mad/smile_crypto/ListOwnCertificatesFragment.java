@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -10,8 +11,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
+
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -65,9 +69,13 @@ public class ListOwnCertificatesFragment extends Fragment {
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
                     result += "\n\t\t – Type: " + c.getType();
                     result += "\n\t\t – HashCode: " + c.hashCode();
-                    /*try {
-                        // TODO: just a workaround for testing -- will throw an error
-                        DecryptMail dM = new DecryptMail();
+                    try {
+                        //TODO: just for testing -- uses AsyncTask -- fails because of java.lang.NoClassDefFoundError: Failed resolution of: [Ljava/awt/datatransfer/DataFlavor;
+                        //DecryptMail dM = new DecryptMail();
+                        //dM.startEncDecMail();
+
+                        // TODO: just a workaround for testing -- will throw an error (Network on main thread)
+                        /* DecryptMail dM = new DecryptMail();
                         EncryptMail eM = new EncryptMail();
                         Properties props = System.getProperties();
                         Session session = Session.getDefaultInstance(props, null);
@@ -88,11 +96,11 @@ public class ListOwnCertificatesFragment extends Fragment {
                         MimeMessage enc = eM.encrypt(alias, body);
                         Log.e(SMileCrypto.LOG_TAG, "Testmail enc: " + enc.getContent().toString());
                         MimeBodyPart dec = dM.decryptMail(alias, enc);
-                        Log.e(SMileCrypto.LOG_TAG, "Testmail dec: " + dec.getContent().toString());
+                        Log.e(SMileCrypto.LOG_TAG, "Testmail dec: " + dec.getContent().toString()); */
                     } catch (Exception ex) {
                         Log.e(SMileCrypto.LOG_TAG, "Error while encryspting/decrypting mail: " + ex.getMessage());
                         ex.printStackTrace();
-                    }*/
+                    }
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
