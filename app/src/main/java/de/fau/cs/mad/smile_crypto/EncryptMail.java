@@ -18,7 +18,7 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import javax.activation.DataHandler;
+import de.fau.cs.mad.javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.Session;
