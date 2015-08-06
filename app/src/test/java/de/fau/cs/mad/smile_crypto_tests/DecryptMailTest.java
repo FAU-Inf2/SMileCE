@@ -2,7 +2,7 @@ package de.fau.cs.mad.smile_crypto_tests;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spongycastle.asn1.ASN1ObjectIdentifier;
+/*import org.spongycastle.asn1.ASN1ObjectIdentifier;
 import org.spongycastle.cms.RecipientId;
 import org.spongycastle.cms.RecipientInformation;
 import org.spongycastle.cms.RecipientInformationStore;
@@ -23,7 +23,7 @@ import javax.mail.internet.MimeBodyPart;
 import java.security.KeyPair;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-
+*/
 import static org.junit.Assert.*;
 
 public class DecryptMailTest {
@@ -73,11 +73,11 @@ public class DecryptMailTest {
         RecipientId recId = new JceKeyTransRecipientId(cert);
 
         return recId;
-    }*/
+    }
 
     @Test
     public void testDecryptMail() throws Exception {
-        /*SMIMEEnvelopedGenerator gen = new SMIMEEnvelopedGenerator();
+        SMIMEEnvelopedGenerator gen = new SMIMEEnvelopedGenerator();
 
         gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
@@ -93,9 +93,9 @@ public class DecryptMailTest {
         RecipientInformationStore recipients = m.getRecipientInfos();
         RecipientInformation recipient = recipients.get(recId);
 
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC)));*/
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC)));
 
 
         assertFalse(false);
-    }
+    }*/
 }

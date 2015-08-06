@@ -1,7 +1,12 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -16,10 +21,32 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import org.spongycastle.operator.OperatorCreationException;
+
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+
 public class MainActivity extends ActionBarActivity {
+
+    private ImageButton fab;
+
+    private boolean expanded = false;
+
+    private View fabAction1;
+    private View fabAction2;
+
+    private float offset1;
+    private float offset2;
 
     // Name and email in HeaderView -- TODO: for SMile-UI -> get from resources
     String mName;
@@ -50,12 +77,45 @@ public class MainActivity extends ActionBarActivity {
         getSupportFragmentManager().beginTransaction().
                 replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
 
-        ImageButton fab = (ImageButton) findViewById(R.id.fab);
+        /*final ImageButton fab = (ImageButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
-                startActivity(i);
+                /*Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+                startActivity(i);*/
+                /*fab.setSelected(!fab.isSelected());
+                fab.setImageResource(fab.isSelected() ? R.drawable.animated_plus : R.drawable.animated_minus);
+                Drawable drawable = fab.getDrawable();
+                if (drawable instanceof Animatable) {
+                    ((Animatable) drawable).start();
+                }
+            }
+        });*/
+
+        final ViewGroup fabContainer = (ViewGroup) findViewById(R.id.fab_container);
+        fab = (ImageButton) findViewById(R.id.fab);
+        fabAction1 = findViewById(R.id.fab_action_1);
+        fabAction2 = findViewById(R.id.fab_action_2);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                expanded = !expanded;
+                if (expanded) {
+                    expandFab();
+                } else {
+                    collapseFab();
+                }
+            }
+        });
+        fabContainer.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                fabContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+                offset1 = fab.getY() - fabAction1.getY();
+                fabAction1.setTranslationY(offset1);
+                offset2 = fab.getY() - fabAction2.getY();
+                fabAction2.setTranslationY(offset2);
+                return true;
             }
         });
 
@@ -188,5 +248,56 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void collapseFab() {
+        fab.setImageResource(R.drawable.animated_minus);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(createCollapseAnimator(fabAction1, offset1),
+                createCollapseAnimator(fabAction2, offset2));
+        animatorSet.start();
+        animateFab();
+    }
+
+    private void expandFab() {
+        fab.setImageResource(R.drawable.animated_plus);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(createExpandAnimator(fabAction1, offset1),
+                createExpandAnimator(fabAction2, offset2));
+        animatorSet.start();
+        animateFab();
+    }
+
+    private static final String TRANSLATION_Y = "translationY";
+
+    private Animator createCollapseAnimator(View view, float offset) {
+        return ObjectAnimator.ofFloat(view, TRANSLATION_Y, 0, offset)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime));
+    }
+
+    private Animator createExpandAnimator(View view, float offset) {
+        return ObjectAnimator.ofFloat(view, TRANSLATION_Y, offset, 0)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime));
+    }
+
+    private void animateFab() {
+        Drawable drawable = fab.getDrawable();
+        if (drawable instanceof Animatable) {
+            ((Animatable) drawable).start();
+        }
+    }
+
+    public void fabAction1(View view) {
+        Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+        startActivity(i);
+    }
+
+    public void fabAction2(View view) {
+        try {
+            new SelfSignedCertificateCreator().create();
+        } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
+            Toast.makeText(this, R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 }
