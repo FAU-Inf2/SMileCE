@@ -11,7 +11,7 @@
         <ImageButton
             android:id="@+id/fab_action_2"
             style="@style/FloatingActionButton.Mini"
-            android:src="@drawable/plus"
+            android:src="@drawable/ic_create_white_24dp"
             android:layout_above="@+id/fab_action_1"
             android:layout_alignEnd="@+id/fab"
             android:contentDescription="@null"
@@ -20,7 +20,7 @@
         <ImageButton
             android:id="@id/fab_action_1"
             style="@style/FloatingActionButton.Mini"
-            android:src="@drawable/plus"
+            android:src="@drawable/ic_file_download_white_24dp"
             android:layout_above="@id/fab"
             android:layout_alignEnd="@id/fab"
             android:contentDescription="@null"
@@ -30,11 +30,10 @@
             android:id="@id/fab"
             style="@style/FloatingActionButton"
             android:src="@drawable/plus"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
             android:contentDescription="@null"
             android:visibility="visible"
-            android:layout_marginTop="8dp" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
 
     </RelativeLayout>
 </merge>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.fau.cs.mad.smile_crypto" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="de.fau.cs.mad.smile_crypto">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -42,6 +43,16 @@
             android:name=".DecryptLocalMailActivity"
             android:label="@string/title_activity_decrypt_local_mail" >
         </activity>
+        <service
+            android:name=".remote.SMimeService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote_api"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="de.fau.cs.mad.ISMimeService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
