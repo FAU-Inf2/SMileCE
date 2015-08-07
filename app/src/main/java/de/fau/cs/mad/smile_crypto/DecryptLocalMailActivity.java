@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
@@ -16,11 +15,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import javax.mail.internet.MimeBodyPart;
 
 public class DecryptLocalMailActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -156,10 +152,15 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
     private Boolean decryptFile(String pathToFile, String passphrase) {
         DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE).getAbsolutePath());
-        MimeBodyPart bodyPart = decryptMail.decryptMail(pathToFile, passphrase);
-        if(bodyPart == null)
+        //MimeBodyPart bodyPart = decryptMail.decryptMail(pathToFile, passphrase);
+        //if(bodyPart == null)
+        //    return false;
+        //String result = decryptMail.convertMimeBodyPartToString(bodyPart);
+
+        String result = decryptMail.decryptEncodeMail(pathToFile, passphrase);
+        if (result == null)
             return false;
-        String result = decryptMail.convertMimeBodyPartToString(bodyPart);
+
         getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
                 DecryptLocalMailFragment.newInstanceDecryptedContent(result)).commitAllowingStateLoss();
         return true;
