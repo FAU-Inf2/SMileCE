@@ -288,11 +288,15 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void fabAction1(View view) {
+        collapseFab();
+        expanded = false;
         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
         startActivity(i);
     }
 
     public void fabAction2(View view) {
+        collapseFab();
+        expanded = false;
         try {
             new SelfSignedCertificateCreator().create();
         } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
