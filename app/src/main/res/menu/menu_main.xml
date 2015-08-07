@@ -15,13 +15,6 @@
         app:showAsAction="ifRoom"
         ></item>
 
-    <item
-        android:id="@+id/go_to_list_key_chain"
-        android:orderInCategory="200"
-        android:title="@string/navigation_drawer_key_chain"
-        android:icon="@drawable/ic_add_box_white_48dp"
-        app:showAsAction="never"
-        ></item>
 
     <item
         android:id="@+id/decrypt_local_mail"
