@@ -22,4 +22,11 @@
         android:icon="@drawable/ic_add_box_white_48dp"
         app:showAsAction="never"
         ></item>
+
+    <item
+        android:id="@+id/decrypt_local_mail"
+        android:orderInCategory="200"
+        android:title="@string/navigation_decrypt_local_mail"
+        app:showAsAction="never"
+        ></item>
 </menu>

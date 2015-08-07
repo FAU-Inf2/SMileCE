@@ -7,6 +7,7 @@
     <string name="retry">Retry</string>
     <string name="go">Go</string>
     <string name="try_again">Please try again.</string>
+    <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
 
     <string name="toolbar_default_title">SMile-crypto!</string>
@@ -17,6 +18,7 @@
     <string name="navigation_drawer_settings">Settings</string>
     <string name="navigation_drawer_import_certificate">Import S/MIME-Certificate</string>
     <string name="navigation_drawer_key_chain">Get Cert from KeyChain</string>
+    <string name="navigation_decrypt_local_mail">Decrypt locally saved mail</string>
 
     <string name="navigation_drawer_header_name">FAU is MAD!</string>
     <string name="navigation_drawer_header_email_address">fixmymail@i2.cs.fau.de</string>
@@ -41,14 +43,20 @@
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_import_certificate">ImportCertificateActivity</string>
     <string name="title_activity_key_chain">KeyChainActivity</string>
+    <string name="title_activity_decrypt_local_mail">DecryptLocalMailActivity</string>
 
     <string name="import_certificate_todo">…import certificate…</string>
     <string name="fab_select_import_certificate">Select a certificate to import</string>
+    <string name="import_decrypted_file">Select an encrypted mail</string>
     <string name="no_file_manager">Please install a file manager.</string>
     <string name="import_certificate_show_path">Your selected file was:&#160;</string>
     <string name="import_certificate_successful">Importing your certificate was successful.</string>
     <string name="import_certificate_no_file">No file to import was selected.</string>
+    <string name="not_eml">The selected file was not an .eml-file.</string>
+    <string name="decrypt_file_show_path">File to be decrypted:&#160;</string>
 
     <string name="enter_passphrase">Please enter the passphrase to unlock:</string>
     <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
+    <string name="something_went_wrong">Sorry, something went wrong. Maybe wrong passphrase or invalid file?</string>
+
 </resources>

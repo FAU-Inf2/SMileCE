@@ -38,6 +38,10 @@
             android:name=".KeyChainActivity"
             android:label="@string/title_activity_key_chain" >
         </activity>
+        <activity
+            android:name=".DecryptLocalMailActivity"
+            android:label="@string/title_activity_decrypt_local_mail" >
+        </activity>
     </application>
 
 </manifest>
