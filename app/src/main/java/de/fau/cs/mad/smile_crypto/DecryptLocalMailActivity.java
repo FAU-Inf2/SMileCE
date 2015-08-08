@@ -4,22 +4,30 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import javax.mail.internet.MimeMessage;
 
 public class DecryptLocalMailActivity extends ActionBarActivity {
     private Toolbar toolbar;
+    private TextView mTextView;
     protected final int DLMA_FILE_CHOOSER_REQUEST_CODE = 0;
 
     @Override
@@ -33,8 +41,12 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new DecryptLocalMailFragment()).commit();
+        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, new DecryptLocalMailFragment()).commit();
+
+        mTextView = (TextView) findViewById(R.id.decrypt_local_mail_text_view);
+        mTextView.setTextSize(12);
+        mTextView.setGravity(Gravity.CENTER_VERTICAL);
+        mTextView.setMovementMethod(new ScrollingMovementMethod());
 
         Log.d(SMileCrypto.LOG_TAG, "Started DecryptLocalMailActivity.");
         showFileChooser();
@@ -70,19 +82,18 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
                     if(path.endsWith(".eml")) {
                         Log.d(SMileCrypto.LOG_TAG, " " + path);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
-                                DecryptLocalMailFragment.newInstance(path)).commitAllowingStateLoss();
-                        showPassphrasePrompt(path);
+                        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstance(path)).commitAllowingStateLoss();
+
+                        mTextView.setText(getString(R.string.decrypt_file_show_path) + path);
+                        passphraseDecryptOrPrompt(path);
                     } else {
                         Toast.makeText(this, R.string.not_eml, Toast.LENGTH_LONG).show();
-                        getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
-                                DecryptLocalMailFragment.newInstance(getResources().getString(R.string.not_eml))).
-                                commitAllowingStateLoss();
+                        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstance(getResources().getString(R.string.not_eml))).commitAllowingStateLoss();
+                        mTextView.setText(getString(R.string.not_eml));
                     }
                 } else {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
-                            DecryptLocalMailFragment.newInstance(getResources().
-                                    getString(R.string.import_certificate_no_file))).commitAllowingStateLoss();
+                    //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstance(getResources().getString(R.string.import_certificate_no_file))).commitAllowingStateLoss();
+                    mTextView.setText(getString(R.string.import_certificate_no_file));
                 }
                 break;
         }
@@ -107,6 +118,48 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                     getResources().getString(R.string.no_file_manager),
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void passphraseDecryptOrPrompt(String pathToFile) {
+        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
+                getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
+        String passphrase;
+        MimeMessage m = decryptMail.getMimeMessageFromFile(pathToFile);
+        if(m == null) {
+            showPassphrasePrompt(pathToFile);
+            return;
+        }
+        String alias = decryptMail.getAliasByMimeMessage(m);
+        if(alias == null) {
+            showPassphrasePrompt(pathToFile);
+            return;
+        }
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if(preferences.contains(alias+"-passphrase")) {
+            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
+            Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+            try {
+                PasswordEncryption passwordEncryption = new PasswordEncryption(this,
+                        getResources().getString(R.string.smile_save_passphrases_certificate_alias));
+
+                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+                passphrase = passwordEncryption.decryptString(encryptedPassphrase);
+
+                if (passphrase == null) {
+                    Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
+                    showPassphrasePrompt(pathToFile);
+                    return;
+                }
+                Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
+            } catch (Exception e) {
+                showPassphrasePrompt(pathToFile);
+                return;
+            }
+        } else {
+            showPassphrasePrompt(pathToFile);
+            return;
+        }
+        decryptFile(pathToFile, passphrase);
     }
 
     public void showPassphrasePrompt(final String pathToFile) {
@@ -151,7 +204,8 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     private Boolean decryptFile(String pathToFile, String passphrase) {
-        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE).getAbsolutePath());
+        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
+                getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
         //MimeBodyPart bodyPart = decryptMail.decryptMail(pathToFile, passphrase);
         //if(bodyPart == null)
         //    return false;
@@ -161,8 +215,10 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         if (result == null)
             return false;
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
-                DecryptLocalMailFragment.newInstanceDecryptedContent(result)).commitAllowingStateLoss();
+        Log.d(SMileCrypto.LOG_TAG, "decrypted text: " + result);
+
+        mTextView.setText(result);
+        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstanceDecryptedContent(result)).commitAllowingStateLoss();
         return true;
     }
 }

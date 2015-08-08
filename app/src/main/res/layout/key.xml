@@ -1,77 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/card_view"
-        android:layout_gravity="center"
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="4dp">
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        card_view:cardCornerRadius="4dp">
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <TableRow>
-                <TextView
-                    android:id="@+id/alias"
-                    android:layout_width="match_parent"
-                    android:layout_height="20pt"
-                    android:layout_marginLeft="8dip"
-                    android:text="alias"/>
-            </TableRow>
-            <TableRow
-                android:layout_marginLeft="8dip">
-                <QuickContactBadge
-                    android:id="@+id/contact_badge"
-                    android:layout_height="40dip"
-                    android:layout_width="40dip"
-                    android:layout_gravity="left"/>
-                <!--- android:src="@drawable/ic_contact_picture"-->
-                <!--- style="?android:attr/quickContactBadgeStyleWindowLarge" -->
-                    <!--- android:background="@android:color/transparent"/-->
-                <TextView
-                    android:id="@+id/contact"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dip"
-                    android:layout_marginLeft="8dip"
-                    android:layout_gravity="left"
-                    android:text="contact"/>
-                <TextView
-                    android:id="@+id/mail"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dip"
-                    android:layout_marginLeft="8dip"
-                    android:layout_gravity="right"
-                    android:text="email"/>
-            </TableRow>
+        android:layout_height="match_parent">
+        <TableRow>
+            <TextView
+                android:id="@+id/alias"
+                android:layout_width="match_parent"
+                android:layout_height="20pt"
+                android:layout_marginLeft="8dip"
+                android:text="alias"/>
+        </TableRow>
+        <TableRow
+            android:layout_marginLeft="8dip">
+            <QuickContactBadge
+                android:id="@+id/contact_badge"
+                android:layout_height="40dip"
+                android:layout_width="40dip"
+                android:layout_gravity="left"/>
+            <!--- android:src="@drawable/ic_contact_picture"-->
+            <!--- style="?android:attr/quickContactBadgeStyleWindowLarge" -->
+                <!--- android:background="@android:color/transparent"/-->
+            <TextView
+                android:id="@+id/contact"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:layout_marginLeft="8dip"
+                android:layout_gravity="left"
+                android:text="contact"/>
+            <TextView
+                android:id="@+id/mail"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:layout_marginLeft="8dip"
+                android:layout_gravity="right"
+                android:text="email"/>
+        </TableRow>
 
-            <TableRow android:layout_marginTop="8dip">
-                <TextView
-                    android:id="@+id/trust_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dip"
-                    android:layout_marginLeft="8dip"
-                    android:text="Trust:"/>
-                <TextView
-                    android:id="@+id/trust"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dip"
-                    android:text="0"/>
-                <TextView
-                    android:id="@+id/termination"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dip"
-                    android:text="Termination:"/>
-                <TextView
-                    android:id="@+id/termination_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dip"
-                    android:text="25.01.2015"/>
-            </TableRow>
+        <TableRow android:layout_marginTop="8dip">
+            <TextView
+                android:id="@+id/type_label"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:layout_marginLeft="8dip"
+                android:text="Type:"/>
+            <TextView
+                android:id="@+id/type"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:text="X.509"/>
+            <TextView
+                android:id="@+id/hash_lable"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:text="HashCode:"/>
+            <TextView
+                android:id="@+id/hash"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:text="123456"/>
+        </TableRow>
 
-        </TableLayout>
-    </android.support.v7.widget.CardView>
+        <TableRow android:layout_marginTop="8dip">
+            <TextView
+                android:id="@+id/trust_label"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:layout_marginLeft="8dip"
+                android:text="Trust:"/>
+            <TextView
+                android:id="@+id/trust"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:text="0"/>
+            <TextView
+                android:id="@+id/termination"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:text="Termination:"/>
+            <TextView
+                android:id="@+id/termination_date"
+                android:layout_width="match_parent"
+                android:layout_height="40dip"
+                android:text="25.01.2015"/>
+        </TableRow>
 
-</LinearLayout>
+    </TableLayout>
+</android.support.v7.widget.CardView>

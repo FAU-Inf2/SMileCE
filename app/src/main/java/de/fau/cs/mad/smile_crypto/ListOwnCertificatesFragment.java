@@ -1,21 +1,41 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -31,14 +51,75 @@ public class ListOwnCertificatesFragment extends Fragment {
     public ListOwnCertificatesFragment() {
     }
 
+    private ImageButton fab;
+
+    private boolean expanded = false;
+
+    private View fabAction1;
+    private View fabAction2;
+
+    private float offset1;
+    private float offset2;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        LinearLayout linearLayout = (LinearLayout) rootView.findViewById(R.id.task_layout);
-        TextView myText = new TextView(getActivity());
+        View rootView = inflater.inflate(R.layout.keylist, container, false);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.keyList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        ArrayList<KeyInfo> keylist = findCerts();
+        KeyAdapter ka = new KeyAdapter(keylist);
+        recyclerView.setAdapter(ka);
+        final ViewGroup fabContainer = (ViewGroup) rootView.findViewById(R.id.fab_container);
+        fab = (ImageButton) rootView.findViewById(R.id.fab);
+        fabAction1 = rootView.findViewById(R.id.fab_action_1);
+        fabAction2 = rootView.findViewById(R.id.fab_action_2);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                expanded = !expanded;
+                if (expanded) {
+                    expandFab();
+                } else {
+                    collapseFab();
+                }
+            }
+        });
+        fabAction1.setOnClickListener(new View.OnClickListener() {
 
-        myText.setText(findCerts());
-        linearLayout.addView(myText);
+            @Override
+            public void onClick(View v) {
+                collapseFab();
+                expanded = false;
+                Intent i = new Intent(getActivity(), ImportCertificateActivity.class);
+                startActivity(i);
+            }
+        });
+
+        fabAction2.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                collapseFab();
+                expanded = false;
+                try {
+                    new SelfSignedCertificateCreator().create();
+                } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
+                    Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
+                    Toast.makeText(getActivity(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        fabContainer.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                fabContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+                offset1 = fab.getY() - fabAction1.getY();
+                fabAction1.setTranslationY(offset1);
+                offset2 = fab.getY() - fabAction2.getY();
+                fabAction2.setTranslationY(offset2);
+                return true;
+            }
+        });
         return rootView;
     }
 
@@ -47,12 +128,9 @@ public class ListOwnCertificatesFragment extends Fragment {
         super.onAttach(activity);
     }
 
-    private String findCerts() {
+    private ArrayList<KeyInfo> findCerts() {
+        ArrayList<KeyInfo> keylist = new ArrayList<>();
         try {
-            /*TODO: This lists own certs and certs from other people. Needs to be splitted into
-             * part for own and a part for other certs. */
-            String result = "My Certificates: ";
-            String result_other = "\n Other Certificates: ";
             Log.d(SMileCrypto.LOG_TAG, "Find certs…");
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
@@ -63,44 +141,14 @@ public class ListOwnCertificatesFragment extends Fragment {
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 if (entry instanceof KeyStore.PrivateKeyEntry) {
-                    ((KeyStore.PrivateKeyEntry) entry).getPrivateKey();
-                    result += "\n\t · Alias: " + alias;
+                    KeyInfo ki = new KeyInfo();
+                    //((KeyStore.PrivateKeyEntry) entry).getPrivateKey();
+                    ki.alias = alias;
                     Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                    result += "\n\t\t – Type: " + c.getType();
-                    result += "\n\t\t – HashCode: " + c.hashCode();
-                    try {
-                        //TODO: just for testing -- uses AsyncTask -- fails because of java.lang.NoClassDefFoundError: Failed resolution of: [Ljava/awt/datatransfer/DataFlavor;
-                        //DecryptMail dM = new DecryptMail();
-                        //dM.startEncDecMail(alias);
-
-                        // TODO: just a workaround for testing -- will throw an error (Network on main thread)
-                        /* DecryptMail dM = new DecryptMail();
-                        EncryptMail eM = new EncryptMail();
-                        Properties props = System.getProperties();
-                        Session session = Session.getDefaultInstance(props, null);
-
-                        Address fromUser = new InternetAddress("\"Eric H. Echidna\"<eric@spongycastle.org>");
-                        Address toUser = new InternetAddress("example@spongycastle.org");
-
-                        MimeMessage body = new MimeMessage(session);
-                        body.setFrom(fromUser);
-                        body.setRecipient(Message.RecipientType.TO, toUser);
-                        body.setSubject("example encrypted message");
-                        MimeBodyPart messagePart = new MimeBodyPart();
-                        MimeMultipart multipart = new MimeMultipart();
-                        messagePart.setText("You message's string content goes here.", "utf-8");
-                        multipart.addBodyPart(messagePart);
-                        body.setContent(multipart);
-                        Log.e(SMileCrypto.LOG_TAG, "Testmail: " + body.getContent().toString());
-                        MimeMessage enc = eM.encrypt(alias, body);
-                        Log.e(SMileCrypto.LOG_TAG, "Testmail enc: " + enc.getContent().toString());
-                        MimeBodyPart dec = dM.decryptMail(alias, enc);
-                        Log.e(SMileCrypto.LOG_TAG, "Testmail dec: " + dec.getContent().toString()); */
-                    } catch (Exception ex) {
-                        Log.e(SMileCrypto.LOG_TAG, "Error while encryspting/decrypting mail: " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
+                    ki.type = c.getType();
+                    ki.hash = Integer.toHexString(c.hashCode());
+                    keylist.add(ki);
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
@@ -108,15 +156,48 @@ public class ListOwnCertificatesFragment extends Fragment {
                     Log.d(SMileCrypto.LOG_TAG, "Not an instance of a PrivateKeyEntry");
                     Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                    result_other += "\n\t · Alias: " + alias;
-                    result_other += "\n\t\t – Type: " + c.getType();
-                    result_other += "\n\t\t – HashCode: " + c.hashCode();
                 }
             }
-            return result + result_other;
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
-            return null;
+        }
+        return keylist;
+    }
+
+    private void collapseFab() {
+        fab.setImageResource(R.drawable.animated_minus);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(createCollapseAnimator(fabAction1, offset1),
+                createCollapseAnimator(fabAction2, offset2));
+        animatorSet.start();
+        animateFab();
+    }
+
+    private void expandFab() {
+        fab.setImageResource(R.drawable.animated_plus);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(createExpandAnimator(fabAction1, offset1),
+                createExpandAnimator(fabAction2, offset2));
+        animatorSet.start();
+        animateFab();
+    }
+
+    private static final String TRANSLATION_Y = "translationY";
+
+    private Animator createCollapseAnimator(View view, float offset) {
+        return ObjectAnimator.ofFloat(view, TRANSLATION_Y, 0, offset)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime));
+    }
+
+    private Animator createExpandAnimator(View view, float offset) {
+        return ObjectAnimator.ofFloat(view, TRANSLATION_Y, offset, 0)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime));
+    }
+
+    private void animateFab() {
+        Drawable drawable = fab.getDrawable();
+        if (drawable instanceof Animatable) {
+            ((Animatable) drawable).start();
         }
     }
 }
