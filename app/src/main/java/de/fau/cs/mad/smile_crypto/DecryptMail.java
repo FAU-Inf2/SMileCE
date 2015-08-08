@@ -1,10 +1,6 @@
 package de.fau.cs.mad.smile_crypto;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 

@@ -26,7 +26,7 @@ public class PathConverter {
      * Framework Documents, as well as the _data field for the MediaStore and
      * other file-based ContentProviders.
      *
-     * @param context The activity.
+     * @param context The context.
      * @param uri The Uri to query.
      */
     public static String getPath(final Context context, final Uri uri) {
@@ -95,7 +95,7 @@ public class PathConverter {
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
-     * @param context The activity.
+     * @param context The context.
      * @param uri The Uri to query.
      * @param selection (Optional) Filter used in the query.
      * @param selectionArgs (Optional) Selection arguments used in the query.

@@ -20,8 +20,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.Map;
-
 import javax.mail.internet.MimeMessage;
 
 public class DecryptLocalMailActivity extends ActionBarActivity {

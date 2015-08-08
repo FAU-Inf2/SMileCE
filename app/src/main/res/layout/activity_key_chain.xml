@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:elevation="7dp"
-    tools:activity="de.fau.cs.mad.smile_crypto.KeyChainActivity"
+    tools:context="de.fau.cs.mad.smile_crypto.KeyChainActivity"
     >
     <LinearLayout
         android:layout_width="match_parent"
