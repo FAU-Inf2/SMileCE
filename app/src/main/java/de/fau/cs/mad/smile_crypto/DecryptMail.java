@@ -4,6 +4,9 @@ import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
+import com.sun.mail.util.QPDecoderStream;
+
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +22,7 @@ import org.spongycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.InternetHeaders;
@@ -216,6 +220,11 @@ public class DecryptMail {
         }
     }
 
+    public MimeMessage decodeMimeBodyParts(MimeBodyPart mimeBodyPart, Boolean decodeBase64Parts) {
+        this.RETURN_DECODED = decodeBase64Parts;
+        return decodeMimeBodyParts(mimeBodyPart);
+    }
+
     public MimeMessage decodeMimeBodyParts(MimeBodyPart mimeBodyPart) {
         try {
             Properties props = System.getProperties();
@@ -240,7 +249,7 @@ public class DecryptMail {
                     if (headers != null && newContent != null) {
                         MimeBodyPart bodyPart;
                         //Log.d(SMileCrypto.LOG_TAG, i + "headers: " + headers.getAllHeaderLines().nextElement());
-                        if (convert) {
+                        if (convert && RETURN_DECODED) {
                             //Log.d(SMileCrypto.LOG_TAG, i + "Convert: " + newContent);
                             byte[] decoded = Base64.decode(newContent, 0);
                             //Log.d(SMileCrypto.LOG_TAG, i + "DECODED: " + new String(decoded));
@@ -274,7 +283,7 @@ public class DecryptMail {
                     headers.addHeaderLine(line);
                 } else if (line.startsWith("Content-Transfer-Encoding")) {
                     if (line.contains("base64")) {
-                        if (possibleConvert) {
+                        if (possibleConvert && RETURN_DECODED) {
                             convert = true;
                             headers.addHeaderLine("Content-Transfer-Encoding: quoted-printable");
                             //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + "Content-Transfer-Encoding: quoted-printable" + "\n\n");
@@ -304,7 +313,26 @@ public class DecryptMail {
             }
             newMimeMessage.setContent(multipart);
             newMimeMessage.saveChanges();
+            /*
+            MimeMultipart mpart = (MimeMultipart) newMimeMessage.getContent();
+            int cnt = mpart.getCount();
+            for (int i = 0; i < cnt; i++) {
+                BodyPart b = mpart.getBodyPart(i);
+                BufferedInputStream bis = new BufferedInputStream((QPDecoderStream) b.getContent());
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    while (true) {
+                        int c = bis.read();
+                        if (c == -1) {
+                            break;
+                        }
+                        baos.write(c);
+                    }
 
+                Log.e(SMileCrypto.LOG_TAG, "Decrypt Content: " + new String(baos.toByteArray()));
+                Log.e(SMileCrypto.LOG_TAG, "Decrypt toString: " + b.toString());
+                Log.e(SMileCrypto.LOG_TAG, "Decrypt getDescription: " + b.getDescription());
+
+            }*/
             return newMimeMessage;
         } catch(Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception decrypting parts: " + e.getMessage());
