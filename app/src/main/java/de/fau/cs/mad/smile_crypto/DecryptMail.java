@@ -23,6 +23,7 @@ import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Header;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.InternetHeaders;
@@ -75,6 +76,8 @@ public class DecryptMail {
 
     private MimeBodyPart decryptMailSynchronous(String alias, MimeMessage mimeMessage, String passphrase) {
         try {
+            encryptedMimeMessage = mimeMessage;
+
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
@@ -108,6 +111,7 @@ public class DecryptMail {
 
             Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
             Log.d(SMileCrypto.LOG_TAG, "DECRYPT (base64-encoded): " + convertMimeBodyPartToString(dec));
+
             return dec;
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
@@ -162,7 +166,7 @@ public class DecryptMail {
         return decryptMail(alias, mimeMessage, passphrase);
     }
 
-    public String decryptEncodeMail(String pathToFile, String passphrase) {
+    public MimeMessage decryptEncodeMail(String pathToFile, String passphrase) {
         this.alias = null;
         this.encryptedMimeMessage = null;
         this.pathToFile = pathToFile;
@@ -174,6 +178,7 @@ public class DecryptMail {
             return null;
         }
     }
+
 
     public MimeMessage getMimeMessageFromFile(String pathToFile) {
         try {
@@ -360,13 +365,99 @@ public class DecryptMail {
 
     public String convertMimeMessageToString(MimeMessage mimeMessage) {
         try {
+            String result = "";
+            Enumeration allHeaders = mimeMessage.getAllHeaders();
+            while (allHeaders.hasMoreElements()) {
+                Header header = (Header) allHeaders.nextElement();
+                result += header.getName() + ": " + header.getValue() + "\n";
+            }
+
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             ((Multipart) mimeMessage.getContent()).writeTo(bytes);
-            return bytes.toString();
+            return result + bytes.toString();
         }catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
             return  null;
         }
+    }
+
+    public String getTextPlainFromMimeMessage(MimeMessage mimeMessage) {
+        try {
+            MimeMultipart mimeMultipart = (MimeMultipart) mimeMessage.getContent();
+            int cnt = mimeMultipart.getCount();
+            for (int i = 0; i < cnt; i++) {
+                BodyPart b = mimeMultipart.getBodyPart(i);
+                if (b.isMimeType("text/plain")) {
+                    if (b.getContent() instanceof String) {
+                        return (String) b.getContent();
+                    } else if (b.getContent() instanceof QPDecoderStream) {
+                        BufferedInputStream bis = new BufferedInputStream((QPDecoderStream) b.getContent());
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        while (true) {
+                            int c = bis.read();
+                            if (c == -1) {
+                                break;
+                            }
+                            baos.write(c);
+                        }
+                        return new String(baos.toByteArray());
+                    } else {
+                        Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public String getTextHtmlFromMimeMessage(MimeMessage mimeMessage) {
+        try {
+            MimeMultipart mimeMultipart = (MimeMultipart) mimeMessage.getContent();
+            int cnt = mimeMultipart.getCount();
+            for (int i = 0; i < cnt; i++) {
+                BodyPart b = mimeMultipart.getBodyPart(i);
+                if (b.isMimeType("text/html")) {
+                    if (b.getContent() instanceof String) {
+                        return (String) b.getContent();
+                    } else if (b.getContent() instanceof QPDecoderStream) {
+                        BufferedInputStream bis = new BufferedInputStream((QPDecoderStream) b.getContent());
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        while (true) {
+                            int c = bis.read();
+                            if (c == -1) {
+                                break;
+                            }
+                            baos.write(c);
+                        }
+                        return new String(baos.toByteArray());
+                    } else {
+                        Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public MimeMessage addOldHeaders(MimeMessage newMimeMessage) {
+        if(encryptedMimeMessage == null)
+            return newMimeMessage;
+        try {
+            Enumeration allHeaders = encryptedMimeMessage.getAllHeaders();
+            while (allHeaders.hasMoreElements()) {
+                Header header = (Header) allHeaders.nextElement();
+                Log.d(SMileCrypto.LOG_TAG, "Headername + value: " + header.getName() + header.getValue());
+                newMimeMessage.addHeader(header.getName(), header.getValue());
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Exception in addOldHeaders:" + e.getMessage());
+        }
+
+        return newMimeMessage;
     }
 
     private class AsyncDecryptMail extends AsyncTask<Void, Void, MimeBodyPart> {
@@ -384,9 +475,9 @@ public class DecryptMail {
         }
     }
 
-    private class AsyncDecryptEncodeMail extends AsyncTask<Void, Void, String> {
+    private class AsyncDecryptEncodeMail extends AsyncTask<Void, Void, MimeMessage> {
 
-        protected String doInBackground(Void... params) {
+        protected MimeMessage doInBackground(Void... params) {
             try {
                 MimeBodyPart mimeBodyPart;
                 if(alias == null || encryptedMimeMessage == null)
@@ -394,8 +485,7 @@ public class DecryptMail {
                 else
                     mimeBodyPart = decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
 
-                MimeMessage decodedMimeMessage = decodeMimeBodyParts(mimeBodyPart);
-                return convertMimeMessageToString(decodedMimeMessage);
+                return addOldHeaders(decodeMimeBodyParts(mimeBodyPart));
             } catch (Exception e) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in doInBackground" + e.getMessage());
                 return null;
