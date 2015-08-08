@@ -76,8 +76,14 @@ public class DecryptMail {
             X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
 
             KeyStore p12 = KeyStore.getInstance("pkcs12");
-            String pathTop12File = certificateDirectory + "/" + alias + ".p12";
-            p12.load(new FileInputStream(pathTop12File), passphrase.toCharArray());
+            String pathTop12File = certificateDirectory + File.separator + alias + ".p12";
+            File p12File = new File(pathTop12File);
+
+            if(!p12File.exists()) {
+                return null;
+            }
+
+            p12.load(new FileInputStream(p12File), passphrase.toCharArray());
 
             PrivateKey privateKey = null;
             Enumeration e = p12.aliases();
