@@ -27,8 +27,6 @@
             android:clipChildren="false"
             android:clipToPadding="false"
             >
-
-            <include layout="@layout/fab" />
         </FrameLayout>
     </LinearLayout>
 
