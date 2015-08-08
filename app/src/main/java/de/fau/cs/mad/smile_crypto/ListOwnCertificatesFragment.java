@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.spongycastle.jce.provider.X509CertParser;
 import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
@@ -61,13 +62,15 @@ public class ListOwnCertificatesFragment extends Fragment {
     private float offset1;
     private float offset2;
 
+    private KeyAdapter ka;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.keylist, container, false);
         RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.keyList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         ArrayList<KeyInfo> keylist = findCerts();
-        KeyAdapter ka = new KeyAdapter(keylist);
+        ka = new KeyAdapter(keylist);
         recyclerView.setAdapter(ka);
         final ViewGroup fabContainer = (ViewGroup) rootView.findViewById(R.id.fab_container);
         fab = (ImageButton) rootView.findViewById(R.id.fab);
@@ -103,6 +106,7 @@ public class ListOwnCertificatesFragment extends Fragment {
                 expanded = false;
                 try {
                     new SelfSignedCertificateCreator().create();
+                    ka.addKey(findCerts());
                 } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
                     Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
                     Toast.makeText(getActivity(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -138,6 +142,8 @@ public class ListOwnCertificatesFragment extends Fragment {
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
+                if(alias.equals(getString(R.string.smile_save_passphrases_certificate_alias)))
+                    continue;
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 if (entry instanceof KeyStore.PrivateKeyEntry) {
@@ -148,6 +154,13 @@ public class ListOwnCertificatesFragment extends Fragment {
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
                     ki.type = c.getType();
                     ki.hash = Integer.toHexString(c.hashCode());
+                    if(c.getType().equals("X.509")) {
+                        X509Certificate cert = (X509Certificate) c;
+                        ki.contact = cert.getSubjectX500Principal().getName();
+                        //ki.mail; TODO
+                        ki.termination_date = cert.getNotAfter();
+                        //ki.trust; TODO
+                    }
                     keylist.add(ki);
                 } else {
                     //--> no private key available for this certificate

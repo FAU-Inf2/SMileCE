@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
 
     public static class KeyViewHolder extends RecyclerView.ViewHolder {
         protected TextView alias;
-        protected QuickContactBadge contact_badge;
+        //protected QuickContactBadge contact_badge;
         protected TextView contact;
         protected TextView mail;
         protected TextView type;
@@ -26,7 +27,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         public KeyViewHolder(View itemView) {
             super(itemView);
             alias = (TextView) itemView.findViewById(R.id.alias);
-            contact_badge = (QuickContactBadge) itemView.findViewById(R.id.contact_badge);
+            //contact_badge = (QuickContactBadge) itemView.findViewById(R.id.contact_badge);
             contact = (TextView) itemView.findViewById(R.id.contact);
             mail = (TextView) itemView.findViewById(R.id.mail);
             type = (TextView) itemView.findViewById(R.id.type);
@@ -58,7 +59,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         KeyInfo ki = keylist.get(position);
         holder.alias.setText(ki.alias);
         holder.contact.setText(ki.contact);
-        holder.contact_badge.assignContactFromEmail(ki.mail, true);
+        //holder.contact_badge.assignContactFromEmail(ki.mail, true);
         holder.hash.setText(ki.hash);
         holder.mail.setText(ki.mail);
         holder.type.setText(ki.type);
@@ -73,12 +74,17 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
     }
 
     public void addKey(KeyInfo key) {
-        if(key != null)
+        if(key != null && !keylist.contains(key)) {
+            int pos = keylist.size();
             keylist.add(key);
+            Log.e(SMileCrypto.LOG_TAG, "Added KeyInfo: " + key + " at position: " + pos);
+            notifyItemInserted(pos);
+        }
     }
 
     public  void addKey(List<KeyInfo> keys) {
         if(keys != null)
-            keylist.addAll(keys);
+            for(KeyInfo ki : keys)
+                addKey(ki);
     }
 }
