@@ -1,6 +1,10 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -164,7 +168,8 @@ public class DecryptMail {
             return null;
         }
     }
-    private MimeMessage getMimeMessageFromFile(String pathToFile) {
+
+    public MimeMessage getMimeMessageFromFile(String pathToFile) {
         try {
             Properties props = System.getProperties();
             Session session = Session.getDefaultInstance(props, null);
@@ -174,6 +179,17 @@ public class DecryptMail {
             Log.e(SMileCrypto.LOG_TAG, "Exception while reading encrypted mail: " + e.getMessage());
             return null;
         }
+    }
+
+    public String getAliasByMimeMessage(MimeMessage mimeMessage) {
+        Address[] addresses = getMailAddressFromMimeMessage(mimeMessage);
+        for (Address a : addresses) {
+            String alias = getAliasByAddress(a);
+            if(alias != null)
+                return alias;
+
+        }
+        return null;
     }
 
     private Address[] getMailAddressFromMimeMessage(MimeMessage mimeMessage) {

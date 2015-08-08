@@ -60,6 +60,8 @@ public class ListOwnCertificatesFragment extends Fragment {
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
+                if(alias.equals(getString(R.string.smile_save_passphrases_certificate_alias)))
+                    continue;
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 if (entry instanceof KeyStore.PrivateKeyEntry) {

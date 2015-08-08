@@ -58,5 +58,6 @@
     <string name="enter_passphrase">Please enter the passphrase to unlock:</string>
     <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
     <string name="something_went_wrong">Sorry, something went wrong. Maybe wrong passphrase or invalid file?</string>
-
+    <string name="smile_save_passphrases_certificate_alias">smile-save-passphrases-certificate</string>
+    <string name="smime_certificates_folder">smime-certificates</string>
 </resources>
