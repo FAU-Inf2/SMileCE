@@ -41,11 +41,8 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, new DecryptLocalMailFragment()).commit();
-
         mTextView = (TextView) findViewById(R.id.decrypt_local_mail_text_view);
         mTextView.setTextSize(12);
-        mTextView.setGravity(Gravity.CENTER_VERTICAL);
         mTextView.setMovementMethod(new ScrollingMovementMethod());
 
         Log.d(SMileCrypto.LOG_TAG, "Started DecryptLocalMailActivity.");
@@ -82,17 +79,13 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
                     if(path.endsWith(".eml")) {
                         Log.d(SMileCrypto.LOG_TAG, " " + path);
-                        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstance(path)).commitAllowingStateLoss();
-
                         mTextView.setText(getString(R.string.decrypt_file_show_path) + path);
                         passphraseDecryptOrPrompt(path);
                     } else {
                         Toast.makeText(this, R.string.not_eml, Toast.LENGTH_LONG).show();
-                        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstance(getResources().getString(R.string.not_eml))).commitAllowingStateLoss();
                         mTextView.setText(getString(R.string.not_eml));
                     }
                 } else {
-                    //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstance(getResources().getString(R.string.import_certificate_no_file))).commitAllowingStateLoss();
                     mTextView.setText(getString(R.string.import_certificate_no_file));
                 }
                 break;
@@ -218,7 +211,6 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, "decrypted text: " + result);
 
         mTextView.setText(result);
-        //getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment, DecryptLocalMailFragment.newInstanceDecryptedContent(result)).commitAllowingStateLoss();
         return true;
     }
 }
