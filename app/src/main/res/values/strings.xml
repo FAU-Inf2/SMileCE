@@ -37,6 +37,10 @@
     <string name="first_element">First element</string>
     <string name="second_element">Second element</string>
     <string name="third_element">Third element</string>
+    <string name="fullmime">Full MimeMessage</string>
+    <string name="textplain">text/plain</string>
+    <string name="texthtml">text/html</string>
+    <string name="containsNoSuchPart">This MimeMessage does not contain the selected part.</string>
 
     <string name="title_activity_info">InfoActivity</string>
     <string name="title_activity_help">HelpActivity</string>
@@ -60,4 +64,8 @@
     <string name="something_went_wrong">Sorry, something went wrong. Maybe wrong passphrase or invalid file?</string>
     <string name="smile_save_passphrases_certificate_alias">smile-save-passphrases-certificate</string>
     <string name="smime_certificates_folder">smime-certificates</string>
+    <string name="save_encrypted_mime_message">Save encrypted MimeMessage</string>
+    <string name="no_mime_message_saved">No MimeMessage was saved.</string>
+    <string name="saved_mime_message">Saved MimeMessage as: &#160;</string>
+
 </resources>

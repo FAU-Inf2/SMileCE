@@ -14,7 +14,7 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar">
+            layout="@layout/toolbar_menu">
         </include>
 
         <TextView

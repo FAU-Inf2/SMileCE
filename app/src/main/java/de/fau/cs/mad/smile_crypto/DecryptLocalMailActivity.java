@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -14,14 +15,19 @@ import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 import javax.mail.internet.MimeMessage;
 
@@ -29,6 +35,11 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     private Toolbar toolbar;
     private TextView mTextView;
     protected final int DLMA_FILE_CHOOSER_REQUEST_CODE = 0;
+
+    private String mimeBodyPartsString;
+    private String textplain;
+    private String texthtml;
+    private MimeMessage decryptedMimeMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +69,21 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
             finish();
+            return true;
+        } if (id == R.id.action_settings) {
+            Intent i = new Intent(DecryptLocalMailActivity.this, SettingsActivity.class);
+            startActivity(i);
+            return true;
+        } else if (id == R.id.action_save) {
+            String pathToFile = saveMimeMessage();
+            if(pathToFile == null)
+                Toast.makeText(this, R.string.no_mime_message_saved, Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(this, getString(R.string.saved_mime_message) + pathToFile, Toast.LENGTH_LONG).show();
             return true;
         }
 
@@ -80,6 +104,10 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                     if(path.endsWith(".eml")) {
                         Log.d(SMileCrypto.LOG_TAG, " " + path);
                         mTextView.setText(getString(R.string.decrypt_file_show_path) + path);
+
+                        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                        e.putString("last-encrypted-file-path", path);
+                        e.apply();
                         passphraseDecryptOrPrompt(path);
                     } else {
                         Toast.makeText(this, R.string.not_eml, Toast.LENGTH_LONG).show();
@@ -153,6 +181,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
         decryptFile(pathToFile, passphrase);
+        options();
     }
 
     public void showPassphrasePrompt(final String pathToFile) {
@@ -186,6 +215,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                         });
                         builder.create().show();
                     }
+                    options();
                 }
             }).setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -199,18 +229,82 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     private Boolean decryptFile(String pathToFile, String passphrase) {
         DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
                 getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
-        //MimeBodyPart bodyPart = decryptMail.decryptMail(pathToFile, passphrase);
-        //if(bodyPart == null)
-        //    return false;
-        //String result = decryptMail.convertMimeBodyPartToString(bodyPart);
 
-        String result = decryptMail.decryptEncodeMail(pathToFile, passphrase);
-        if (result == null)
+        decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, passphrase);
+        mimeBodyPartsString = decryptMail.convertMimeMessageToString(decryptedMimeMessage);
+        if (mimeBodyPartsString == null)
             return false;
 
-        Log.d(SMileCrypto.LOG_TAG, "decrypted text: " + result);
+        textplain = decryptMail.getTextPlainFromMimeMessage(decryptedMimeMessage);
+        if(textplain == null)
+            textplain = getString(R.string.containsNoSuchPart);
+        texthtml = decryptMail.getTextHtmlFromMimeMessage(decryptedMimeMessage);
+        if(texthtml == null)
+            texthtml = getString(R.string.containsNoSuchPart);
 
-        mTextView.setText(result);
+        Log.d(SMileCrypto.LOG_TAG, "Decrypted text: " + mimeBodyPartsString);
         return true;
     }
+
+    private void options() {
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.spinnerTitleListDecryptMail,
+                R.layout.spinner_item);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    mTextView.setText(textplain);
+                } else if (position == 1) {
+                    mTextView.setText(texthtml);
+                } else {
+                    mTextView.setText(mimeBodyPartsString);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Log.d(SMileCrypto.LOG_TAG, "nothing selected");
+            }
+        });
+    }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    private String saveMimeMessage() {
+        try {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if(preferences.contains("last-encrypted-file-path")) {
+                String path = preferences.getString("last-encrypted-file-path", null);
+                Log.d(SMileCrypto.LOG_TAG, "Path: " + path);
+                path = path.substring(0, path.length() - 4);
+                path += "_decrypted.eml";
+                Log.d(SMileCrypto.LOG_TAG, "New path to save MimeMessage: " + path);
+                if (!isExternalStorageWritable()) {
+                    Log.e(SMileCrypto.LOG_TAG, "External storage is not writable!");
+                    return null;
+                }
+
+                File newFile = new File(path);
+                FileOutputStream out = new FileOutputStream(newFile);
+                out.write(mimeBodyPartsString.getBytes(), 0, mimeBodyPartsString.length());
+                out.flush();
+                out.close();
+                return path;
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error saving file: " + e.getMessage());
+        }
+        return null;
+    }
+
 }
