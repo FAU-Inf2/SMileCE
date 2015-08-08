@@ -52,6 +52,7 @@ public class DecryptLocalMailFragment extends Fragment {
                 myText.setText("");
             }
         }
+        myText.computeScroll();
         linearLayout.addView(myText);
         return rootView;
     }
