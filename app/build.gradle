@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+def appSourcesDir = file('src/main/java')
+def commonSourcesDir = rootProject.file('../kwikshop-common/src/main/java')
+
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
@@ -11,6 +14,7 @@ android {
         versionCode 1
         versionName "0.1"
     }
+
     signingConfigs {
         release {
             storeFile file("unknown")
@@ -19,11 +23,21 @@ android {
             keyPassword "unknown"
         }
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+        }
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDir appSourcesDir
+                srcDir commonSourcesDir
+            }
         }
     }
 
@@ -33,9 +47,11 @@ android {
     }
 }
 
+preBuild.dependsOn(":smime-api:build")
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':smime-api:app')
+    compile project(':smime-api')
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support:cardview-v7:22.0.0'
     compile 'com.android.support:recyclerview-v7:22.0.0'
