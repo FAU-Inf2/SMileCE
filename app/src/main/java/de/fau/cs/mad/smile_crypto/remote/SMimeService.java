@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import de.fau.cs.mad.javax.activation.DataSource;
@@ -53,36 +55,16 @@ public class SMimeService extends Service {
         final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
         final OutputStream outputStream = new ParcelFileDescriptor.AutoCloseOutputStream(output);
 
-        DataSource ds = new DataSource() {
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return inputStream;
-            }
-
-            @Override
-            public OutputStream getOutputStream() throws IOException {
-                return outputStream;
-            }
-
-            @Override
-            public String getContentType() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return "smime";
-            }
-        };
-
-        MimeMultipart mimeMultipart = null;
-
         try {
-            mimeMultipart = new MimeMultipart(ds);
+            MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
             final String certDir = getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE).getAbsolutePath();
             final DecryptMail decryptMail = new DecryptMail(certDir);
+            MimeMessage mimeMessage = decryptMail.decodeMimeBodyParts(mimeBodyPart);
+            mimeMessage.writeTo(outputStream);
         } catch (MessagingException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            // TODO:
         }
 
         Intent result = new Intent();
