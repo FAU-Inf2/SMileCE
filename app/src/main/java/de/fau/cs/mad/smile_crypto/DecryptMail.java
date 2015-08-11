@@ -56,6 +56,11 @@ public class DecryptMail {
                 getAbsolutePath();
     }
 
+    @Deprecated
+    public DecryptMail(String certificateDirectory) {
+        this.certificateDirectory = certificateDirectory;
+    }
+
     private MimeBodyPart decryptMailSynchronous(String pathToFile, String passphrase) {
         try {
             MimeMessage mimeMessage = getMimeMessageFromFile(pathToFile);
