@@ -1,6 +1,5 @@
 package de.fau.cs.mad.smile_crypto;
 
-import android.content.Context;
 import android.security.KeyPairGeneratorSpec;
 import android.util.Base64;
 import android.util.Log;
@@ -25,21 +24,21 @@ public class PasswordEncryption {
     private KeyStore keyStore;
     private String passwordEncryptionCertificateAlias;
 
-    public PasswordEncryption(Context context, String alias) throws Exception {
+    public PasswordEncryption(String alias) throws Exception {
         keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
         passwordEncryptionCertificateAlias = alias;
 
         if(!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
-            generateKeyPair(context);
+            generateKeyPair();
         }
     }
 
-    private void generateKeyPair(Context context) throws Exception{
+    private void generateKeyPair() throws Exception{
         Calendar start = new GregorianCalendar();
         Calendar end = new GregorianCalendar();
         end.add(Calendar.YEAR, 5);
-        final KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(context)
+        final KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(App.getContext())
                 .setAlias(passwordEncryptionCertificateAlias)
                 .setSubject(new X500Principal("CN=SMile-crypto-Password-Encrypt"))
                 .setSerialNumber(BigInteger.ONE)
@@ -104,5 +103,4 @@ public class PasswordEncryption {
             return null;
         }
     }
-
 }
