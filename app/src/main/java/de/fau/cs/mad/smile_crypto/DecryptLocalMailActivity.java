@@ -1,7 +1,6 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -142,8 +141,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     public void passphraseDecryptOrPrompt(String pathToFile) {
-        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
-                getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
+        DecryptMail decryptMail = new DecryptMail();
         String passphrase;
         MimeMessage m = decryptMail.getMimeMessageFromFile(pathToFile);
         if(m == null) {
@@ -156,12 +154,12 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if(preferences.contains(alias+"-passphrase")) {
+        if (preferences.contains(alias+"-passphrase")) {
             String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
             Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
             try {
-                PasswordEncryption passwordEncryption = new PasswordEncryption(this,
-                        getResources().getString(R.string.smile_save_passphrases_certificate_alias));
+                PasswordEncryption passwordEncryption = new PasswordEncryption(getResources().
+                        getString(R.string.smile_save_passphrases_certificate_alias));
 
                 Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
                 passphrase = passwordEncryption.decryptString(encryptedPassphrase);
@@ -227,8 +225,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     private Boolean decryptFile(String pathToFile, String passphrase) {
-        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
-                getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
+        DecryptMail decryptMail = new DecryptMail();
 
         decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, passphrase);
         mimeBodyPartsString = decryptMail.convertMimeMessageToString(decryptedMimeMessage);
@@ -258,10 +255,14 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
                     mTextView.setText(textplain);
+                    mTextView.scrollTo(0,0);
+
                 } else if (position == 1) {
                     mTextView.setText(texthtml);
+                    mTextView.scrollTo(0, 0);
                 } else {
                     mTextView.setText(mimeBodyPartsString);
+                    mTextView.scrollTo(0,0);
                 }
             }
 
@@ -269,6 +270,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             public void onNothingSelected(AdapterView<?> parent) {
                 Log.d(SMileCrypto.LOG_TAG, "nothing selected");
             }
+
         });
     }
 
@@ -306,5 +308,4 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         }
         return null;
     }
-
 }

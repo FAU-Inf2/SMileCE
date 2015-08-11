@@ -1,20 +1,15 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.security.KeyChain;
-import android.security.KeyPairGeneratorSpec;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,41 +18,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.math.BigInteger;
-import java.nio.channels.FileChannel;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.security.auth.x500.X500Principal;
 
 public class ImportCertificateActivity extends ActionBarActivity {
 
@@ -155,7 +117,8 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String passphrase = passphraseUserInput.getText().toString();
-                        if (!checkPassphraseAddCertificates(pathToFile, passphrase)) {
+                        KeyManagement keyManagement = new KeyManagement();
+                        if (!keyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
                             Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
@@ -181,97 +144,6 @@ public class ImportCertificateActivity extends ActionBarActivity {
                         }
                 );
         alertDialogBuilder.create().show();
-    }
-
-    private Boolean checkPassphraseAddCertificates(String pathToFile, String passphrase) {
-        try {
-            KeyStore p12 = KeyStore.getInstance("pkcs12");
-            p12.load(new FileInputStream(pathToFile), passphrase.toCharArray());
-            Enumeration e = p12.aliases();
-            while (e.hasMoreElements()) {
-                String alias = (String) e.nextElement();
-                X509Certificate c = (X509Certificate) p12.getCertificate(alias);
-                Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
-                Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + c.getSubjectDN().getName());
-                Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + c.getIssuerDN().getName());
-
-                PrivateKey key = (PrivateKey) p12.getKey(alias, passphrase.toCharArray());
-                String new_alias = addCertificateToKeyStore(key, c);
-
-                copyP12ToInternalDir(pathToFile, new_alias);
-                return savePassphrase(new_alias, passphrase);
-            }
-            return true;
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error while loading keyStore: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private Boolean copyP12ToInternalDir(String pathToFile, String alias) {
-        File src = new File(pathToFile);
-        File certDirectory = this.getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE);
-        String filename = alias + ".p12";
-        File dst = new File(certDirectory, filename);
-
-        try {
-            FileChannel inChannel = new FileInputStream(src).getChannel();
-            FileChannel outChannel = new FileOutputStream(dst).getChannel();
-
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-            inChannel.close();
-            outChannel.close();
-
-            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);
-            return true;
-
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error copying .p12 to internal storage: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private String addCertificateToKeyStore(PrivateKey key, X509Certificate c) {
-        try {
-            Log.d(SMileCrypto.LOG_TAG, "Import certificate to keyStore.");
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
-            long importTime = System.currentTimeMillis();
-            String alias = "SMile_crypto_" + Long.toString(importTime); //TODO: other alias?
-            ks.setKeyEntry(alias, key, null, new Certificate[]{c});
-
-            Toast.makeText(this, R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
-            return alias;
-        } catch (Exception e){
-            Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
-            Toast.makeText(this, R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
-            return null;
-        }
-    }
-
-    private Boolean savePassphrase(String alias, String passphrase) {
-        try {
-            PasswordEncryption passwordEncryption = new PasswordEncryption(this,
-                    getResources().getString(R.string.smile_save_passphrases_certificate_alias));
-
-            Log.d(SMileCrypto.LOG_TAG, "Encrypt passphrase for alias: " + alias);
-            String encryptedPassphrase = passwordEncryption.encryptString(passphrase);
-
-            if(encryptedPassphrase == null)
-                return false;
-
-            Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  " + encryptedPassphrase);
-
-            SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-            e.putString(alias + "-passphrase", encryptedPassphrase);
-            e.commit();
-
-            return true;
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error while saving passphrase: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
     }
 
     /*depreciated -- can be deleted later (stays here to see how KeyChain works*/

@@ -1,6 +1,9 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -47,6 +50,13 @@ public class DecryptMail {
 
     //MimeBodyPart messagePart;
 
+    public DecryptMail() {
+        this.certificateDirectory = App.getContext().getApplicationContext().getDir(
+                App.getContext().getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
+                getAbsolutePath();
+    }
+
+    @Deprecated
     public DecryptMail(String certificateDirectory) {
         this.certificateDirectory = certificateDirectory;
     }
@@ -144,7 +154,9 @@ public class DecryptMail {
         }
         if(passphrase == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
-            return null;
+            passphrase = getPassphrase(alias);
+            if(passphrase == null)
+                return null;
         }
         this.alias = alias;
         this.encryptedMimeMessage = mimeMessage;
@@ -178,7 +190,6 @@ public class DecryptMail {
             return null;
         }
     }
-
 
     public MimeMessage getMimeMessageFromFile(String pathToFile) {
         try {
@@ -460,6 +471,33 @@ public class DecryptMail {
         return newMimeMessage;
     }
 
+    public Boolean hasPassphrase(String alias) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
+                getApplicationContext());
+        return  preferences.contains(alias+"-passphrase");
+    }
+
+    private String getPassphrase(String alias) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
+                getApplicationContext());
+        if(preferences.contains(alias+"-passphrase")) {
+            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
+            Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+            try {
+                PasswordEncryption passwordEncryption = new PasswordEncryption(App.getContext().
+                        getResources().getString(R.string.smile_save_passphrases_certificate_alias));
+
+                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+                return passwordEncryption.decryptString(encryptedPassphrase);
+
+            } catch (Exception e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     private class AsyncDecryptMail extends AsyncTask<Void, Void, MimeBodyPart> {
 
         protected MimeBodyPart doInBackground(Void... params) {
@@ -492,7 +530,6 @@ public class DecryptMail {
             }
         }
     }
-
 
     /*
     public void startEncDecMail(String alias) {
