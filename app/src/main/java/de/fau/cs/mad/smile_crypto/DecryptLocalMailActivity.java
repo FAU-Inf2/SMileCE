@@ -1,7 +1,6 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -155,7 +154,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if(preferences.contains(alias+"-passphrase")) {
+        if (preferences.contains(alias+"-passphrase")) {
             String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
             Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
             try {
@@ -256,10 +255,14 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
                     mTextView.setText(textplain);
+                    mTextView.scrollTo(0,0);
+
                 } else if (position == 1) {
                     mTextView.setText(texthtml);
+                    mTextView.scrollTo(0, 0);
                 } else {
                     mTextView.setText(mimeBodyPartsString);
+                    mTextView.scrollTo(0,0);
                 }
             }
 
@@ -267,6 +270,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             public void onNothingSelected(AdapterView<?> parent) {
                 Log.d(SMileCrypto.LOG_TAG, "nothing selected");
             }
+
         });
     }
 
@@ -304,5 +308,4 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         }
         return null;
     }
-
 }
