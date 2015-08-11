@@ -1,5 +1,6 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -49,8 +50,10 @@ public class DecryptMail {
 
     //MimeBodyPart messagePart;
 
-    public DecryptMail(String certificateDirectory) {
-        this.certificateDirectory = certificateDirectory;
+    public DecryptMail() {
+        this.certificateDirectory = App.getContext().getApplicationContext().getDir(
+                App.getContext().getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
+                getAbsolutePath();
     }
 
     private MimeBodyPart decryptMailSynchronous(String pathToFile, String passphrase) {

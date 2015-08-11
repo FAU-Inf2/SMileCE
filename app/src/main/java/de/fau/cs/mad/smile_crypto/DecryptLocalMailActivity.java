@@ -142,8 +142,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     public void passphraseDecryptOrPrompt(String pathToFile) {
-        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
-                getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
+        DecryptMail decryptMail = new DecryptMail();
         String passphrase;
         MimeMessage m = decryptMail.getMimeMessageFromFile(pathToFile);
         if(m == null) {
@@ -227,8 +226,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     private Boolean decryptFile(String pathToFile, String passphrase) {
-        DecryptMail decryptMail = new DecryptMail(this.getApplicationContext().getDir(
-                getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).getAbsolutePath());
+        DecryptMail decryptMail = new DecryptMail();
 
         decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, passphrase);
         mimeBodyPartsString = decryptMail.convertMimeMessageToString(decryptedMimeMessage);
