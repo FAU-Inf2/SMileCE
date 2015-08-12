@@ -2,6 +2,8 @@ package de.fau.cs.mad.smile_crypto;
 
 import android.util.Log;
 
+import org.joda.time.DateTime;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -12,20 +14,21 @@ public class KeyInfo {
     protected String type = "";
     protected String hash = "";
     protected String trust = "0";
-    protected Date termination_date = new Date();
+    protected String thumbprint = "0";
+    protected DateTime termination_date = new DateTime();
 
     @Override
     public boolean equals(Object o) {
-        //Log.e(SMileCrypto.LOG_TAG, "Equals");
+        Log.e(SMileCrypto.LOG_TAG, "Equals");
         if(o instanceof KeyInfo) {
             KeyInfo other = (KeyInfo) o;
-            //Log.e(SMileCrypto.LOG_TAG, "This.hash = " + this.hash + " o.hash = " + other.hash);
-            if (other.hash.equals(this.hash)) {
-                //Log.e(SMileCrypto.LOG_TAG, "This.hash == o.hash");
+            Log.e(SMileCrypto.LOG_TAG, "This.thumbprint = " + this.thumbprint + " o.thumbprint = " + other.thumbprint);
+            if (other.thumbprint.equals(this.thumbprint)) {
+                Log.e(SMileCrypto.LOG_TAG, "This.thumbprint == o.thumbprint");
                 return true;
             }
         }
-        //Log.e(SMileCrypto.LOG_TAG, "This.hash != o.hash");
+        Log.e(SMileCrypto.LOG_TAG, "This.thumbprint != o.thumbprint");
         return false;
     }
 }

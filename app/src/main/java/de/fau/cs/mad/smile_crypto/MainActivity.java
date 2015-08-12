@@ -35,8 +35,27 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
+import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
 
 public class MainActivity extends ActionBarActivity {
+
+    private CardArrayRecyclerViewAdapter mCardArrayAdapter;
+    private KeyManagement keyManager;
+
+    private ImageButton fab;
+
+    private boolean expanded = false;
+
+    private View fabAction1;
+    private View fabAction2;
+
+    private float offset1;
+    private float offset2;
 
     // Name and email in HeaderView -- TODO: for SMile-UI -> get from resources
     String mName;
@@ -64,8 +83,75 @@ public class MainActivity extends ActionBarActivity {
         toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
 
-        getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
+        /*getSupportFragmentManager().beginTransaction().
+                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
+
+        ArrayList<Card> cards = new ArrayList<Card>();
+
+        keyManager = new KeyManagement();
+
+        //Staggered grid view
+        CardRecyclerView gRecyclerView = (CardRecyclerView) this.findViewById(R.id.carddemo_recyclerview);
+        gRecyclerView.setHasFixedSize(false);
+        gRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mCardArrayAdapter = new CardArrayRecyclerViewAdapter(this, cards);
+        gRecyclerView.setAdapter(mCardArrayAdapter);
+
+        updateCards();
+
+        final ViewGroup fabContainer = (ViewGroup) this.findViewById(R.id.fab_container);
+        fab = (ImageButton) this.findViewById(R.id.fab);
+        fabAction1 = this.findViewById(R.id.fab_action_1);
+        fabAction2 = this.findViewById(R.id.fab_action_2);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                expanded = !expanded;
+                if (expanded) {
+                    expandFab();
+                } else {
+                    collapseFab();
+                }
+            }
+        });
+        fabAction1.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                collapseFab();
+                expanded = false;
+                Intent i = new Intent(v.getContext(), ImportCertificateActivity.class);
+                startActivity(i);
+                updateCards();
+            }
+        });
+
+        fabAction2.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                collapseFab();
+                expanded = false;
+                try {
+                    new SelfSignedCertificateCreator().create();
+                    updateCards();
+                } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
+                    Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
+                    Toast.makeText(v.getContext(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        fabContainer.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                fabContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+                offset1 = fab.getY() - fabAction1.getY();
+                fabAction1.setTranslationY(offset1);
+                offset2 = fab.getY() - fabAction2.getY();
+                fabAction2.setTranslationY(offset2);
+                return true;
+            }
+        });
 
         /*final ImageButton fab = (ImageButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -127,8 +213,8 @@ public class MainActivity extends ActionBarActivity {
 
                     //switch not possible here :-(
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
-                        getSupportFragmentManager().beginTransaction().
-                                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
+                        /*getSupportFragmentManager().beginTransaction().
+                                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
                     } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
@@ -146,10 +232,11 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(i);
                         return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
-                        getSupportFragmentManager().beginTransaction().
-                                replace(R.id.currentFragment, new SearchFragment()).commit();
+                        /*getSupportFragmentManager().beginTransaction().
+                                replace(R.id.currentFragment, new SearchFragment()).commit();*/
                     }
                     toolbar.setTitle(title);
+                    updateCards();
                     return true;
                 }
                 return false;
@@ -187,8 +274,9 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onResume() {
-        getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();
+        /*getSupportFragmentManager().beginTransaction().
+                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
+        updateCards();
         super.onResume();
     }
 
@@ -212,5 +300,68 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void collapseFab() {
+        fab.setImageResource(R.drawable.animated_minus);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(createCollapseAnimator(fabAction1, offset1),
+                createCollapseAnimator(fabAction2, offset2));
+        animatorSet.start();
+        animateFab();
+    }
+
+    private void expandFab() {
+        fab.setImageResource(R.drawable.animated_plus);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(createExpandAnimator(fabAction1, offset1),
+                createExpandAnimator(fabAction2, offset2));
+        animatorSet.start();
+        animateFab();
+    }
+
+    private static final String TRANSLATION_Y = "translationY";
+
+    private Animator createCollapseAnimator(View view, float offset) {
+        return ObjectAnimator.ofFloat(view, TRANSLATION_Y, 0, offset)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime));
+    }
+
+    private Animator createExpandAnimator(View view, float offset) {
+        return ObjectAnimator.ofFloat(view, TRANSLATION_Y, offset, 0)
+                .setDuration(getResources().getInteger(android.R.integer.config_mediumAnimTime));
+    }
+
+    private void animateFab() {
+        Drawable drawable = fab.getDrawable();
+        if (drawable instanceof Animatable) {
+            ((Animatable) drawable).start();
+        }
+    }
+
+    private void updateCards() {
+        for(KeyInfo ki : keyManager.getAllCertificates()) {
+
+            //Create a Card
+            KeyCard card = new KeyCard(this, ki);
+
+            //Create a CardHeader
+            CardHeader header = new CardHeader(this);
+            //Add Header to card
+            card.addCardHeader(header);
+            boolean contains = false;
+            for(int i = 0; i < mCardArrayAdapter.getItemCount(); ++i) {
+                KeyCard kc = (KeyCard) mCardArrayAdapter.getItem(i);
+                Log.e(SMileCrypto.LOG_TAG, "Testing item.");
+                if(kc.equals(card)) {
+                    Log.e(SMileCrypto.LOG_TAG, "Items are equal");
+                    contains = true;
+                }
+            }
+            if(!contains) {
+                Log.e(SMileCrypto.LOG_TAG, "Items added");
+                mCardArrayAdapter.add(card);
+            }
+        }
     }
 }

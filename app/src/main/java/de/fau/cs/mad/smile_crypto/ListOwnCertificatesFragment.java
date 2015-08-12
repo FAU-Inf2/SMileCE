@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.DateTime;
 import org.spongycastle.jce.provider.X509CertParser;
 import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
@@ -158,7 +159,7 @@ public class ListOwnCertificatesFragment extends Fragment {
                         X509Certificate cert = (X509Certificate) c;
                         ki.contact = cert.getSubjectX500Principal().getName();
                         //ki.mail; TODO
-                        ki.termination_date = cert.getNotAfter();
+                        ki.termination_date = new DateTime(cert.getNotAfter());
                         //ki.trust; TODO
                     }
                     keylist.add(ki);

@@ -26,14 +26,14 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
 
         public KeyViewHolder(View itemView) {
             super(itemView);
-            alias = (TextView) itemView.findViewById(R.id.alias);
+            /*alias = (TextView) itemView.findViewById(R.id.alias);
             //contact_badge = (QuickContactBadge) itemView.findViewById(R.id.contact_badge);
             contact = (TextView) itemView.findViewById(R.id.contact);
             mail = (TextView) itemView.findViewById(R.id.mail);
             type = (TextView) itemView.findViewById(R.id.type);
             hash = (TextView) itemView.findViewById(R.id.hash);
             trust = (TextView) itemView.findViewById(R.id.trust);
-            termination_date = (TextView) itemView.findViewById(R.id.termination_date);
+            termination_date = (TextView) itemView.findViewById(R.id.termination_date);*/
         }
     }
 

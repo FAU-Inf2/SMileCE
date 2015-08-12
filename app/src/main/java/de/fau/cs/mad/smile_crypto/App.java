@@ -5,6 +5,8 @@ import android.content.Context;
 import android.security.KeyPairGeneratorSpec;
 import android.util.Log;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import java.math.BigInteger;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -21,6 +23,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = this;
+        JodaTimeAndroid.init(this);
         generateKeyPair();
     }
 

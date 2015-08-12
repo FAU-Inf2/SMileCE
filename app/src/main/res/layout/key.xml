@@ -1,117 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/card_view"
-    android:layout_gravity="center"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
-    card_view:cardCornerRadius="4dp">
+    android:layout_height="wrap_content"
+    android:id="@+id/card_inner_layout">
 
-    <GridLayout
+    <QuickContactBadge
+        android:id="@+id/badge"
+        android:layout_width="48dp"
+        android:layout_height="48dp">
+    </QuickContactBadge>
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:columnCount="4"
-        android:rowCount="4">
+        android:id="@+id/email_label"
+        android:text="@string/email_label"
+        android:layout_toRightOf="@id/badge"
+        android:layout_marginLeft="8dp"
+        />
 
-            <TextView
-                android:id="@+id/alias"
-                android:layout_width="match_parent"
-                android:layout_height="20pt"
-                android:layout_marginLeft="8dip"
-                android:text="alias"
-                android:layout_row="0"
-                android:layout_column="0"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/valid_label"
+        android:text="@string/valid_label"
+        android:layout_toRightOf="@id/badge"
+        android:layout_below="@id/email_label"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"/>
 
-            <!--- QuickContactBadge
-                android:id="@+id/contact_badge"
-                android:layout_height="40dip"
-                android:layout_width="40dip"
-                android:layout_row="0"
-                android:layout_column="0"/>
-            android:src="@drawable/ic_contact_picture"-->
-            <!--- style="?android:attr/quickContactBadgeStyleWindowLarge" -->
-                <!--- android:background="@android:color/transparent"/-->
-
-            <TextView
-                android:id="@+id/contact"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:layout_marginLeft="8dip"
-                android:text="contact"
-                android:layout_row="1"
-                android:layout_column="0"/>
-            <TextView
-                android:id="@+id/mail"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:layout_marginLeft="8dip"
-                android:text="email"
-                android:layout_row="1"
-                android:layout_column="1"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/email"
+        android:text="Max@Mustermann.de"
+        android:layout_toRightOf="@id/valid_label"
+        android:layout_marginLeft="8dp"/>
 
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/valid_until"
+        android:text="21.10.2015"
+        android:layout_toRightOf="@id/valid_label"
+        android:layout_below="@id/email"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"/>
 
-            <TextView
-                android:id="@+id/type_label"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:layout_marginLeft="8dip"
-                android:text="Type:"
-                android:layout_row="2"
-                android:layout_column="0"/>
-            <TextView
-                android:id="@+id/type"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:text="X.509"
-                android:layout_row="2"
-                android:layout_column="1"/>
-            <TextView
-                android:id="@+id/hash_lable"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:text="HashCode:"
-                android:layout_row="2"
-                android:layout_column="2"/>
-            <TextView
-                android:id="@+id/hash"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:text="123456"
-                android:layout_row="2"
-                android:layout_column="3"/>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/email"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="4dp">
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:id="@+id/valid_circle_0"
+            android:background="@drawable/valid_circles"/>
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:id="@+id/valid_circle_1"
+            android:layout_toRightOf="@id/valid_circle_0"
+            android:background="@drawable/valid_circles"
+            android:layout_marginLeft="4dp"/>
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:id="@+id/valid_circle_2"
+            android:layout_toRightOf="@id/valid_circle_1"
+            android:background="@drawable/valid_circles"
+            android:layout_marginLeft="4dp"/>
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:id="@+id/valid_circle_3"
+            android:layout_toRightOf="@id/valid_circle_2"
+            android:background="@drawable/valid_circles"
+            android:layout_marginLeft="4dp"/>
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:id="@+id/valid_circle_4"
+            android:layout_toRightOf="@id/valid_circle_3"
+            android:background="@drawable/valid_circles"
+            android:layout_marginLeft="4dp"/>
+    </RelativeLayout>
 
-
-
-            <TextView
-                android:id="@+id/trust_label"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:layout_marginLeft="8dip"
-                android:text="Trust:"
-                android:layout_row="3"
-                android:layout_column="0"/>
-            <TextView
-                android:id="@+id/trust"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:text="0"
-                android:layout_row="3"
-                android:layout_column="1"/>
-            <TextView
-                android:id="@+id/termination"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:text="Termination:"
-                android:layout_row="3"
-                android:layout_column="2"/>
-            <TextView
-                android:id="@+id/termination_date"
-                android:layout_width="match_parent"
-                android:layout_height="40dip"
-                android:text="25.01.2015"
-                android:layout_row="3"
-                android:layout_column="3"/>
-    </GridLayout>
-</android.support.v7.widget.CardView>
+</RelativeLayout>
