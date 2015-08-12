@@ -117,8 +117,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String passphrase = passphraseUserInput.getText().toString();
-                        KeyManagement keyManagement = new KeyManagement();
-                        if (!keyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
+                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
                             Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
