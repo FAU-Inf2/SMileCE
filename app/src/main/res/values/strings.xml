@@ -69,7 +69,10 @@
         \t Link: <a href="https://rtyley.github.io/spongycastle/">https://rtyley.github.io/spongycastle/</a>\n
         · scmail:\n
         \t License: Adaption of MIT X11 License \n
-        \t Link: <a href="http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3">http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3</a>
+        \t Link: <a href="http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3">http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3</a>\n
+        · aFileChooser:\n
+        \t License: Apache License 2.0\n
+        \t Link: <a href="https://github.com/iPaulPro/aFileChooser">https://github.com/iPaulPro/aFileChooser</a>
     </string>
 
     <string name="key_management">SMile key management</string>
