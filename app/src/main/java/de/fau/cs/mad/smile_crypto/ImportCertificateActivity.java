@@ -146,7 +146,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         alertDialogBuilder.create().show();
     }
 
-    /*depreciated -- can be deleted later (stays here to see how KeyChain works*/
+    /*deprecated -- can be deleted later (stays here to see how KeyChain works*/
     @Deprecated
     private void addCertificateToKeyChain(String pathToFile) {
         try {

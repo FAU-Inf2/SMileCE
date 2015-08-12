@@ -143,41 +143,47 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     public void passphraseDecryptOrPrompt(String pathToFile) {
         DecryptMail decryptMail = new DecryptMail();
         String passphrase;
-        MimeMessage m = decryptMail.getMimeMessageFromFile(pathToFile);
-        if(m == null) {
+        MimeMessage mimeMessage = decryptMail.getMimeMessageFromFile(pathToFile);
+
+        if(mimeMessage == null) {
             showPassphrasePrompt(pathToFile);
             return;
         }
-        String alias = decryptMail.getAliasByMimeMessage(m);
+
+        String alias = decryptMail.getAliasByMimeMessage(mimeMessage);
         if(alias == null) {
             showPassphrasePrompt(pathToFile);
             return;
         }
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (preferences.contains(alias+"-passphrase")) {
-            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-            Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
-            try {
-                PasswordEncryption passwordEncryption = new PasswordEncryption(getResources().
-                        getString(R.string.smile_save_passphrases_certificate_alias));
-
-                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
-                passphrase = passwordEncryption.decryptString(encryptedPassphrase);
-
-                if (passphrase == null) {
-                    Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
-                    showPassphrasePrompt(pathToFile);
-                    return;
-                }
-                Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
-            } catch (Exception e) {
-                showPassphrasePrompt(pathToFile);
-                return;
-            }
-        } else {
+        if(!preferences.contains(alias+"-passphrase")) {
             showPassphrasePrompt(pathToFile);
             return;
         }
+
+        String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
+        Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+
+        try {
+            PasswordEncryption passwordEncryption = new PasswordEncryption(getResources().
+                    getString(R.string.smile_save_passphrases_certificate_alias));
+
+            Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+            passphrase = passwordEncryption.decryptString(encryptedPassphrase);
+
+            if (passphrase == null) {
+                Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
+                showPassphrasePrompt(pathToFile);
+                return;
+            }
+
+            Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
+        } catch (Exception e) {
+            showPassphrasePrompt(pathToFile);
+            return;
+        }
+
         decryptFile(pathToFile, passphrase);
         options();
     }
@@ -229,15 +235,19 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
         decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, passphrase);
         mimeBodyPartsString = decryptMail.convertMimeMessageToString(decryptedMimeMessage);
-        if (mimeBodyPartsString == null)
+        if (mimeBodyPartsString == null) {
             return false;
+        }
 
         textplain = decryptMail.getTextPlainFromMimeMessage(decryptedMimeMessage);
-        if(textplain == null)
+        if(textplain == null) {
             textplain = getString(R.string.containsNoSuchPart);
+        }
+
         texthtml = decryptMail.getTextHtmlFromMimeMessage(decryptedMimeMessage);
-        if(texthtml == null)
+        if(texthtml == null) {
             texthtml = getString(R.string.containsNoSuchPart);
+        }
 
         Log.d(SMileCrypto.LOG_TAG, "Decrypted text: " + mimeBodyPartsString);
         return true;
@@ -253,17 +263,20 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {
-                    mTextView.setText(textplain);
-                    mTextView.scrollTo(0,0);
-
-                } else if (position == 1) {
-                    mTextView.setText(texthtml);
-                    mTextView.scrollTo(0, 0);
-                } else {
-                    mTextView.setText(mimeBodyPartsString);
-                    mTextView.scrollTo(0,0);
+                String text = mimeBodyPartsString;
+                switch(position) {
+                    case 0: {
+                        text = textplain;
+                        break;
+                    }
+                    case 1: {
+                        text = texthtml;
+                        break;
+                    }
                 }
+
+                mTextView.setText(text);
+                mTextView.scrollTo(0,0);
             }
 
             @Override
@@ -276,10 +289,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     private String saveMimeMessage() {
@@ -291,6 +301,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                 path = path.substring(0, path.length() - 4);
                 path += "_decrypted.eml";
                 Log.d(SMileCrypto.LOG_TAG, "New path to save MimeMessage: " + path);
+
                 if (!isExternalStorageWritable()) {
                     Log.e(SMileCrypto.LOG_TAG, "External storage is not writable!");
                     return null;
