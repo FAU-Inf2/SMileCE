@@ -166,11 +166,8 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
 
         try {
-            PasswordEncryption passwordEncryption = new PasswordEncryption(getResources().
-                    getString(R.string.smile_save_passphrases_certificate_alias));
-
             Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
-            passphrase = passwordEncryption.decryptString(encryptedPassphrase);
+            passphrase = PasswordEncryption.decryptString(encryptedPassphrase);
 
             if (passphrase == null) {
                 Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");

@@ -6,6 +6,7 @@
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
     <string name="go">Go</string>
+    <string name="done">Done</string>
     <string name="try_again">Please try again.</string>
     <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
@@ -25,10 +26,53 @@
 
     <string name="app_info">Created in "Mobile Application Development" 2015.\n
         Licensed under Apache 2.0 License.\n
-        More information on https://mad.cs.fau.de/ \n
-        Image credits: http://blog.spoongraphics.co.uk\n
-        Material Design Icons: https://www.google.com/design/icons/\n
-        Included Project: https://code.google.com/p/javamail-android/
+        More information on <a href="https://mad.cs.fau.de/">https://mad.cs.fau.de/</a> \n
+        Image credits: <a href="http://blog.spoongraphics.co.uk">http://blog.spoongraphics.co.uk</a>\n
+        Material Design Icons: <a href="https://www.google.com/design/icons/">https://www.google.com/design/icons/</a>\n
+        Included Project: <a href="https://code.google.com/p/javamail-android/">https://code.google.com/p/javamail-android/</a>
+    </string>
+
+    <string name="author">Author</string>
+    <string name="license">License</string>
+    <string name="other_projects">Other Projects</string>
+
+    <string name="author_text">Created in project \"Mobile Application Delevopement\" at
+    Friedrich-Alexander-University Erlangen-Nuremberg, 2015. \n\n
+        · More information about MAD: \n\t<a href="https://mad.cs.fau.de/">https://mad.cs.fau.de/</a>\n
+        · Sourcecode on Github: \n\t<a href="https://github.com/FAU-Inf2/SMile-encryption">https://github.com/FAU-Inf2/SMile-encryption</a></string>
+    <string name="apache">Copyright 2015 SMile\n\n
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.\n\n
+        You may obtain a copy of the License at\n
+        \n
+        \t\t<a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>\n
+        \n
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\n
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    </string>
+    <string name="other_projects_list">This application includes work from these projects: \n\n
+
+        · Javamail-Android:\n
+        \t License: GNU GPL v2 \n
+        \t Link: <a href="https://code.google.com/p/javamail-android/">https://code.google.com/p/javamail-android/</a> \n
+        · Material Design Icons:\n
+        \t License: CC BY 4.0 \n
+       \t Link: <a href="https://www.google.com/design/icons/">https://www.google.com/design/icons/</a>\n
+        · Polygon Background:\n
+        \t License: CC BY 2.0 \n
+        \t Link: <a href="http://blog.spoongraphics.co.uk">http://blog.spoongraphics.co.uk</a>\n
+        · Spongycastle:\n
+        \t License: Adaption of MIT X11 License \n
+        \t Link: <a href="https://rtyley.github.io/spongycastle/">https://rtyley.github.io/spongycastle/</a>\n
+        · scmail:\n
+        \t License: Adaption of MIT X11 License \n
+        \t Link: <a href="http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3">http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3</a>\n
+        · aFileChooser:\n
+        \t License: Apache License 2.0\n
+        \t Link: <a href="https://github.com/iPaulPro/aFileChooser">https://github.com/iPaulPro/aFileChooser</a>
     </string>
 
     <string name="key_management">SMile key management</string>
@@ -67,5 +111,4 @@
     <string name="save_encrypted_mime_message">Save encrypted MimeMessage</string>
     <string name="no_mime_message_saved">No MimeMessage was saved.</string>
     <string name="saved_mime_message">Saved MimeMessage as: &#160;</string>
-
 </resources>

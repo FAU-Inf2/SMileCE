@@ -15,7 +15,7 @@ public class HelpActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_info);
+        setContentView(R.layout.activity_help);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.navigation_drawer_help);

@@ -1,58 +1,33 @@
 package de.fau.cs.mad.smile_crypto;
 
-import android.security.KeyPairGeneratorSpec;
 import android.util.Base64;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.security.auth.x500.X500Principal;
 
 public class PasswordEncryption {
-    private KeyStore keyStore;
-    private String passwordEncryptionCertificateAlias;
-
-    public PasswordEncryption(String alias) throws Exception {
-        keyStore = KeyStore.getInstance("AndroidKeyStore");
-        keyStore.load(null);
-        passwordEncryptionCertificateAlias = alias;
-
-        if(!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
-            generateKeyPair();
-        }
+    public PasswordEncryption()  {
     }
 
-    private void generateKeyPair() throws Exception{
-        Calendar start = new GregorianCalendar();
-        Calendar end = new GregorianCalendar();
-        end.add(Calendar.YEAR, 5);
-        final KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(App.getContext())
-                .setAlias(passwordEncryptionCertificateAlias)
-                .setSubject(new X500Principal("CN=SMile-crypto-Password-Encrypt"))
-                .setSerialNumber(BigInteger.ONE)
-                .setStartDate(start.getTime())
-                .setEndDate(end.getTime())
-                .build();
-
-        final KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
-        gen.initialize(spec);
-        gen.generateKeyPair();
-    }
-
-    public String encryptString(String passphrase) {
+    public static String encryptString(String passphrase) {
         try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            String passwordEncryptionCertificateAlias = App.getContext().getResources().getString(R.string.smile_save_passphrases_certificate_alias);
+
+            if(!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
+                return null;
+            }
+
             KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry)
                     keyStore.getEntry(passwordEncryptionCertificateAlias, null);
             RSAPublicKey publicKey = (RSAPublicKey) privateKeyEntry.getCertificate().getPublicKey();
@@ -73,8 +48,16 @@ public class PasswordEncryption {
         }
     }
 
-    public String decryptString(String encryptedPassphrase) {
+    public static String decryptString(String encryptedPassphrase) {
         try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);;
+            String passwordEncryptionCertificateAlias = App.getContext().getResources().getString(R.string.smile_save_passphrases_certificate_alias);
+
+            if(!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
+                return null;
+            }
+
             KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry)
                     keyStore.getEntry(passwordEncryptionCertificateAlias, null);
             RSAPrivateKey privateKey = (RSAPrivateKey) privateKeyEntry.getPrivateKey();
