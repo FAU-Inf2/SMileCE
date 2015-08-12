@@ -97,8 +97,11 @@ public class KeyManagement {
                     ki.hash = Integer.toHexString(c.hashCode());
                     if(c.getType().equals("X.509")) {
                         X509Certificate cert = (X509Certificate) c;
+                        String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
+                        String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
+                        Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
+                        ki.mail = email;
                         ki.contact = cert.getSubjectX500Principal().getName();
-                        //ki.mail; TODO
                         ki.termination_date = new DateTime(cert.getNotAfter());
                         //ki.trust; TODO
                         ki.thumbprint = getThumbprint(cert);
@@ -143,8 +146,11 @@ public class KeyManagement {
                 ki.hash = Integer.toHexString(c.hashCode());
                 if(c.getType().equals("X.509")) {
                     X509Certificate cert = (X509Certificate) c;
+                    String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
+                    String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
+                    Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
+                    ki.mail = email;
                     ki.contact = cert.getSubjectX500Principal().getName();
-                    //ki.mail; TODO
                     ki.termination_date = new DateTime(cert.getNotAfter());
                     //ki.trust; TODO
                     ki.thumbprint = getThumbprint(cert);
