@@ -6,6 +6,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.joda.time.DateTime;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +20,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class KeyManagement {
+
+    private static ArrayList<KeyInfo> knownOwnKeys = new ArrayList<>();
+    private static ArrayList<KeyInfo> knownAllKeys = new ArrayList<>();
+
     public KeyManagement() {}
 
     public Boolean addPrivateKeyFromP12ToKeyStore(String pathToFile, String passphrase) {
@@ -72,10 +78,11 @@ public class KeyManagement {
                         X509Certificate cert = (X509Certificate) c;
                         ki.contact = cert.getSubjectX500Principal().getName();
                         //ki.mail; TODO
-                        ki.termination_date = cert.getNotAfter();
+                        ki.termination_date = new DateTime(cert.getNotAfter());
                         //ki.trust; TODO
                     }
-                    keylist.add(ki);
+                    if(!knownOwnKeys.contains(ki))
+                        keylist.add(ki);
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
@@ -88,6 +95,7 @@ public class KeyManagement {
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
         }
+        knownOwnKeys.addAll(keylist);
         return keylist;
     }
 
@@ -115,14 +123,16 @@ public class KeyManagement {
                     X509Certificate cert = (X509Certificate) c;
                     ki.contact = cert.getSubjectX500Principal().getName();
                     //ki.mail; TODO
-                    ki.termination_date = cert.getNotAfter();
+                    ki.termination_date = new DateTime(cert.getNotAfter());
                     //ki.trust; TODO
                 }
-                keylist.add(ki);
+                if(!knownAllKeys.contains(ki))
+                    keylist.add(ki);
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
         }
+        knownAllKeys.addAll(keylist);
         return keylist;
     }
 
