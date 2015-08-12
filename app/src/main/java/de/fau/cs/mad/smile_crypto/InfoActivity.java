@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,8 +33,9 @@ public class InfoActivity extends ActionBarActivity {
                 LayoutInflater inflater = LayoutInflater.from(InfoActivity.this);
                 View v = inflater.inflate(R.layout.scrollable_textview, null);
 
-                TextView license_text = (TextView) v.findViewById(R.id.textview_scrollable);
-                license_text.setText(R.string.author_text);
+                TextView authorText = (TextView) v.findViewById(R.id.textview_scrollable);
+                authorText.setText(R.string.author_text);
+                authorText.setMovementMethod(LinkMovementMethod.getInstance());
 
                 AlertDialog alertDialog = new AlertDialog.Builder(InfoActivity.this).create();
                 alertDialog.setTitle(R.string.author);
@@ -53,8 +55,9 @@ public class InfoActivity extends ActionBarActivity {
                 LayoutInflater inflater = LayoutInflater.from(InfoActivity.this);
                 View v = inflater.inflate(R.layout.scrollable_textview, null);
 
-                TextView license_text = (TextView) v.findViewById(R.id.textview_scrollable);
-                license_text.setText(R.string.apache);
+                TextView licenseText = (TextView) v.findViewById(R.id.textview_scrollable);
+                licenseText.setText(R.string.apache);
+                licenseText.setMovementMethod(LinkMovementMethod.getInstance());
 
                 AlertDialog alertDialog = new AlertDialog.Builder(InfoActivity.this).create(); //Read Update
                 alertDialog.setTitle(R.string.license);
@@ -74,8 +77,9 @@ public class InfoActivity extends ActionBarActivity {
                 LayoutInflater inflater = LayoutInflater.from(InfoActivity.this);
                 View v = inflater.inflate(R.layout.scrollable_textview, null);
 
-                TextView license_text = (TextView) v.findViewById(R.id.textview_scrollable);
-                license_text.setText(R.string.other_projects_list);
+                TextView otherProjectsText = (TextView) v.findViewById(R.id.textview_scrollable);
+                otherProjectsText.setText(R.string.other_projects_list);
+                otherProjectsText.setMovementMethod(LinkMovementMethod.getInstance());
 
                 AlertDialog alertDialog = new AlertDialog.Builder(InfoActivity.this).create();
                 alertDialog.setTitle(R.string.other_projects);

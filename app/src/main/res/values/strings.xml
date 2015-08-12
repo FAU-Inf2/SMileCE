@@ -40,7 +40,8 @@
     Friedrich-Alexander-University Erlangen-Nuremberg, 2015. \n\n
         · More information about MAD: \n\t<a href="https://mad.cs.fau.de/">https://mad.cs.fau.de/</a>\n
         · Sourcecode on Github: \n\t<a href="https://github.com/FAU-Inf2/SMile-encryption">https://github.com/FAU-Inf2/SMile-encryption</a></string>
-    <string name="apache">Licensed under the Apache License, Version 2.0 (the "License");
+    <string name="apache">Copyright 2015 SMile\n\n
+        Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.\n\n
         You may obtain a copy of the License at\n
         \n
