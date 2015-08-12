@@ -215,7 +215,6 @@ public class MainActivity extends ActionBarActivity {
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
                         /*getSupportFragmentManager().beginTransaction().
                                 replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
-                        mCardArrayAdapter.notifyDataSetChanged();
                     } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
@@ -237,6 +236,7 @@ public class MainActivity extends ActionBarActivity {
                                 replace(R.id.currentFragment, new SearchFragment()).commit();*/
                     }
                     toolbar.setTitle(title);
+                    updateCards();
                     return true;
                 }
                 return false;
@@ -276,7 +276,7 @@ public class MainActivity extends ActionBarActivity {
     public void onResume() {
         /*getSupportFragmentManager().beginTransaction().
                 replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
-        mCardArrayAdapter.notifyDataSetChanged();
+        updateCards();
         super.onResume();
     }
 

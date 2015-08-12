@@ -101,6 +101,7 @@ public class KeyManagement {
                         //ki.mail; TODO
                         ki.termination_date = new DateTime(cert.getNotAfter());
                         //ki.trust; TODO
+                        ki.thumbprint = getThumbprint(cert);
                     }
                     if(!knownOwnKeys.contains(ki))
                         keylist.add(ki);
@@ -146,6 +147,7 @@ public class KeyManagement {
                     //ki.mail; TODO
                     ki.termination_date = new DateTime(cert.getNotAfter());
                     //ki.trust; TODO
+                    ki.thumbprint = getThumbprint(cert);
                 }
                 if(!knownAllKeys.contains(ki))
                     keylist.add(ki);
