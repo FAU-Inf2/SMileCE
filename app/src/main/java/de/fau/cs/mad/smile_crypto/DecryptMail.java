@@ -484,11 +484,8 @@ public class DecryptMail {
             String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
             Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
             try {
-                PasswordEncryption passwordEncryption = new PasswordEncryption(App.getContext().
-                        getResources().getString(R.string.smile_save_passphrases_certificate_alias));
-
                 Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
-                return passwordEncryption.decryptString(encryptedPassphrase);
+                return PasswordEncryption.decryptString(encryptedPassphrase);
 
             } catch (Exception e) {
                 return null;

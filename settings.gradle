@@ -1,1 +1,19 @@
-include ':app', ':smime-api:app'
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'org.ajoberstar:gradle-git:0.8.0' }
+}
+
+import org.ajoberstar.grgit.*
+
+File dir = new File('../smime-api')
+if (!dir.exists()) {
+    println 'Cloning smime-api repository...'
+    def grgit = Grgit.clone(dir: dir, uri: 'https://github.com/sonork/smime-api')
+} else {
+    println 'Pulling changes from smime-api repository...'
+    def grgit = Grgit.open(dir)
+    grgit.pull()
+}
+
+include ':app', ':smime-api'
+project(':smime-api').projectDir = new File(settingsDir, '../smime-api')
