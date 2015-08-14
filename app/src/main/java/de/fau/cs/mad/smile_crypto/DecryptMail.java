@@ -146,18 +146,24 @@ public class DecryptMail {
 
     public MimeBodyPart decryptMail(String alias, MimeMessage mimeMessage, String passphrase) {
         if(alias == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty alias.");
-            return null;
+            alias = getAliasByMimeMessage(mimeMessage);
+            if(alias == null) {
+                Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty alias.");
+                return null;
+            }
+            Log.d(SMileCrypto.LOG_TAG, "Found alias: " + alias);
         }
         if(mimeMessage == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
             return null;
         }
         if(passphrase == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
+            Log.d(SMileCrypto.LOG_TAG, "Check whether passphrase is available for alias: " + alias);
             passphrase = getPassphrase(alias);
-            if(passphrase == null)
+            if(passphrase == null) {
+                Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
                 return null;
+            }
         }
         this.alias = alias;
         this.encryptedMimeMessage = mimeMessage;

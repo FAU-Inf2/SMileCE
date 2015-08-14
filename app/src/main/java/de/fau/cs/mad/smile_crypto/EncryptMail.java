@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile_crypto;
 
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.spongycastle.asn1.x509.GeneralName;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.mail.Address;
+import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -28,7 +30,34 @@ public class EncryptMail {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
+    public MimeMessage encryptMessage(MimeMessage message) {
+        try {
+            return new AsyncEncryptMessage().execute(message).get();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public MimeMessage encryptMessage(MimeMessage message, X509Certificate certificate) {
+        try {
+            return new AsyncEncryptMessage().execute(message, certificate).get();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            return null;
+        }
+    }
+
     public MimeBodyPart encryptBodyPart(MimeBodyPart mimePart, X509Certificate certificate) {
+        try {
+            return new AsyncEncryptPart().execute(mimePart, certificate).get();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public MimeBodyPart encryptBodyPartSynchronous(MimeBodyPart mimePart, X509Certificate certificate) {
         SMIMEEnvelopedGenerator envelopedGenerator = new SMIMEEnvelopedGenerator();
         try {
             RecipientInfoGenerator recipientInfoGen = new JceKeyTransRecipientInfoGenerator(certificate);
@@ -40,11 +69,12 @@ public class EncryptMail {
             return envelopedGenerator.generate(mimePart, encryptor);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception while encrypting MimeBodyPart: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
 
-    public MimeMessage encryptMessage(MimeMessage message, X509Certificate certificate) {
+    public MimeMessage encryptMessageSynchronous(MimeMessage message, X509Certificate certificate) {
         SMIMEEnvelopedGenerator envelopedGenerator = new SMIMEEnvelopedGenerator();
         try {
             RecipientInfoGenerator recipientInfoGen = new JceKeyTransRecipientInfoGenerator(certificate);
@@ -61,12 +91,13 @@ public class EncryptMail {
 
             return result;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessage: " + e.getMessage());
+            Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessageSynchronous: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
 
-    public MimeMessage encryptMessage(MimeMessage message) {
+    public MimeMessage encryptMessageSynchronous(MimeMessage message) {
         SMIMEEnvelopedGenerator envelopedGenerator = new SMIMEEnvelopedGenerator();
 
         try {
@@ -84,11 +115,20 @@ public class EncryptMail {
 
             MimeMessage result = new MimeMessage(message);
             result.setContent(encryptedContent.getContent(), encryptedContent.getContentType());
+
+            result.setFrom(message.getSender());
+            result.setRecipients(Message.RecipientType.TO, message.getRecipients(Message.RecipientType.TO));
+            result.setRecipients(Message.RecipientType.CC, message.getRecipients(Message.RecipientType.BCC));
+            result.setRecipients(Message.RecipientType.BCC, message.getRecipients(Message.RecipientType.BCC));
             result.saveChanges();
+
+            Log.e(SMileCrypto.LOG_TAG, "Sender: " + result.getSender());
+            Log.e(SMileCrypto.LOG_TAG, "Recipient: " + result.getAllRecipients());
 
             return result;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessage: " + e.getMessage());
+            Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessageSynchronous: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
@@ -111,6 +151,7 @@ public class EncryptMail {
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in getCertificates:" + e.getMessage());
+            e.printStackTrace();
         }
         return certificates;
     }
@@ -129,4 +170,27 @@ public class EncryptMail {
             return null;
         }
     }
+
+    private class AsyncEncryptMessage extends AsyncTask<Object, Void, MimeMessage> {
+        @Override
+        protected MimeMessage doInBackground(Object... params) {
+            if(params.length == 1)
+                return encryptMessageSynchronous((MimeMessage) params[0]);
+            else if(params.length == 2)
+                return encryptMessageSynchronous((MimeMessage) params[0], (X509Certificate) params[1]);
+            else
+                return null;
+        }
+    }
+
+    private class AsyncEncryptPart extends AsyncTask<Object, Void, MimeBodyPart> {
+        @Override
+        protected MimeBodyPart doInBackground(Object... params) {
+            if(params.length == 2)
+                return encryptBodyPartSynchronous((MimeBodyPart) params[0], (X509Certificate) params[1]);
+            else
+                return null;
+        }
+    }
+
 }
