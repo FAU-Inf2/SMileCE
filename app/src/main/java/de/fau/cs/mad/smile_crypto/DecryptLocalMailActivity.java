@@ -145,12 +145,12 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         String passphrase;
         MimeMessage m = decryptMail.getMimeMessageFromFile(pathToFile);
         if(m == null) {
-            showPassphrasePrompt(pathToFile);
+            showErrorPrompt();
             return;
         }
         String alias = decryptMail.getAliasByMimeMessage(m);
         if(alias == null) {
-            showPassphrasePrompt(pathToFile);
+            showErrorPrompt();
             return;
         }
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -191,34 +191,55 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         passphraseUserInput.setTransformationMethod(new PasswordTransformationMethod());
 
         alertDialogBuilder.setCancelable(false).setNegativeButton(getResources().getString(R.string.go),
-            new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    if (!decryptFile(pathToFile, passphraseUserInput.getText().toString())) {
-                        Log.d(SMileCrypto.LOG_TAG, "Maybe wrong passphrase. Show passphrase prompt again.");
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (!decryptFile(pathToFile, passphraseUserInput.getText().toString())) {
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
-                        builder.setTitle(getResources().getString(R.string.error));
-                        builder.setMessage(getResources().getString(R.string.something_went_wrong) +
-                                "\n" + getResources().getString(R.string.ask_try_again));
-
-                        builder.setPositiveButton(R.string.cancel, null);
-                        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                showPassphrasePrompt(pathToFile);
+                            if (!(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_WRONG_PASSPHRASE)) {
+                                showErrorPrompt();
+                                return;
                             }
-                        });
-                        builder.create().show();
+                            Log.d(SMileCrypto.LOG_TAG, "Maybe wrong passphrase. Show passphrase prompt again.");
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
+                            builder.setTitle(getResources().getString(R.string.error));
+                            builder.setMessage(getResources().getString(R.string.something_went_wrong) +
+                                    "\n" + getResources().getString(R.string.ask_try_again));
+
+                            builder.setPositiveButton(R.string.cancel, null);
+                            builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    showPassphrasePrompt(pathToFile);
+                                }
+                            });
+                            builder.create().show();
+                        }
+                        options();
                     }
-                    options();
-                }
-            }).setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                }).setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                     }
                 }
         );
         alertDialogBuilder.create().show();
+    }
+
+
+    public void showErrorPrompt() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE_IN_FILE) {
+            builder.setMessage(getResources().getString(R.string.no_valid_mime_message));
+        } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_RECIPIENTS_FOUND) {
+            builder.setMessage(getResources().getString(R.string.no_certificate_for_recipients));
+        } else {
+            Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+            builder.setMessage(getResources().getString(R.string.internal_error));
+        }
+        builder.setPositiveButton(R.string.cancel, null);
+        builder.create().show();
     }
 
     private Boolean decryptFile(String pathToFile, String passphrase) {
