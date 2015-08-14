@@ -116,7 +116,7 @@
     <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
     <string name="something_went_wrong">Sorry, something went wrong. Maybe wrong passphrase or invalid file?</string>
     <string name="no_certificate_for_recipients">No certificate was found for the recipient. Please import your certificate.</string>
-    <string name="no_recipients">MimeMessage did not contail valid recipients.</string>
+    <string name="no_recipients">MimeMessage did not contain valid recipients.</string>
     <string name="no_valid_mime_message">The selected file does not contain a valid MimeMessage.</string>
     <string name="internal_error">An internal error occurred. Sorry for that. Please check the logfile.</string>
     <string name="smile_save_passphrases_certificate_alias">smile-save-passphrases-certificate</string>

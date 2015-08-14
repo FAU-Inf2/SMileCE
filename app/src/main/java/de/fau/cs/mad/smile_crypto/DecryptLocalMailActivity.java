@@ -240,7 +240,12 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
             builder.setMessage(getResources().getString(R.string.internal_error));
         }
-        builder.setPositiveButton(R.string.cancel, null);
+        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
         builder.create().show();
     }
 
