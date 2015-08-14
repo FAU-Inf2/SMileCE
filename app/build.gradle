@@ -63,6 +63,7 @@ dependencies {
     compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.1.0'
     compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.1.0'
     compile 'net.danlew:android.joda:2.8.2'
+    compile 'commons-io:commons-io:2.4'
     testCompile 'junit:junit:4.12'
     testCompile('org.robolectric:robolectric:3.0') {
         exclude group: 'commons-logging', module: 'commons-logging'

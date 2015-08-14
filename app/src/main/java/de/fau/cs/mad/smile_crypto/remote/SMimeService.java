@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.spongycastle.asn1.cms.RecipientInfo;
 import org.spongycastle.cms.CMSException;
@@ -30,6 +31,7 @@ import javax.mail.internet.MimeMultipart;
 import de.fau.cs.mad.javax.activation.DataSource;
 import de.fau.cs.mad.smile_crypto.DecryptMail;
 import de.fau.cs.mad.smile_crypto.SMIMEToolkit;
+import de.fau.cs.mad.smile_crypto.SMileCrypto;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 
@@ -67,7 +69,7 @@ public class SMimeService extends Service {
         final OutputStream outputStream = new ParcelFileDescriptor.AutoCloseOutputStream(output);
 
         try {
-            MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
+            /*MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
             SMIMEEnveloped enveloped = new SMIMEEnveloped(mimeBodyPart);
             Collection<RecipientInformation> recipients = enveloped.getRecipientInfos().getRecipients();
 
@@ -79,12 +81,18 @@ public class SMimeService extends Service {
             //final DecryptMail decryptMail = new DecryptMail();
             //MimeMessage mimeMessage = decryptMail.decodeMimeBodyParts(mimeBodyPart);
             //mimeMessage.writeTo(outputStream);
+            */
+            Log.d(SMileCrypto.LOG_TAG, "return dummy mime body");
+            MimeBodyPart outputPart = new MimeBodyPart();
+            outputPart.setText("It works");
+            outputPart.writeTo(outputStream);
         } catch (MessagingException e) {
             e.printStackTrace();
-        } catch (CMSException e) {
-            // TODO:
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
+        Log.d(SMileCrypto.LOG_TAG, "decryptAndVerify: returning intent");
         Intent result = new Intent();
         result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
         return result;
