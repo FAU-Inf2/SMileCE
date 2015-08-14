@@ -127,4 +127,24 @@
     <string name="email_label">Email:</string>
     <string name="valid_label">Valid until:</string>
 
+    <string name="faq_author">Who is the author of SMile?</string>
+    <string name="faq_license">Which license does SMile have?</string>
+    <string name="faq_other_projects">Which other projects are used by this app?</string>
+
+    <string name="faq_import_cert_q">How can I import a S/MIME-certificate?</string>
+    <string name="faq_import_cert">First of all save your certificate somewhere on the phone. The
+        certificate must be a file of type pkcs12 (ends with .p12). Then open this app and click
+        on the Floating Action Button or navigate to
+        \"Import S/MIME-Certificate\" in the sidebar. Use the opened file browser to select your
+        certificate. Finally you have to enter your passphrase.</string>
+
+    <string name="faq_passphrase_saved_q">Will my passphrase be stored? Is this safe?</string>
+    <string name="faq_passphrase_saved">Yes, the app will save your passphrase, so you do not have to
+        enter the passphrase each time you want something to be decrypted. Therefore a internal keypair is
+        created and your passphrase is encrypted with this key. The encrypted passphrase will be stored
+        in the internal storage of the application. Without being root no other app can even access the
+        file with the encrypted passphrase and even with being root another app cannot get the private
+        key to decrypt the passphrase because the keypair is stored in the AndroidKeyStore which is only
+        accessible by the app itself.</string>
+
 </resources>
