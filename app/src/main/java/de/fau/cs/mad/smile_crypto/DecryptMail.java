@@ -555,8 +555,8 @@ public class DecryptMail {
             try {
                 Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
                 return PasswordEncryption.decryptString(encryptedPassphrase);
-
             } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error while decrypting passphrase: " + e.getMessage());
                 return null;
             }
         } else {

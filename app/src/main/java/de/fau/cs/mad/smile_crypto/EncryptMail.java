@@ -132,15 +132,7 @@ public class EncryptMail {
 
             MimeMessage result = new MimeMessage(message);
             result.setContent(encryptedContent.getContent(), encryptedContent.getContentType());
-
-            result.setFrom(message.getSender());
-            result.setRecipients(Message.RecipientType.TO, message.getRecipients(Message.RecipientType.TO));
-            result.setRecipients(Message.RecipientType.CC, message.getRecipients(Message.RecipientType.BCC));
-            result.setRecipients(Message.RecipientType.BCC, message.getRecipients(Message.RecipientType.BCC));
             result.saveChanges();
-
-            Log.e(SMileCrypto.LOG_TAG, "Sender: " + result.getSender());
-            Log.e(SMileCrypto.LOG_TAG, "Recipient: " + result.getAllRecipients());
 
             return result;
         } catch (Exception e) {
