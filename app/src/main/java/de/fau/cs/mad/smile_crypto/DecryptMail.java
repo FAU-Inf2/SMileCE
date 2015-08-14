@@ -65,22 +65,27 @@ public class DecryptMail {
     private MimeBodyPart decryptMailSynchronous(String pathToFile, String passphrase) {
         try {
             MimeMessage mimeMessage = getMimeMessageFromFile(pathToFile);
-            if(mimeMessage == null)
-                return null;
 
             Address[] recipients = getMailAddressFromMimeMessage(mimeMessage);
+            if (recipients == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_RECIPIENTS_FOUND;
+                return null;
+            }
             String alias = null;
             for(Address r : recipients) {
                 if ((alias = getAliasByAddress(r)) != null)
                     break;
             }
-            if(alias == null)
+            if(alias == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 return null;
+            }
 
             return decryptMailSynchronous(alias, mimeMessage, passphrase);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             e.printStackTrace();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
@@ -98,20 +103,28 @@ public class DecryptMail {
             File p12File = new File(pathTop12File);
 
             if(!p12File.exists()) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
                 return null;
             }
 
-            p12.load(new FileInputStream(p12File), passphrase.toCharArray());
-
             PrivateKey privateKey = null;
-            Enumeration e = p12.aliases();
-            while (e.hasMoreElements()) {
-                String aliasp12 = (String) e.nextElement();
-                privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+            try {
+                p12.load(new FileInputStream(p12File), passphrase.toCharArray());
+                Enumeration e = p12.aliases();
+
+                while (e.hasMoreElements()) {
+                    String aliasp12 = (String) e.nextElement();
+                    privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+                }
+            } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_WRONG_PASSPHRASE;
+                return null;
             }
 
             if(privateKey == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
                 return null;
             }
 
@@ -121,12 +134,14 @@ public class DecryptMail {
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
             Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
-            Log.d(SMileCrypto.LOG_TAG, "DECRYPT (base64-encoded): " + convertMimeBodyPartToString(dec));
+            Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
 
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return dec;
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             e.printStackTrace();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
@@ -140,28 +155,32 @@ public class DecryptMail {
             return new AsyncDecryptMail().execute().get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
     }
 
     public MimeBodyPart decryptMail(String alias, MimeMessage mimeMessage, String passphrase) {
+        if(mimeMessage == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
         if(alias == null) {
             alias = getAliasByMimeMessage(mimeMessage);
             if(alias == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty alias.");
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 return null;
             }
             Log.d(SMileCrypto.LOG_TAG, "Found alias: " + alias);
-        }
-        if(mimeMessage == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
-            return null;
         }
         if(passphrase == null) {
             Log.d(SMileCrypto.LOG_TAG, "Check whether passphrase is available for alias: " + alias);
             passphrase = getPassphrase(alias);
             if(passphrase == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_PASSPHRASE_AVAILABLE;
                 return null;
             }
         }
@@ -172,6 +191,7 @@ public class DecryptMail {
             return new AsyncDecryptMail().execute().get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
     }
@@ -180,6 +200,7 @@ public class DecryptMail {
         String alias = getAliasByAddress(emailAddress);
         if(alias == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not find certificate for given email address in decryptMail.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
             return null;
         }
         return decryptMail(alias, mimeMessage, passphrase);
@@ -195,6 +216,7 @@ public class DecryptMail {
             return new AsyncDecryptEncodeMail().execute().get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
     }
@@ -207,18 +229,25 @@ public class DecryptMail {
             return new MimeMessage(session, new FileInputStream(file));
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception while reading encrypted mail: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE_IN_FILE;
             return null;
         }
     }
 
     public String getAliasByMimeMessage(MimeMessage mimeMessage) {
         Address[] addresses = getMailAddressFromMimeMessage(mimeMessage);
+        if (addresses == null) {
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_RECIPIENTS_FOUND;
+            return null;
+        }
+
         for (Address a : addresses) {
             String alias = getAliasByAddress(a);
             if(alias != null)
                 return alias;
 
         }
+        SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
         return null;
     }
 
@@ -238,6 +267,9 @@ public class DecryptMail {
             Enumeration e = ks.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
+                if(alias.contains("_other_")) //no private key available
+                    continue;
+
                 X509Certificate c = (X509Certificate) ks.getCertificate(alias);
                 //TODO: handle case if one mailaddress has more than one certificate
                 if(c.getSubjectDN().getName().contains("E="+emailAddress.toString()))
@@ -366,24 +398,36 @@ public class DecryptMail {
             return newMimeMessage;
         } catch(Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception decrypting parts: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
 
     public String convertMimeBodyPartToString(MimeBodyPart mimeBodyPart) {
         try {
+            if(mimeBodyPart == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.getDataHandler().writeTo(baos);
 
             return baos.toString();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error converting MimeBodyPart to String: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
 
     public String convertMimeMessageToString(MimeMessage mimeMessage) {
         try {
+            if(mimeMessage == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
+
             String result = "";
             Enumeration allHeaders = mimeMessage.getAllHeaders();
             while (allHeaders.hasMoreElements()) {
@@ -396,12 +440,18 @@ public class DecryptMail {
             return result + bytes.toString();
         }catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
-            return  null;
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            return null;
         }
     }
 
     public String getTextPlainFromMimeMessage(MimeMessage mimeMessage) {
         try {
+            if(mimeMessage == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
+
             MimeMultipart mimeMultipart = (MimeMultipart) mimeMessage.getContent();
             int cnt = mimeMultipart.getCount();
             for (int i = 0; i < cnt; i++) {
@@ -422,17 +472,25 @@ public class DecryptMail {
                         return new String(baos.toByteArray());
                     } else {
                         Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                        SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+                        return null;
                     }
                 }
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
         return null;
     }
 
     public String getTextHtmlFromMimeMessage(MimeMessage mimeMessage) {
         try {
+            if(mimeMessage == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
+
             MimeMultipart mimeMultipart = (MimeMultipart) mimeMessage.getContent();
             int cnt = mimeMultipart.getCount();
             for (int i = 0; i < cnt; i++) {
@@ -453,11 +511,14 @@ public class DecryptMail {
                         return new String(baos.toByteArray());
                     } else {
                         Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                        SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+                        return null;
                     }
                 }
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
         return null;
     }
@@ -474,6 +535,7 @@ public class DecryptMail {
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in addOldHeaders:" + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
 
         return newMimeMessage;
@@ -482,7 +544,7 @@ public class DecryptMail {
     public Boolean hasPassphrase(String alias) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
                 getApplicationContext());
-        return  preferences.contains(alias+"-passphrase");
+        return preferences.contains(alias+"-passphrase");
     }
 
     private String getPassphrase(String alias) {
@@ -506,33 +568,23 @@ public class DecryptMail {
     private class AsyncDecryptMail extends AsyncTask<Void, Void, MimeBodyPart> {
 
         protected MimeBodyPart doInBackground(Void... params) {
-            try {
-                if(alias == null || encryptedMimeMessage == null)
-                    return decryptMailSynchronous(pathToFile, passphrase);
-                else
-                    return decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
-            } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Error in doInBackground" + e.getMessage());
-                return null;
-            }
+            if(alias == null || encryptedMimeMessage == null)
+                return decryptMailSynchronous(pathToFile, passphrase);
+            else
+                return decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
         }
     }
 
     private class AsyncDecryptEncodeMail extends AsyncTask<Void, Void, MimeMessage> {
 
         protected MimeMessage doInBackground(Void... params) {
-            try {
-                MimeBodyPart mimeBodyPart;
-                if(alias == null || encryptedMimeMessage == null)
-                    mimeBodyPart = decryptMailSynchronous(pathToFile, passphrase);
-                else
-                    mimeBodyPart = decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
+            MimeBodyPart mimeBodyPart;
+            if(alias == null || encryptedMimeMessage == null)
+                mimeBodyPart = decryptMailSynchronous(pathToFile, passphrase);
+            else
+                mimeBodyPart = decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
 
-                return addOldHeaders(decodeMimeBodyParts(mimeBodyPart));
-            } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Error in doInBackground" + e.getMessage());
-                return null;
-            }
+            return addOldHeaders(decodeMimeBodyParts(mimeBodyPart));
         }
     }
 

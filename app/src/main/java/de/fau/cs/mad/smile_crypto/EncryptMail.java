@@ -32,27 +32,43 @@ public class EncryptMail {
 
     public MimeMessage encryptMessage(MimeMessage message) {
         try {
+            if(message == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
             return new AsyncEncryptMessage().execute(message).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
     }
 
     public MimeMessage encryptMessage(MimeMessage message, X509Certificate certificate) {
         try {
+            if(message == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
             return new AsyncEncryptMessage().execute(message, certificate).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
     }
 
     public MimeBodyPart encryptBodyPart(MimeBodyPart mimePart, X509Certificate certificate) {
         try {
+            if(mimePart == null || certificate == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+                return null;
+            }
+
             return new AsyncEncryptPart().execute(mimePart, certificate).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
     }
@@ -70,6 +86,7 @@ public class EncryptMail {
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception while encrypting MimeBodyPart: " + e.getMessage());
             e.printStackTrace();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
@@ -129,6 +146,7 @@ public class EncryptMail {
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessageSynchronous: " + e.getMessage());
             e.printStackTrace();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
@@ -152,6 +170,7 @@ public class EncryptMail {
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in getCertificates:" + e.getMessage());
             e.printStackTrace();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
         return certificates;
     }
@@ -192,5 +211,4 @@ public class EncryptMail {
                 return null;
         }
     }
-
 }
