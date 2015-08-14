@@ -550,7 +550,8 @@ public class DecryptMail {
                 getApplicationContext());
         if(preferences.contains(alias+"-passphrase")) {
             String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-            Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+            //Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+            Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase found.");
             try {
                 Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
                 return PasswordEncryption.decryptString(encryptedPassphrase);
