@@ -233,6 +233,8 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE_IN_FILE) {
             builder.setMessage(getResources().getString(R.string.no_valid_mime_message));
         } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_RECIPIENTS_FOUND) {
+            builder.setMessage(getResources().getString(R.string.no_recipients));
+        } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_CERTIFICATE_FOUND) {
             builder.setMessage(getResources().getString(R.string.no_certificate_for_recipients));
         } else {
             Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);

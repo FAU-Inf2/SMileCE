@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -36,9 +37,6 @@ public class ImportCertificateActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new ImportCertificateFragment()).commit();
 
         Log.d(SMileCrypto.LOG_TAG, "Started ImportCertificateActivity.");
         showFileChooser();
@@ -69,14 +67,11 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     Uri uri = data.getData();
                     String path = PathConverter.getPath(this, uri);
                     Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
-                            ImportCertificateFragment.newInstance(path)).commitAllowingStateLoss();
-                    //addCertificateToKeyChain(path);
+                    TextView textView = (TextView) this.findViewById(R.id.import_text_view);
+                    textView.setText(getString(R.string.import_certificate_show_path) + path);
                     showPassphrasePrompt(path);
                 } else {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.currentFragment,
-                            ImportCertificateFragment.newInstance(getResources().
-                                    getString(R.string.import_certificate_no_file))).commitAllowingStateLoss();
+                    noFileSelected();
                 }
                 break;
         }
@@ -96,9 +91,17 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
         } catch (android.content.ActivityNotFoundException anfe) {
             Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
-            Toast.makeText(this,
-                    getResources().getString(R.string.no_file_manager),
-                    Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+            builder.setTitle(getResources().getString(R.string.error));
+            builder.setMessage(getResources().getString(R.string.no_file_manager));
+
+            builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    finish();
+                }
+            });
+            builder.create().show();
         }
     }
 
@@ -117,32 +120,92 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String passphrase = passphraseUserInput.getText().toString();
-                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
-                            Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
-                            builder.setTitle(getResources().getString(R.string.error));
-                            builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
-                                    "\n" + getResources().getString(R.string.try_again));
-
-                            builder.setPositiveButton(R.string.cancel, null);
-                            builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int id) {
-                                    showPassphrasePrompt(pathToFile);
-                                }
-                            });
-                            builder.create().show();
-                        }
+                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase))
+                            wrongPassphrase(pathToFile);
+                        else
+                            importSuccessful();
                     }
                 })
                 .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
+                                //dialog.dismiss();
+                                finish();
                             }
                         }
                 );
         alertDialogBuilder.create().show();
+    }
+
+    private void wrongPassphrase(final String pathToFile) {
+        Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
+                "\n" + getResources().getString(R.string.try_again));
+
+        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showPassphrasePrompt(pathToFile);
+            }
+        });
+        builder.create().show();
+    }
+
+    private void noFileSelected() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(getResources().getString(R.string.import_certificate_no_file));
+
+        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showFileChooser();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void importSuccessful() {
+        Log.d(SMileCrypto.LOG_TAG, "Exit-Status: " + SMileCrypto.EXIT_STATUS);
+        if (SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED) {
+            AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportCertificateActivity.this);
+            builderImported.setTitle(getResources().getString(R.string.info));
+            builderImported.setMessage(getResources().getString(R.string.certificate_already_imported));
+
+            builderImported.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    finish();
+                }
+            });
+            builderImported.create().show();
+        } else {
+            AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportCertificateActivity.this);
+            builderImported.setTitle(getResources().getString(R.string.info));
+            builderImported.setMessage(getResources().getString(R.string.import_certificate_successful));
+
+            builderImported.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    finish();
+                }
+            });
+            builderImported.create().show();
+        }
     }
 
     /*depreciated -- can be deleted later (stays here to see how KeyChain works*/

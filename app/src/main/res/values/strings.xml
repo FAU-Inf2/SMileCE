@@ -7,6 +7,8 @@
     <string name="retry">Retry</string>
     <string name="go">Go</string>
     <string name="done">Done</string>
+    <string name="info">Info</string>
+    <string name="okay">Okay</string>
     <string name="try_again">Please try again.</string>
     <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
@@ -106,6 +108,7 @@
     <string name="import_certificate_show_path">Your selected file was:&#160;</string>
     <string name="import_certificate_successful">Importing your certificate was successful.</string>
     <string name="import_certificate_no_file">No file to import was selected.</string>
+    <string name="certificate_already_imported">The selected certificate is already imported.</string>
     <string name="not_eml">The selected file was not an .eml-file.</string>
     <string name="decrypt_file_show_path">File to be decrypted:&#160;</string>
 
@@ -113,6 +116,7 @@
     <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
     <string name="something_went_wrong">Sorry, something went wrong. Maybe wrong passphrase or invalid file?</string>
     <string name="no_certificate_for_recipients">No certificate was found for the recipient. Please import your certificate.</string>
+    <string name="no_recipients">MimeMessage did not contail valid recipients.</string>
     <string name="no_valid_mime_message">The selected file does not contain a valid MimeMessage.</string>
     <string name="internal_error">An internal error occurred. Sorry for that. Please check the logfile.</string>
     <string name="smile_save_passphrases_certificate_alias">smile-save-passphrases-certificate</string>

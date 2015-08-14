@@ -231,12 +231,16 @@ public class KeyManagement {
 
             String alias = "SMile_crypto_own_" + getThumbprint(c);
             //Check whether cert is already there
-            if(ks.containsAlias(alias))
+            if(ks.containsAlias(alias)) {
+                Log.d(SMileCrypto.LOG_TAG, "Alias " + alias + " already exists.");
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return alias;
+            }
 
             ks.setKeyEntry(alias, key, null, new Certificate[]{c});
 
             Toast.makeText(App.getContext(), R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return alias;
         } catch (Exception e){
             Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());

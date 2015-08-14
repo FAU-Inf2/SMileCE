@@ -17,8 +17,8 @@
             layout="@layout/toolbar">
         </include>
 
-        <FrameLayout
-            android:id="@+id/currentFragment"
+        <TextView
+            android:id="@+id/import_text_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             />
