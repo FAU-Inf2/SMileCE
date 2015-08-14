@@ -51,8 +51,9 @@ public class DecryptMail {
     //MimeBodyPart messagePart;
 
     public DecryptMail() {
-        this.certificateDirectory = App.getContext().getApplicationContext().getDir(
-                App.getContext().getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
+        final Context context = App.getContext();
+        this.certificateDirectory = context.getDir(
+                context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
                 getAbsolutePath();
     }
 
@@ -183,6 +184,7 @@ public class DecryptMail {
         this.encryptedMimeMessage = null;
         this.pathToFile = pathToFile;
         this.passphrase = passphrase;
+
         try {
             return new AsyncDecryptEncodeMail().execute().get();
         } catch (Exception e) {

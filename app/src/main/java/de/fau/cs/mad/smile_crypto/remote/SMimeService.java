@@ -8,9 +8,19 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 
+import org.spongycastle.asn1.cms.RecipientInfo;
+import org.spongycastle.cms.CMSException;
+import org.spongycastle.cms.Recipient;
+import org.spongycastle.cms.RecipientId;
+import org.spongycastle.cms.RecipientInformation;
+import org.spongycastle.mail.smime.SMIMEEnveloped;
+import org.spongycastle.mail.smime.SMIMESigned;
+import org.spongycastle.mail.smime.SMIMEUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
@@ -19,6 +29,7 @@ import javax.mail.internet.MimeMultipart;
 
 import de.fau.cs.mad.javax.activation.DataSource;
 import de.fau.cs.mad.smile_crypto.DecryptMail;
+import de.fau.cs.mad.smile_crypto.SMIMEToolkit;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 
@@ -57,13 +68,20 @@ public class SMimeService extends Service {
 
         try {
             MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
-            final String certDir = getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE).getAbsolutePath();
-            final DecryptMail decryptMail = new DecryptMail(certDir);
-            MimeMessage mimeMessage = decryptMail.decodeMimeBodyParts(mimeBodyPart);
-            mimeMessage.writeTo(outputStream);
+            SMIMEEnveloped enveloped = new SMIMEEnveloped(mimeBodyPart);
+            Collection<RecipientInformation> recipients = enveloped.getRecipientInfos().getRecipients();
+
+            for(RecipientInformation recipient : recipients) {
+                RecipientId id = recipient.getRID();
+                //MimeBodyPart part = SMIMEUtil.toMimeBodyPart(recipient.getContent(null, "BC"));
+            }
+
+            //final DecryptMail decryptMail = new DecryptMail();
+            //MimeMessage mimeMessage = decryptMail.decodeMimeBodyParts(mimeBodyPart);
+            //mimeMessage.writeTo(outputStream);
         } catch (MessagingException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (CMSException e) {
             // TODO:
         }
 
