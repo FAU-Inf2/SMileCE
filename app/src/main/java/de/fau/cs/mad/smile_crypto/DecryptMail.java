@@ -17,7 +17,9 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.FilenameUtils;
@@ -101,6 +103,7 @@ public class DecryptMail {
 
             KeyStore p12 = KeyStore.getInstance("pkcs12");
             String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
+            Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
             File p12File = new File(pathTop12File);
 
             if(!p12File.exists()) {
@@ -326,6 +329,21 @@ public class DecryptMail {
                 }
 
                 X509Certificate c = (X509Certificate) ks.getCertificate(alias);
+                Log.d(SMileCrypto.LOG_TAG, c.toString());
+
+                Collection<List<?>> alternateNames = c.getSubjectAlternativeNames();
+
+                for(List<?> names: alternateNames) {
+                    for(Object name : names) {
+                        if(name instanceof String) {
+                            if(emailAddress.toString().equals(name.toString())) {
+                                Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
+                                return alias;
+                            }
+                        }
+                    }
+                }
+
                 //TODO: handle case if one mailaddress has more than one certificate
                 if(c.getSubjectDN().getName().contains("E=" + emailAddress.toString())) {
                     Log.d(SMileCrypto.LOG_TAG, "alias found: " + alias);

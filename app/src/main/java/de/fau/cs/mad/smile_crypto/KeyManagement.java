@@ -224,14 +224,15 @@ public class KeyManagement {
         File dst = new File(certDirectory, filename);
 
         try {
-            FileChannel inChannel = new FileInputStream(src).getChannel();
+            org.apache.commons.io.FileUtils.copyFile(src, dst);
+            /*FileChannel inChannel = new FileInputStream(src).getChannel();
             FileChannel outChannel = new FileOutputStream(dst).getChannel();
 
             inChannel.transferTo(0, inChannel.size(), outChannel);
             inChannel.close();
             outChannel.close();
 
-            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);
+            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);*/
             return true;
 
         } catch (Exception e) {

@@ -118,6 +118,7 @@ public class ListOwnCertificatesFragment extends Fragment {
         super.onAttach(activity);
     }
 
+    // FIXME: duplicate code to KeyManagement.getAllCertificates
     private ArrayList<KeyInfo> findCerts() {
         ArrayList<KeyInfo> keylist = new ArrayList<>();
         try {
