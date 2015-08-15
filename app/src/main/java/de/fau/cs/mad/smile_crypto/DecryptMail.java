@@ -335,12 +335,15 @@ public class DecryptMail {
 
                 Collection<List<?>> alternateNames = c.getSubjectAlternativeNames();
 
-                for(List<?> names: alternateNames) {
-                    for(Object name : names) {
-                        if(name instanceof String) {
-                            if(emailAddress.toString().equals(name.toString())) {
-                                Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
-                                return alias;
+                if(alternateNames != null) {
+                    //seems to be always null...
+                    for (List<?> names : alternateNames) {
+                        for (Object name : names) {
+                            if (name instanceof String) {
+                                if (emailAddress.toString().equals(name.toString())) {
+                                    Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
+                                    return alias;
+                                }
                             }
                         }
                     }
@@ -356,6 +359,7 @@ public class DecryptMail {
             return null;
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

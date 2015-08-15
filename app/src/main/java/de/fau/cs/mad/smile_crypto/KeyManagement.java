@@ -125,6 +125,7 @@ public class KeyManagement {
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
+            e.printStackTrace();
         }
 
         knownOwnKeys.addAll(keylist);
@@ -157,12 +158,21 @@ public class KeyManagement {
                     X509Certificate cert = (X509Certificate) c;
                     Collection<List<?>> alternateNames = cert.getSubjectAlternativeNames();
 
-                    for(List<?> names: alternateNames) {
-                        for(Object name : names) {
-                            if(name instanceof String) {
-                                keyInfo.mailAddresses.add(name.toString());
+                    if  (alternateNames != null) {
+                        //seems to be always null...
+                        for (List<?> names : alternateNames) {
+                            for (Object name : names) {
+                                if (name instanceof String) {
+                                    keyInfo.mailAddresses.add(name.toString());
+                                }
                             }
                         }
+                    } else {
+                        // workaround...
+                        String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
+                        String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
+                        Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
+                        keyInfo.mail = email;
                     }
 
                     keyInfo.contact = cert.getSubjectDN().getName();
@@ -177,6 +187,7 @@ public class KeyManagement {
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
+            e.printStackTrace();
         }
         knownAllKeys.addAll(keylist);
         return keylist;
