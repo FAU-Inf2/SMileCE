@@ -32,6 +32,11 @@ android {
         }
     }
 
+    lintOptions {
+        abortOnError true
+        //lintConfig file("$rootProject.projectDir/config/lint/lint.xml")
+    }
+
     sourceSets {
         main {
             java {

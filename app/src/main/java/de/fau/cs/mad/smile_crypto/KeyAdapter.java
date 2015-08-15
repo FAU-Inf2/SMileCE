@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,16 +57,18 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
 
     @Override
     public void onBindViewHolder(KeyViewHolder holder, int position) {
-        KeyInfo ki = keylist.get(position);
-        holder.alias.setText(ki.alias);
-        holder.contact.setText(ki.contact);
-        //holder.contact_badge.assignContactFromEmail(ki.mail, true);
-        holder.hash.setText(ki.hash);
-        holder.mail.setText(ki.mail);
-        holder.type.setText(ki.type);
-        holder.trust.setText(ki.trust);
-        if(ki.termination_date != null)
-            holder.termination_date.setText(ki.termination_date.toString());
+        KeyInfo keyInfo = keylist.get(position);
+        holder.alias.setText(keyInfo.alias);
+        holder.contact.setText(keyInfo.contact);
+        //holder.contact_badge.assignContactFromEmail(keyInfo.mail, true);
+        holder.hash.setText(keyInfo.hash);
+        holder.mail.setText(keyInfo.mail);
+        holder.type.setText(keyInfo.type);
+        holder.trust.setText(keyInfo.trust);
+
+        if (keyInfo.termination_date != null) {
+            holder.termination_date.setText(keyInfo.termination_date.toString());
+        }
     }
 
     @Override
@@ -74,7 +77,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
     }
 
     public void addKey(KeyInfo key) {
-        if(key != null && !keylist.contains(key)) {
+        if (key != null && !keylist.contains(key)) {
             int pos = keylist.size();
             keylist.add(key);
             Log.e(SMileCrypto.LOG_TAG, "Added KeyInfo: " + key + " at position: " + pos);
@@ -82,9 +85,13 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         }
     }
 
-    public  void addKey(List<KeyInfo> keys) {
-        if(keys != null)
-            for(KeyInfo ki : keys)
-                addKey(ki);
+    public void addKey(List<KeyInfo> keys) {
+        if (keys == null) {
+            return;
+        }
+
+        for (KeyInfo ki : keys) {
+            addKey(ki);
+        }
     }
 }

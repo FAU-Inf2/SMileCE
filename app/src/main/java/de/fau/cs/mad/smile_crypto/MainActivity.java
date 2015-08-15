@@ -340,16 +340,17 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void updateCards() {
-        for(KeyInfo ki : keyManager.getAllCertificates()) {
+        for(KeyInfo keyInfo : keyManager.getAllCertificates()) {
 
             //Create a Card
-            KeyCard card = new KeyCard(this, ki);
+            KeyCard card = new KeyCard(this, keyInfo);
 
             //Create a CardHeader
             CardHeader header = new CardHeader(this);
             //Add Header to card
             card.addCardHeader(header);
             boolean contains = false;
+
             for(int i = 0; i < mCardArrayAdapter.getItemCount(); ++i) {
                 KeyCard kc = (KeyCard) mCardArrayAdapter.getItem(i);
                 Log.e(SMileCrypto.LOG_TAG, "Testing item.");
@@ -358,6 +359,7 @@ public class MainActivity extends ActionBarActivity {
                     contains = true;
                 }
             }
+
             if(!contains) {
                 Log.e(SMileCrypto.LOG_TAG, "Items added");
                 mCardArrayAdapter.add(card);

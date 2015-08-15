@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,7 @@ public class KeyCard extends Card {
     ImageView validCircle2;
     ImageView validCircle3;
     ImageView validCircle4;
-    KeyInfo ki;
+    KeyInfo keyInfo;
 
     public KeyCard(Context context) {
         this(context, R.layout.key);
@@ -40,7 +41,7 @@ public class KeyCard extends Card {
 
     public KeyCard(Context context, KeyInfo keyInfo) {
         this(context, R.layout.key);
-        ki = keyInfo;
+        this.keyInfo = keyInfo;
     }
 
     @Override
@@ -54,19 +55,25 @@ public class KeyCard extends Card {
         validCircle2 = (ImageView) parent.findViewById(R.id.valid_circle_2);
         validCircle3 = (ImageView) parent.findViewById(R.id.valid_circle_3);
         validCircle4 = (ImageView) parent.findViewById(R.id.valid_circle_4);
-        if(ki != null)
-            setData(ki);
+
+        if(keyInfo != null) {
+            setData(keyInfo);
+        }
     }
 
     private void setData(KeyInfo ki) {
-        if(ki.mail != null)
-            email.setText(ki.mail);
+        if(ki.mailAddresses.size() > 0) {
+            email.setText(ki.mailAddresses.get(0));
+        }
+
         if(ki.termination_date != null) {
             DateTime valid = ki.termination_date;
-            valid_until.setText(valid.toString());
+            CharSequence displayDate = DateUtils.formatDateTime(getContext(), ki.termination_date.getMillis(), 0);
+            valid_until.setText(displayDate);
             DateTime today = new DateTime();
             Years years = Years.yearsBetween(today, valid);
             Months months = Months.monthsBetween(today, valid);
+
             if(valid.getMillis() <= today.getMillis()) {
                 validCircle0.getBackground().setColorFilter(getColorFilter("red"));
                 validCircle1.getBackground().setColorFilter(getColorFilter("white"));
@@ -105,8 +112,10 @@ public class KeyCard extends Card {
                 validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
             }
         }
-        if(ki.contact != null)
+
+        if(ki.contact != null) {
             setTitle(ki.contact);
+        }
     }
 
     private ColorFilter getColorFilter(String color) {
@@ -127,13 +136,13 @@ public class KeyCard extends Card {
     @Override
     public boolean equals(Object o) {
         Log.e(SMileCrypto.LOG_TAG, "KeyCard equals called");
-        if(ki == null) {
+        if(keyInfo == null) {
             Log.e(SMileCrypto.LOG_TAG, "KeyCard != o");
             return false;
         }
         if(o instanceof KeyCard) {
             KeyCard kc = (KeyCard) o;
-            if(ki.equals(kc.ki)) {
+            if(keyInfo.equals(kc.keyInfo)) {
                 Log.e(SMileCrypto.LOG_TAG, "KeyCard == o");
                 return true;
             }
@@ -144,6 +153,6 @@ public class KeyCard extends Card {
 
     @Override
     public int hashCode() {
-        return ki != null ? ki.hashCode() : 0;
+        return keyInfo != null ? keyInfo.hashCode() : 0;
     }
 }
