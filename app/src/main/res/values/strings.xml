@@ -143,8 +143,19 @@
         enter the passphrase each time you want something to be decrypted. Therefore a internal keypair is
         created and your passphrase is encrypted with this key. The encrypted passphrase will be stored
         in the internal storage of the application. Without being root no other app can even access the
-        file with the encrypted passphrase and even with being root another app cannot get the private
-        key to decrypt the passphrase because the keypair is stored in the AndroidKeyStore which is only
-        accessible by the app itself.</string>
+        file with the encrypted passphrase and even with being root another app should not be able to
+        get the private key to decrypt the passphrase because the keypair is stored in the AndroidKeyStore
+        which should only be accessible by the app itself.</string>
 
+    <string name="faq_meaning_colour_q">What is the meaning of the colours next to the certificates?</string>
+    <string name="faq_meaning_colour">The colours are an easy way to see for how long the certificate
+    will be valid: </string>
+
+    <string name="faq_colour_00"> Not valid yet. (TODO: not implemented)</string>
+    <string name="faq_colour_01"> &gt; 1 year valid</string>
+    <string name="faq_colour_02"> &gt; 6 months and &lt; 1 year valid</string>
+    <string name="faq_colour_03"> &gt; 3 months and &lt; 6 months valid</string>
+    <string name="faq_colour_04"> &gt; 1 months and &lt; 3 months valid</string>
+    <string name="faq_colour_05"> &lt; 1 month valid</string>
+    <string name="faq_colour_06"> Expired.</string>
 </resources>

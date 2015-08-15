@@ -62,6 +62,59 @@
                     />
 
                 <TextView
+                    android:id="@+id/buttonlike_faq_meaning_colour_q"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    style="@android:style/Widget.Button"
+                    android:layout_marginEnd="5sp"
+                    android:text="@string/faq_meaning_colour_q"
+                    android:clickable="false"
+                    />
+                <TextView
+                    android:id="@+id/text_faq_meaning_colour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/faq_meaning_colour"
+                    android:visibility="gone"
+                    android:textSize="13sp"
+                    />
+                <include
+                    android:id="@+id/valid_00"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+                <include
+                    android:id="@+id/valid_01"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+                <include
+                    android:id="@+id/valid_02"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+                <include
+                    android:id="@+id/valid_03"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+                <include
+                    android:id="@+id/valid_04"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+                <include
+                    android:id="@+id/valid_05"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+                <include
+                    android:id="@+id/valid_06"
+                    layout="@layout/validity_circles"
+                    android:visibility="gone">
+                </include>
+
+                <TextView
                     android:id="@+id/buttonlike_author"
                     android:layout_height="wrap_content"
                     android:layout_width="fill_parent"
@@ -78,6 +131,7 @@
                     android:visibility="gone"
                     android:textSize="13sp"
                 />
+
 
                 <TextView
                     android:id="@+id/buttonlike_license"
