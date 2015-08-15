@@ -118,7 +118,9 @@ public class DecryptMail {
 
                 while (e.hasMoreElements()) {
                     String aliasp12 = (String) e.nextElement();
-                    privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+                    if(p12.isKeyEntry(aliasp12)) {
+                        privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+                    }
                 }
             } catch (Exception e) {
                 Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());

@@ -79,10 +79,11 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.action_save) {
             String pathToFile = saveMimeMessage();
-            if(pathToFile == null)
+            if(pathToFile == null) {
                 Toast.makeText(this, R.string.no_mime_message_saved, Toast.LENGTH_LONG).show();
-            else
+            } else {
                 Toast.makeText(this, getString(R.string.saved_mime_message) + pathToFile, Toast.LENGTH_LONG).show();
+            }
             return true;
         }
 
