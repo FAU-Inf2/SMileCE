@@ -7,10 +7,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,14 +17,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.joda.time.DateTime;
-import org.spongycastle.jce.provider.X509CertParser;
 import org.spongycastle.operator.OperatorCreationException;
-import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -39,15 +33,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Properties;
-
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 public class ListOwnCertificatesFragment extends Fragment {
     public ListOwnCertificatesFragment() {
@@ -63,7 +48,7 @@ public class ListOwnCertificatesFragment extends Fragment {
     private float offset1;
     private float offset2;
 
-    private KeyAdapter ka;
+    private KeyAdapter keyAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,8 +56,8 @@ public class ListOwnCertificatesFragment extends Fragment {
         RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.keyList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         ArrayList<KeyInfo> keylist = findCerts();
-        ka = new KeyAdapter(keylist);
-        recyclerView.setAdapter(ka);
+        keyAdapter = new KeyAdapter(keylist);
+        recyclerView.setAdapter(keyAdapter);
         final ViewGroup fabContainer = (ViewGroup) rootView.findViewById(R.id.fab_container);
         fab = (ImageButton) rootView.findViewById(R.id.fab);
         fabAction1 = rootView.findViewById(R.id.fab_action_1);
@@ -107,7 +92,7 @@ public class ListOwnCertificatesFragment extends Fragment {
                 expanded = false;
                 try {
                     new SelfSignedCertificateCreator().create();
-                    ka.addKey(findCerts());
+                    keyAdapter.addKey(findCerts());
                 } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
                     Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
                     Toast.makeText(getActivity(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -133,6 +118,7 @@ public class ListOwnCertificatesFragment extends Fragment {
         super.onAttach(activity);
     }
 
+    // FIXME: duplicate code to KeyManagement.getAllCertificates
     private ArrayList<KeyInfo> findCerts() {
         ArrayList<KeyInfo> keylist = new ArrayList<>();
         try {
@@ -158,9 +144,9 @@ public class ListOwnCertificatesFragment extends Fragment {
                     if(c.getType().equals("X.509")) {
                         X509Certificate cert = (X509Certificate) c;
                         ki.contact = cert.getSubjectX500Principal().getName();
-                        //ki.mail; TODO
+                        //keyInfo.mail; TODO
                         ki.termination_date = new DateTime(cert.getNotAfter());
-                        //ki.trust; TODO
+                        //keyInfo.trust; TODO
                     }
                     keylist.add(ki);
                 } else {

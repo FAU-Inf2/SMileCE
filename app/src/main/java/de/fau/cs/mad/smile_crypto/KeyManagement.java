@@ -18,7 +18,9 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 
 public class KeyManagement {
 
@@ -62,8 +64,9 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Check whether certificate is stored for alias: " + alias);
 
             //Check whether cert is already there
-            if(ks.containsAlias(alias))
+            if(ks.containsAlias(alias)) {
                 return true;
+            }
 
             Log.d(SMileCrypto.LOG_TAG, "Alias is not there, import new certificate without private key.");
             ks.setCertificateEntry(alias, certificate);
@@ -89,25 +92,28 @@ public class KeyManagement {
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 if (entry instanceof KeyStore.PrivateKeyEntry) {
-                    KeyInfo ki = new KeyInfo();
-                    ki.alias = alias;
+                    KeyInfo keyInfo = new KeyInfo();
+                    keyInfo.alias = alias;
                     Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                    ki.type = c.getType();
-                    ki.hash = Integer.toHexString(c.hashCode());
+                    keyInfo.type = c.getType();
+                    keyInfo.hash = Integer.toHexString(c.hashCode());
+
                     if(c.getType().equals("X.509")) {
                         X509Certificate cert = (X509Certificate) c;
                         String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
                         String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
                         Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
-                        ki.mail = email;
-                        ki.contact = cert.getSubjectX500Principal().getName();
-                        ki.termination_date = new DateTime(cert.getNotAfter());
-                        //ki.trust; TODO
-                        ki.thumbprint = getThumbprint(cert);
+                        keyInfo.mail = email;
+                        keyInfo.contact = cert.getSubjectX500Principal().getName();
+                        keyInfo.termination_date = new DateTime(cert.getNotAfter());
+                        //keyInfo.trust; TODO
+                        keyInfo.thumbprint = getThumbprint(cert);
                     }
-                    if(!knownOwnKeys.contains(ki))
-                        keylist.add(ki);
+
+                    if(!knownOwnKeys.contains(keyInfo)) {
+                        keylist.add(keyInfo);
+                    }
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
@@ -120,6 +126,7 @@ public class KeyManagement {
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
         }
+
         knownOwnKeys.addAll(keylist);
         return keylist;
     }
@@ -134,29 +141,39 @@ public class KeyManagement {
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
-                if(alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias)))
+                if(alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias))) {
                     continue;
+                }
+
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
-                KeyInfo ki = new KeyInfo();
-                ki.alias = alias;
+                KeyInfo keyInfo = new KeyInfo();
+                keyInfo.alias = alias;
                 Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                 Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                ki.type = c.getType();
-                ki.hash = Integer.toHexString(c.hashCode());
+                keyInfo.type = c.getType();
+                keyInfo.hash = Integer.toHexString(c.hashCode());
                 if(c.getType().equals("X.509")) {
                     X509Certificate cert = (X509Certificate) c;
-                    String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
-                    String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
-                    Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
-                    ki.mail = email;
-                    ki.contact = cert.getSubjectX500Principal().getName();
-                    ki.termination_date = new DateTime(cert.getNotAfter());
-                    //ki.trust; TODO
-                    ki.thumbprint = getThumbprint(cert);
+                    Collection<List<?>> alternateNames = cert.getSubjectAlternativeNames();
+
+                    for(List<?> names: alternateNames) {
+                        for(Object name : names) {
+                            if(name instanceof String) {
+                                keyInfo.mailAddresses.add(name.toString());
+                            }
+                        }
+                    }
+
+                    keyInfo.contact = cert.getSubjectDN().getName();
+                    keyInfo.termination_date = new DateTime(cert.getNotAfter());
+                    //keyInfo.trust; TODO
+                    keyInfo.thumbprint = getThumbprint(cert);
                 }
-                if(!knownAllKeys.contains(ki))
-                    keylist.add(ki);
+
+                if(!knownAllKeys.contains(keyInfo)) {
+                    keylist.add(keyInfo);
+                }
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
@@ -207,14 +224,15 @@ public class KeyManagement {
         File dst = new File(certDirectory, filename);
 
         try {
-            FileChannel inChannel = new FileInputStream(src).getChannel();
+            org.apache.commons.io.FileUtils.copyFile(src, dst);
+            /*FileChannel inChannel = new FileInputStream(src).getChannel();
             FileChannel outChannel = new FileOutputStream(dst).getChannel();
 
             inChannel.transferTo(0, inChannel.size(), outChannel);
             inChannel.close();
             outChannel.close();
 
-            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);
+            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);*/
             return true;
 
         } catch (Exception e) {

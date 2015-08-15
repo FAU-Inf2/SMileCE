@@ -120,10 +120,11 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String passphrase = passphraseUserInput.getText().toString();
-                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase))
+                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
                             wrongPassphrase(pathToFile);
-                        else
+                        } else {
                             importSuccessful();
+                        }
                     }
                 })
                 .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
