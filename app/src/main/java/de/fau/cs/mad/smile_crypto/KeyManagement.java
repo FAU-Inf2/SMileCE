@@ -286,7 +286,7 @@ public class KeyManagement {
             if(encryptedPassphrase == null)
                 return false;
 
-            Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  " + encryptedPassphrase);
+            Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  <sensitive>");
 
             SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(App.getContext().getApplicationContext()).edit();
             e.putString(alias + "-passphrase", encryptedPassphrase);
