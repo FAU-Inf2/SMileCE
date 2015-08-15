@@ -76,10 +76,10 @@ public class KeyCard extends Card {
 
             if(valid.getMillis() <= today.getMillis()) {
                 validCircle0.getBackground().setColorFilter(getColorFilter("red"));
-                validCircle1.getBackground().setColorFilter(getColorFilter("white"));
-                validCircle2.getBackground().setColorFilter(getColorFilter("white"));
-                validCircle3.getBackground().setColorFilter(getColorFilter("white"));
-                validCircle4.getBackground().setColorFilter(getColorFilter("white"));
+                validCircle1.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
             } else if(years.getYears() > 1 || (years.getYears() == 1 && months.getMonths() > 0)) {
                 validCircle0.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 validCircle1.getBackground().setColorFilter(getColorFilter("#00ff00"));
