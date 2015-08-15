@@ -110,8 +110,23 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                         e.apply();
                         passphraseDecryptOrPrompt(path);
                     } else {
-                        Toast.makeText(this, R.string.not_eml, Toast.LENGTH_LONG).show();
                         mTextView.setText(getString(R.string.not_eml));
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
+                        builder.setTitle(getResources().getString(R.string.error));
+                        builder.setMessage(getResources().getString(R.string.not_eml));
+                        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                finish();
+                            }
+                        });
+                        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                showFileChooser();
+                            }
+                        });
+                        builder.create().show();
                     }
                 } else {
                     mTextView.setText(getString(R.string.import_certificate_no_file));
