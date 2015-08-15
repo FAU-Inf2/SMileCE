@@ -36,6 +36,10 @@ public class KeyManagement {
             Enumeration e = p12.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
+                if(!p12.isKeyEntry(alias)) {
+                    continue;
+                }
+
                 X509Certificate c = (X509Certificate) p12.getCertificate(alias);
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                 Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + c.getSubjectDN().getName());

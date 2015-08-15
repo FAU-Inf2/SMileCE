@@ -28,6 +28,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
 public class DecryptLocalMailActivity extends ActionBarActivity {

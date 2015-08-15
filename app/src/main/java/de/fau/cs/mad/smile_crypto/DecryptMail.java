@@ -319,7 +319,12 @@ public class DecryptMail {
 
     private String getAliasByAddress(Address emailAddress) {
         try {
-            Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + emailAddress);
+            String mailAddress = emailAddress.toString();
+            if (emailAddress instanceof InternetAddress) {
+                mailAddress = ((InternetAddress) emailAddress).getAddress();
+            }
+
+            Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + mailAddress);
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             Enumeration e = ks.aliases();
@@ -340,7 +345,7 @@ public class DecryptMail {
                     for (List<?> names : alternateNames) {
                         for (Object name : names) {
                             if (name instanceof String) {
-                                if (emailAddress.toString().equals(name.toString())) {
+                                if (mailAddress.toString().equals(name.toString())) {
                                     Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
                                     return alias;
                                 }
@@ -350,7 +355,7 @@ public class DecryptMail {
                 }
 
                 //TODO: handle case if one mailaddress has more than one certificate
-                if(c.getSubjectDN().getName().contains("E=" + emailAddress.toString())) {
+                if(c.getSubjectDN().getName().contains("E=" + mailAddress.toString())) {
                     Log.d(SMileCrypto.LOG_TAG, "alias found: " + alias);
                     return alias;
                 }

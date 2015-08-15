@@ -61,14 +61,16 @@ public class KeyCard extends Card {
         }
     }
 
-    private void setData(KeyInfo ki) {
-        if(ki.mailAddresses.size() > 0) {
-            email.setText(ki.mailAddresses.get(0));
+    private void setData(KeyInfo keyInfo) {
+        if(keyInfo.mailAddresses.size() > 0) {
+            email.setText(keyInfo.mailAddresses.get(0));
+        } else {
+            email.setText(keyInfo.mail);
         }
 
-        if(ki.termination_date != null) {
-            DateTime valid = ki.termination_date;
-            CharSequence displayDate = DateUtils.formatDateTime(getContext(), ki.termination_date.getMillis(), 0);
+        if(keyInfo.termination_date != null) {
+            DateTime valid = keyInfo.termination_date;
+            CharSequence displayDate = DateUtils.formatDateTime(getContext(), keyInfo.termination_date.getMillis(), 0);
             valid_until.setText(displayDate);
             DateTime today = new DateTime();
             Years years = Years.yearsBetween(today, valid);
@@ -113,8 +115,8 @@ public class KeyCard extends Card {
             }
         }
 
-        if(ki.contact != null) {
-            setTitle(ki.contact);
+        if(keyInfo.contact != null) {
+            setTitle(keyInfo.contact);
         }
     }
 
