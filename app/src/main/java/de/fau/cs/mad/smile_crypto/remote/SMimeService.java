@@ -58,6 +58,8 @@ public class SMimeService extends Service {
         final String sender = data.getStringExtra(SMimeApi.EXTRA_SENDER);
         File encryptedFile = null;
 
+        final Intent result = new Intent();
+
         try {
             encryptedFile = copyToFile(inputStream);
 
@@ -65,7 +67,9 @@ public class SMimeService extends Service {
             MimeBodyPart mimeBodyPart = new MimeBodyPart(new SharedFileInputStream(encryptedFile));
             MimeBodyPart decryptedPart = decryptMail.decryptMail(recipient, mimeBodyPart);
             decryptedPart.writeTo(outputStream);
+            result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
         } catch (Exception e) {
+            result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
             e.printStackTrace();
         } finally {
             if(outputStream != null) {
@@ -87,9 +91,6 @@ public class SMimeService extends Service {
                 encryptedFile.delete();
             }
         }
-
-        Intent result = new Intent();
-        result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
 
         Log.d(SMileCrypto.LOG_TAG, "decryptAndVerify: returning intent: " + result);
         return result;

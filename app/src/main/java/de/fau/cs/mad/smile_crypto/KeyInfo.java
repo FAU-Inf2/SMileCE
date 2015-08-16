@@ -19,6 +19,7 @@ public class KeyInfo {
     protected String trust = "0";
     protected String thumbprint = "0";
     protected DateTime termination_date = new DateTime();
+    protected Boolean hasPrivateKey = false;
 
     public KeyInfo() {
         mailAddresses = new ArrayList<String>();

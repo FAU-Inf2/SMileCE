@@ -51,6 +51,7 @@ public class DecryptMail {
     }
 
     private final String certificateDirectory;
+    private final KeyManagement keyManagement;
 
     //TODO: parameter for AsyncTask
     private String alias;
@@ -60,11 +61,13 @@ public class DecryptMail {
 
     //MimeBodyPart messagePart;
 
-    public DecryptMail() {
+    public DecryptMail() throws KeyStoreException, IOException, NoSuchAlgorithmException,
+            CertificateException {
         final Context context = App.getContext();
         this.certificateDirectory = context.getDir(
                 context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
                 getAbsolutePath();
+        keyManagement = new KeyManagement();
     }
 
     private MimeBodyPart decryptMailSynchronous(String pathToFile, String passphrase) {
@@ -78,13 +81,13 @@ public class DecryptMail {
             }
 
             String alias = null;
-            for(Address r : recipients) {
-                if ((alias = getAliasByAddress(r)) != null) {
+            for (Address r : recipients) {
+                if ((alias = keyManagement.getAliasByAddress(r)) != null) {
                     break;
                 }
             }
 
-            if(alias == null) {
+            if (alias == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 return null;
             }
@@ -106,8 +109,8 @@ public class DecryptMail {
             ks.load(null);
             X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
 
-            final PrivateKey privateKey = getPrivateKey(alias, passphrase);
-            if(privateKey == null) {
+            final PrivateKey privateKey = keyManagement.getPrivateKeyForAlias(alias, passphrase);
+            if (privateKey == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
                 return null;
@@ -131,37 +134,6 @@ public class DecryptMail {
         }
     }
 
-    private final PrivateKey getPrivateKey(final String alias, final String passphrase) throws KeyStoreException{
-        KeyStore p12 = KeyStore.getInstance("pkcs12");
-        String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
-        Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
-        File p12File = new File(pathTop12File);
-
-        if(!p12File.exists()) {
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
-            return null;
-        }
-
-        PrivateKey privateKey = null;
-        try {
-            p12.load(new FileInputStream(p12File), passphrase.toCharArray());
-            Enumeration e = p12.aliases();
-
-            while (e.hasMoreElements()) {
-                String aliasp12 = (String) e.nextElement();
-                if(p12.isKeyEntry(aliasp12)) {
-                    privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
-                }
-            }
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_WRONG_PASSPHRASE;
-            return null;
-        }
-
-        return privateKey;
-    }
-
     public MimeBodyPart decryptMail(String pathToFile, String passphrase) {
         this.alias = null;
         this.encryptedMimeMessage = null;
@@ -177,35 +149,30 @@ public class DecryptMail {
         }
     }
 
-    public MimeBodyPart decryptMail(String senderAddress, MimeBodyPart mimeBodyPart)
+    public final MimeBodyPart decryptMail(final String senderAddress,
+                                          final MimeBodyPart mimeBodyPart)
             throws KeyStoreException, MessagingException, NoSuchAlgorithmException,
             CertificateException, IOException, SMIMEException {
-        if(mimeBodyPart == null) {
+        if (mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
 
-        try {
-            this.alias = getAliasByAddress(new InternetAddress(senderAddress));
-        } catch (AddressException e) {
-            e.printStackTrace();
-        }
+        this.alias = keyManagement.getAliasByAddress(new InternetAddress(senderAddress));
 
         Log.d(SMileCrypto.LOG_TAG, "Check whether passphrase is available for alias: " + senderAddress);
-        this.passphrase = getPassphrase(this.alias);
-        if(this.passphrase == null) {
+        this.passphrase = keyManagement.getPassphraseForAlias(this.alias);
+        if (this.passphrase == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_PASSPHRASE_AVAILABLE;
             return null;
         }
 
-        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-        ks.load(null);
-        X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+        X509Certificate cert = keyManagement.getCertificateForAlias(alias);
 
-        final PrivateKey privateKey = getPrivateKey(alias, passphrase);
-        if(privateKey == null) {
+        final PrivateKey privateKey = keyManagement.getPrivateKeyForAlias(alias, passphrase);
+        if (privateKey == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
             return null;
@@ -216,39 +183,18 @@ public class DecryptMail {
         MimeBodyPart decryptedBodyPart = toolkit.decrypt(mimeBodyPart, new JceKeyTransRecipientId(cert),
                 new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
         return decryptedBodyPart;
-/*
-        Properties properties = System.getProperties();
-        Session session = Session.getDefaultInstance(properties, null);
-        MimeMessage mimeMessage = new MimeMessage(session);
-        Multipart multipart = new MimeMultipart();
-
-        try {
-            multipart.addBodyPart(mimeBodyPart);
-            mimeMessage.setContent(multipart);
-            this.encryptedMimeMessage = mimeMessage;
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            return new AsyncDecryptMail().execute().get();
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
-            return null;
-        }*/
     }
 
     public MimeBodyPart decryptMail(String alias, MimeMessage mimeMessage, String passphrase) {
-        if(mimeMessage == null) {
+        if (mimeMessage == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
 
-        if(alias == null) {
+        if (alias == null) {
             alias = getAliasByMimeMessage(mimeMessage);
-            if(alias == null) {
+            if (alias == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty alias.");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 return null;
@@ -256,10 +202,10 @@ public class DecryptMail {
             Log.d(SMileCrypto.LOG_TAG, "Found alias: " + alias);
         }
 
-        if(passphrase == null) {
+        if (passphrase == null) {
             Log.d(SMileCrypto.LOG_TAG, "Check whether passphrase is available for alias: " + alias);
-            passphrase = getPassphrase(alias);
-            if(passphrase == null) {
+            passphrase = keyManagement.getPassphraseForAlias(alias);
+            if (passphrase == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_PASSPHRASE_AVAILABLE;
                 return null;
@@ -280,8 +226,8 @@ public class DecryptMail {
     }
 
     public MimeBodyPart decryptMail(Address emailAddress, MimeMessage mimeMessage, String passphrase) {
-        String alias = getAliasByAddress(emailAddress);
-        if(alias == null) {
+        String alias = keyManagement.getAliasByAddress(emailAddress);
+        if (alias == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not find certificate for given email address in decryptMail.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
             return null;
@@ -326,8 +272,8 @@ public class DecryptMail {
         }
 
         for (Address a : addresses) {
-            String alias = getAliasByAddress(a);
-            if(alias != null) {
+            String alias = keyManagement.getAliasByAddress(a);
+            if (alias != null) {
                 return alias;
             }
 
@@ -342,58 +288,6 @@ public class DecryptMail {
             return mimeMessage.getAllRecipients();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while getting all recipients: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private String getAliasByAddress(Address emailAddress) {
-        try {
-            String mailAddress = emailAddress.toString();
-            if (emailAddress instanceof InternetAddress) {
-                mailAddress = ((InternetAddress) emailAddress).getAddress();
-            }
-
-            Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + mailAddress);
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
-            Enumeration e = ks.aliases();
-            while (e.hasMoreElements()) {
-                String alias = (String) e.nextElement();
-                Log.d(SMileCrypto.LOG_TAG, "checking alias: " + alias);
-                if(alias.contains("_other_")) {//no private key available
-                    continue;
-                }
-
-                X509Certificate c = (X509Certificate) ks.getCertificate(alias);
-                //Log.d(SMileCrypto.LOG_TAG, c.toString());
-
-                Collection<List<?>> alternateNames = c.getSubjectAlternativeNames();
-
-                if(alternateNames != null) {
-                    //seems to be always null...
-                    for (List<?> names : alternateNames) {
-                        for (Object name : names) {
-                            if (name instanceof String) {
-                                if (mailAddress.toString().equals(name.toString())) {
-                                    Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
-                                    return alias;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //TODO: handle case if one mailaddress has more than one certificate
-                if(c.getSubjectDN().getName().contains("E=" + mailAddress.toString())) {
-                    Log.d(SMileCrypto.LOG_TAG, "alias found: " + alias);
-                    return alias;
-                }
-            }
-
-            return null;
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
-            e.printStackTrace();
             return null;
         }
     }
@@ -434,7 +328,7 @@ public class DecryptMail {
                             bodyPart = new MimeBodyPart(headers, decoded);
                         } else {
                             //Log.d(SMileCrypto.LOG_TAG, i + "not convert: " + newContent);
-                            if(newContent.equals(""))
+                            if (newContent.equals(""))
                                 newContent = "\n";
                             bodyPart = new MimeBodyPart(headers, newContent.getBytes());
                         }
@@ -452,7 +346,7 @@ public class DecryptMail {
                 } else if (line.startsWith("Content-Type")) {
                     if ((line.contains("text/plain") || line.contains("text/html")) && line.contains("utf-8")) {
                         possibleConvert = true;
-                    } else if(line.contains("multipart/alternative"))
+                    } else if (line.contains("multipart/alternative"))
                         continue; //ignore
 
                     headers = new InternetHeaders();
@@ -468,12 +362,12 @@ public class DecryptMail {
                         }
                     }
                     //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + line + "\n\n");
-                    if(headers == null)
+                    if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (line.startsWith("Content-Disposition")) {
                     //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + line + "\n\n");
-                    if(headers == null)
+                    if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (line.equals("\n") || line.equals("\r")) {
@@ -511,7 +405,7 @@ public class DecryptMail {
 
             }*/
             return newMimeMessage;
-        } catch(Exception e) {
+        } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception decrypting parts: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
@@ -520,7 +414,7 @@ public class DecryptMail {
 
     public String convertMimeBodyPartToString(MimeBodyPart mimeBodyPart) {
         try {
-            if(mimeBodyPart == null) {
+            if (mimeBodyPart == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }
@@ -538,7 +432,7 @@ public class DecryptMail {
 
     public String convertMimeMessageToString(MimeMessage mimeMessage) {
         try {
-            if(mimeMessage == null) {
+            if (mimeMessage == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }
@@ -553,7 +447,7 @@ public class DecryptMail {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             ((Multipart) mimeMessage.getContent()).writeTo(bytes);
             return result + bytes.toString();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
@@ -562,7 +456,7 @@ public class DecryptMail {
 
     public String getTextPlainFromMimeMessage(MimeMessage mimeMessage) {
         try {
-            if(mimeMessage == null) {
+            if (mimeMessage == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }
@@ -601,7 +495,7 @@ public class DecryptMail {
 
     public String getTextHtmlFromMimeMessage(MimeMessage mimeMessage) {
         try {
-            if(mimeMessage == null) {
+            if (mimeMessage == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }
@@ -639,7 +533,7 @@ public class DecryptMail {
     }
 
     public MimeMessage addOldHeaders(MimeMessage newMimeMessage) {
-        if(encryptedMimeMessage == null) {
+        if (encryptedMimeMessage == null) {
             return newMimeMessage;
         }
 
@@ -661,34 +555,13 @@ public class DecryptMail {
     public Boolean hasPassphrase(String alias) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
                 getApplicationContext());
-        return preferences.contains(alias+"-passphrase");
-    }
-
-    private String getPassphrase(String alias) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
-                getApplicationContext());
-
-        if(preferences.contains(alias+"-passphrase")) {
-            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-            //Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
-            Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase found.");
-            
-            try {
-                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
-                return PasswordEncryption.decryptString(encryptedPassphrase);
-            } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Error while decrypting passphrase: " + e.getMessage());
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return preferences.contains(alias + "-passphrase");
     }
 
     private class AsyncDecryptMail extends AsyncTask<Void, Void, MimeBodyPart> {
 
         protected MimeBodyPart doInBackground(Void... params) {
-            if(alias == null || encryptedMimeMessage == null) {
+            if (alias == null || encryptedMimeMessage == null) {
                 return decryptMailSynchronous(pathToFile, passphrase);
             }
 
@@ -700,7 +573,7 @@ public class DecryptMail {
 
         protected MimeMessage doInBackground(Void... params) {
             MimeBodyPart mimeBodyPart;
-            if(alias == null || encryptedMimeMessage == null) {
+            if (alias == null || encryptedMimeMessage == null) {
                 mimeBodyPart = decryptMailSynchronous(pathToFile, passphrase);
             } else {
                 mimeBodyPart = decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);

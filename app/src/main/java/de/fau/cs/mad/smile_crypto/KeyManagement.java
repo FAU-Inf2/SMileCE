@@ -3,9 +3,11 @@ package de.fau.cs.mad.smile_crypto;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
@@ -19,23 +21,42 @@ import org.spongycastle.jce.X509Principal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.mail.Address;
+import javax.mail.internet.InternetAddress;
+
 public class KeyManagement {
 
     private static ArrayList<KeyInfo> knownOwnKeys = new ArrayList<>();
     private static ArrayList<KeyInfo> knownAllKeys = new ArrayList<>();
 
-    public KeyManagement() {}
+    private final String certificateDirectory;
+    private final KeyStore androidKeyStore;
+
+    public KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        final Context context = App.getContext();
+        this.certificateDirectory = context.getDir(
+                context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
+                getAbsolutePath();
+        this.androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
+        androidKeyStore.load(null);
+    }
 
     public static Boolean addPrivateKeyFromP12ToKeyStore(String pathToFile, String passphrase) {
         try {
@@ -44,7 +65,7 @@ public class KeyManagement {
             Enumeration e = p12.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
-                if(!p12.isKeyEntry(alias)) {
+                if (!p12.isKeyEntry(alias)) {
                     continue;
                 }
 
@@ -76,14 +97,14 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Check whether certificate is stored for alias: " + alias);
 
             //Check whether cert is already there
-            if(ks.containsAlias(alias)) {
+            if (ks.containsAlias(alias)) {
                 return true;
             }
 
             Log.d(SMileCrypto.LOG_TAG, "Alias is not there, import new certificate without private key.");
             ks.setCertificateEntry(alias, certificate);
             return ks.containsAlias(alias);
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in x: " + e.getMessage());
             return false;
         }
@@ -99,8 +120,11 @@ public class KeyManagement {
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
-                if(alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias)))
+
+                if (alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias))) {
                     continue;
+                }
+
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 if (entry instanceof KeyStore.PrivateKeyEntry) {
@@ -111,18 +135,18 @@ public class KeyManagement {
                     keyInfo.type = c.getType();
                     keyInfo.hash = Integer.toHexString(c.hashCode());
 
-                    if(c.getType().equals("X.509")) {
+                    if (c.getType().equals("X.509")) {
                         X509Certificate cert = (X509Certificate) c;
                         X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
                         RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
                         String email = "Certificate does not contain an email address.";
-                        if(rdn_email.length > 0) {
+                        if (rdn_email.length > 0) {
                             email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
                         }
                         Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
                         keyInfo.mail = email;
                         RDN[] cn = x500name.getRDNs(BCStyle.CN);
-                        if(cn.length > 0) {
+                        if (cn.length > 0) {
                             keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
                         }
                         keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
@@ -131,7 +155,7 @@ public class KeyManagement {
                         keyInfo.thumbprint = getThumbprint(cert);
                     }
 
-                    if(!knownOwnKeys.contains(keyInfo)) {
+                    if (!knownOwnKeys.contains(keyInfo)) {
                         keylist.add(keyInfo);
                     }
                 } else {
@@ -153,81 +177,216 @@ public class KeyManagement {
     }
 
     public ArrayList<KeyInfo> getAllCertificates() {
-        ArrayList<KeyInfo> keylist = new ArrayList<>();
         try {
             Log.d(SMileCrypto.LOG_TAG, "Find all own certificates…");
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
-            Enumeration e = ks.aliases();
+
+            Enumeration e = androidKeyStore.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
-                if(alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias))) {
+                if (alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias))) {
                     continue;
                 }
 
-                Certificate c = ks.getCertificate(alias);
-                KeyStore.Entry entry = ks.getEntry(alias, null);
-                KeyInfo keyInfo = new KeyInfo();
-                keyInfo.alias = alias;
-                Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
-                Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                keyInfo.type = c.getType();
-                keyInfo.hash = Integer.toHexString(c.hashCode());
-                if(c.getType().equals("X.509")) {
-                    X509Certificate cert = (X509Certificate) c;
-                    Collection<List<?>> alternateNames = cert.getSubjectAlternativeNames();
+                KeyInfo keyInfo = getKeyInfo(alias);
 
-                    if  (alternateNames != null) {
-                        //seems to be always null...
-                        for (List<?> names : alternateNames) {
-                            for (Object name : names) {
-                                if (name instanceof String) {
-                                    keyInfo.mailAddresses.add(name.toString());
-                                }
-                            }
-                        }
-                    } else {
-                        // workaround...
-                        X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
-                        RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
-                        String email = "Certificate does not contain an email address.";
-                        if(rdn_email.length > 0) {
-                            email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
-                        }
-                        Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
-                        keyInfo.mail = email;
-                    }
-                    X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
-                    RDN[] cn = x500name.getRDNs(BCStyle.CN);
-                    if(cn.length > 0) {
-                        keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
-                    }
-                    keyInfo.termination_date = new DateTime(cert.getNotAfter());
-                    //keyInfo.trust; TODO
-                    keyInfo.thumbprint = getThumbprint(cert);
+                if (androidKeyStore.isKeyEntry(alias) && !knownOwnKeys.contains(keyInfo)) {
+                    knownOwnKeys.add(keyInfo);
                 }
 
-                if(!knownAllKeys.contains(keyInfo)) {
-                    keylist.add(keyInfo);
+                if (!knownAllKeys.contains(keyInfo)) {
+                    knownAllKeys.add(keyInfo);
                 }
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
             e.printStackTrace();
         }
-        knownAllKeys.addAll(keylist);
-        return keylist;
+
+        return knownAllKeys;
     }
 
-    public static Boolean deleteKey(String alias) {
+    public final X509Certificate getCertificateForAlias(final String alias) throws KeyStoreException {
+        return (X509Certificate) androidKeyStore.getCertificate(alias);
+    }
+
+    public PrivateKey getPrivateKeyForAlias(final String alias, final String passphrase) throws KeyStoreException {
+        KeyStore p12 = KeyStore.getInstance("pkcs12");
+        String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
+        Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
+        File p12File = new File(pathTop12File);
+
+        if (!p12File.exists()) {
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
+            return null;
+        }
+
+        PrivateKey privateKey = null;
+        try {
+            p12.load(new FileInputStream(p12File), passphrase.toCharArray());
+            Enumeration e = p12.aliases();
+
+            while (e.hasMoreElements()) {
+                String aliasp12 = (String) e.nextElement();
+                if (p12.isKeyEntry(aliasp12)) {
+                    privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_WRONG_PASSPHRASE;
+            return null;
+        }
+
+        return privateKey;
+    }
+
+    public final String getPassphraseForAlias(final String alias) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
+                getApplicationContext());
+
+        if (preferences.contains(alias + "-passphrase")) {
+            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
+            //Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+            Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase found.");
+
+            try {
+                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+                return PasswordEncryption.decryptString(encryptedPassphrase);
+            } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error while decrypting passphrase: " + e.getMessage());
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    public final String getAliasByAddress(final Address emailAddress) {
+        try {
+            String mailAddress = emailAddress.toString();
+            if (emailAddress instanceof InternetAddress) {
+                mailAddress = ((InternetAddress) emailAddress).getAddress();
+            }
+
+            Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + mailAddress);
+
+            for (KeyInfo keyInfo : getAllCertificates()) {
+                if (keyInfo.hasPrivateKey) {
+                    for (String mail : keyInfo.mailAddresses) {
+                        if (mailAddress.equals(mail)) {
+                            return keyInfo.alias;
+                        }
+                    }
+                }
+            }
+/*
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            Enumeration e = ks.aliases();
+            while (e.hasMoreElements()) {
+                String alias = (String) e.nextElement();
+                Log.d(SMileCrypto.LOG_TAG, "checking alias: " + alias);
+                if (alias.contains("_other_")) {//no private key available
+                    continue;
+                }
+
+                X509Certificate c = (X509Certificate) ks.getCertificate(alias);
+                //Log.d(SMileCrypto.LOG_TAG, c.toString());
+
+                Collection<List<?>> alternateNames = c.getSubjectAlternativeNames();
+
+                if (alternateNames != null) {
+                    //seems to be always null...
+                    for (List<?> names : alternateNames) {
+                        for (Object name : names) {
+                            if (name instanceof String) {
+                                if (mailAddress.toString().equals(name.toString())) {
+                                    Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
+                                    return alias;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //TODO: handle case if one mailaddress has more than one certificate
+                if (c.getSubjectDN().getName().contains("E=" + mailAddress.toString())) {
+                    Log.d(SMileCrypto.LOG_TAG, "alias found: " + alias);
+                    return alias;
+                }
+            }
+*/
+            return null;
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @NonNull
+    private final KeyInfo getKeyInfo(final String alias) throws KeyStoreException,
+            CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
+        Certificate c = androidKeyStore.getCertificate(alias); // maybe hand in certificate?
+        KeyInfo keyInfo = new KeyInfo();
+        keyInfo.alias = alias;
+        Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
+        Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
+        keyInfo.type = c.getType();
+        keyInfo.hash = Integer.toHexString(c.hashCode());
+
+        if (c.getType().equals("X.509")) {
+            X509Certificate cert = (X509Certificate) c;
+            keyInfo.mailAddresses.addAll(getNamesFromCert(cert));
+            keyInfo.hasPrivateKey = androidKeyStore.isKeyEntry(alias);
+
+            X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+            RDN[] cn = x500name.getRDNs(BCStyle.CN);
+            if (cn.length > 0) {
+                keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
+            }
+
+            keyInfo.termination_date = new DateTime(cert.getNotAfter());
+            //keyInfo.trust; TODO
+            keyInfo.thumbprint = getThumbprint(cert);
+        }
+
+        return keyInfo;
+    }
+
+    private final List<String> getNamesFromCert(final X509Certificate cert) throws CertificateParsingException, CertificateEncodingException {
+        ArrayList<String> altNames = new ArrayList<>();
+        Collection<List<?>> alternateNames = cert.getSubjectAlternativeNames();
+
+        if (alternateNames != null) {
+            //seems to be always null...
+            for (List<?> names : alternateNames) {
+                for (Object name : names) {
+                    if (name instanceof String) {
+                        altNames.add(name.toString());
+                    }
+                }
+            }
+        } else {
+            // workaround...
+            X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+            RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
+            for (int i = 0; i < rdn_email.length; i++) {
+                altNames.add(IETFUtils.valueToString(rdn_email[i].getFirst().getValue()));
+            }
+        }
+
+        return altNames;
+    }
+
+    public Boolean deleteKey(String alias) {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Delete key with alias: " + alias);
-            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);
 
-            if(keyStore.containsAlias(alias))
-                keyStore.deleteEntry(alias);
+            if (androidKeyStore.containsAlias(alias)) {
+                androidKeyStore.deleteEntry(alias);
+            }
 
             return deletePassphrase(alias) && deleteP12FromInternalDir(alias);
         } catch (Exception e) {
@@ -236,7 +395,8 @@ public class KeyManagement {
         }
     }
 
-    public static String getThumbprint(X509Certificate certificate) throws Exception {
+    public static String getThumbprint(final X509Certificate certificate)
+            throws NoSuchAlgorithmException, CertificateEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         byte[] der = certificate.getEncoded();
         md.update(der);
@@ -245,9 +405,10 @@ public class KeyManagement {
     }
 
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
     private static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
+        for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[v >>> 4];
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
@@ -279,7 +440,7 @@ public class KeyManagement {
 
             String alias = "SMile_crypto_own_" + getThumbprint(c);
             //Check whether cert is already there
-            if(ks.containsAlias(alias)) {
+            if (ks.containsAlias(alias)) {
                 Log.d(SMileCrypto.LOG_TAG, "Alias " + alias + " already exists.");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return alias;
@@ -290,7 +451,7 @@ public class KeyManagement {
             Toast.makeText(App.getContext(), R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return alias;
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
             Toast.makeText(App.getContext(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
             return null;
@@ -302,7 +463,7 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Encrypt passphrase for alias: " + alias);
             String encryptedPassphrase = PasswordEncryption.encryptString(passphrase);
 
-            if(encryptedPassphrase == null) {
+            if (encryptedPassphrase == null) {
                 return false;
             }
 

@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +28,10 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -158,7 +163,12 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     public void passphraseDecryptOrPrompt(String pathToFile) {
-        DecryptMail decryptMail = new DecryptMail();
+        DecryptMail decryptMail = getDecryptMail();
+        if (decryptMail == null) {
+            showErrorPrompt();
+            return;
+        }
+
         String passphrase;
         MimeMessage mimeMessage = decryptMail.getMimeMessageFromFile(pathToFile);
 
@@ -200,6 +210,29 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
         decryptFile(pathToFile, passphrase);
         options();
+    }
+
+    @Nullable
+    private DecryptMail getDecryptMail() {
+        DecryptMail decryptMail = null;
+
+        try {
+            decryptMail = new DecryptMail();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } finally {
+            if(decryptMail == null) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+                return null;
+            }
+        }
+        return decryptMail;
     }
 
     public void showPassphrasePrompt(final String pathToFile) {
@@ -272,7 +305,10 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     private Boolean decryptFile(String pathToFile, String passphrase) {
-        DecryptMail decryptMail = new DecryptMail();
+        DecryptMail decryptMail = getDecryptMail();
+        if(decryptMail == null) {
+            return false;
+        }
 
         decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, passphrase);
         mimeBodyPartsString = decryptMail.convertMimeMessageToString(decryptedMimeMessage);

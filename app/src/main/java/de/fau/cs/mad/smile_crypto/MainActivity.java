@@ -88,7 +88,17 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<Card> cards = new ArrayList<Card>();
 
-        keyManager = new KeyManagement();
+        try {
+            keyManager = new KeyManagement();
+        } catch (KeyStoreException e) { // TODO: display error message and die
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
 
         //Staggered grid view
         CardRecyclerView gRecyclerView = (CardRecyclerView) this.findViewById(R.id.carddemo_recyclerview);
@@ -355,6 +365,7 @@ public class MainActivity extends ActionBarActivity {
             } else {
                 header.setTitle("No contact information available.");
             }
+
             card.addCardHeader(header);
             boolean contains = false;
 
