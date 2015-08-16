@@ -13,9 +13,13 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -25,6 +29,7 @@ import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.spongycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.spongycastle.cms.jcajce.JceKeyTransRecipientId;
+import org.spongycastle.mail.smime.SMIMEException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
 import javax.mail.Address;
@@ -101,33 +106,7 @@ public class DecryptMail {
             ks.load(null);
             X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
 
-            KeyStore p12 = KeyStore.getInstance("pkcs12");
-            String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
-            Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
-            File p12File = new File(pathTop12File);
-
-            if(!p12File.exists()) {
-                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
-                return null;
-            }
-
-            PrivateKey privateKey = null;
-            try {
-                p12.load(new FileInputStream(p12File), passphrase.toCharArray());
-                Enumeration e = p12.aliases();
-
-                while (e.hasMoreElements()) {
-                    String aliasp12 = (String) e.nextElement();
-                    if(p12.isKeyEntry(aliasp12)) {
-                        privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());
-                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_WRONG_PASSPHRASE;
-                return null;
-            }
-
+            final PrivateKey privateKey = getPrivateKey(alias, passphrase);
             if(privateKey == null) {
                 Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
@@ -139,8 +118,8 @@ public class DecryptMail {
             MimeBodyPart dec = toolkit.decrypt(mimeMessage, new JceKeyTransRecipientId(cert),
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
-            Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
-            Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
+            //Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
+            //Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
 
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return dec;
@@ -150,6 +129,37 @@ public class DecryptMail {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
+    }
+
+    private final PrivateKey getPrivateKey(final String alias, final String passphrase) throws KeyStoreException{
+        KeyStore p12 = KeyStore.getInstance("pkcs12");
+        String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
+        Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
+        File p12File = new File(pathTop12File);
+
+        if(!p12File.exists()) {
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
+            return null;
+        }
+
+        PrivateKey privateKey = null;
+        try {
+            p12.load(new FileInputStream(p12File), passphrase.toCharArray());
+            Enumeration e = p12.aliases();
+
+            while (e.hasMoreElements()) {
+                String aliasp12 = (String) e.nextElement();
+                if(p12.isKeyEntry(aliasp12)) {
+                    privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_WRONG_PASSPHRASE;
+            return null;
+        }
+
+        return privateKey;
     }
 
     public MimeBodyPart decryptMail(String pathToFile, String passphrase) {
@@ -167,7 +177,9 @@ public class DecryptMail {
         }
     }
 
-    public MimeBodyPart decryptMail(String senderAddress, MimeBodyPart mimeBodyPart) {
+    public MimeBodyPart decryptMail(String senderAddress, MimeBodyPart mimeBodyPart)
+            throws KeyStoreException, MessagingException, NoSuchAlgorithmException,
+            CertificateException, IOException, SMIMEException {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -188,6 +200,23 @@ public class DecryptMail {
             return null;
         }
 
+        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+        ks.load(null);
+        X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+
+        final PrivateKey privateKey = getPrivateKey(alias, passphrase);
+        if(privateKey == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
+            return null;
+        }
+
+        SMIMEToolkit toolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
+
+        MimeBodyPart decryptedBodyPart = toolkit.decrypt(mimeBodyPart, new JceKeyTransRecipientId(cert),
+                new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
+        return decryptedBodyPart;
+/*
         Properties properties = System.getProperties();
         Session session = Session.getDefaultInstance(properties, null);
         MimeMessage mimeMessage = new MimeMessage(session);
@@ -207,7 +236,7 @@ public class DecryptMail {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
-        }
+        }*/
     }
 
     public MimeBodyPart decryptMail(String alias, MimeMessage mimeMessage, String passphrase) {
@@ -336,7 +365,7 @@ public class DecryptMail {
                 }
 
                 X509Certificate c = (X509Certificate) ks.getCertificate(alias);
-                Log.d(SMileCrypto.LOG_TAG, c.toString());
+                //Log.d(SMileCrypto.LOG_TAG, c.toString());
 
                 Collection<List<?>> alternateNames = c.getSubjectAlternativeNames();
 

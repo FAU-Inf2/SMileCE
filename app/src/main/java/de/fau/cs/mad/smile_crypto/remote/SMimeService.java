@@ -9,31 +9,19 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.spongycastle.asn1.cms.RecipientInfo;
-import org.spongycastle.cms.CMSException;
-import org.spongycastle.cms.Recipient;
-import org.spongycastle.cms.RecipientId;
-import org.spongycastle.cms.RecipientInformation;
-import org.spongycastle.mail.smime.SMIMEEnveloped;
-import org.spongycastle.mail.smime.SMIMESigned;
-import org.spongycastle.mail.smime.SMIMEUtil;
+import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Properties;
 
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
-import de.fau.cs.mad.javax.activation.DataSource;
+import de.fau.cs.mad.smile_crypto.App;
 import de.fau.cs.mad.smile_crypto.DecryptMail;
-import de.fau.cs.mad.smile_crypto.SMIMEToolkit;
 import de.fau.cs.mad.smile_crypto.SMileCrypto;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
@@ -80,14 +68,14 @@ public class SMimeService extends Service {
             }
 
             */
+            File encryptedFile = copyToFile(inputStream);
 
             final DecryptMail decryptMail = new DecryptMail();
-            MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
+            InputStream encryptedStream = FileUtils.openInputStream(encryptedFile);
+            MimeBodyPart mimeBodyPart = new MimeBodyPart(encryptedStream);
             MimeBodyPart decryptedPart = decryptMail.decryptMail(recipient, mimeBodyPart);
             decryptedPart.writeTo(outputStream);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if(outputStream != null) {
@@ -111,6 +99,19 @@ public class SMimeService extends Service {
 
         Log.d(SMileCrypto.LOG_TAG, "decryptAndVerify: returning intent: " + result);
         return result;
+    }
+
+    private File copyToFile(InputStream inputStream) throws IOException {
+        File targetDir = App.getContext().getApplicationContext().getDir("service-messages", Context.MODE_PRIVATE);
+        File targetFile = null;
+        int fileNumber = 1;
+
+        do {
+            targetFile = new File(targetDir, String.format("%05d", fileNumber++));
+        } while (targetFile.exists());
+
+        FileUtils.copyInputStreamToFile(inputStream, targetFile);
+        return targetFile;
     }
 
     private final Intent sign(final Intent data, final ParcelFileDescriptor input, final ParcelFileDescriptor output) {

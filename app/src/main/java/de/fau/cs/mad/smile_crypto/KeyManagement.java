@@ -240,16 +240,8 @@ public class KeyManagement {
 
         try {
             org.apache.commons.io.FileUtils.copyFile(src, dst);
-            /*FileChannel inChannel = new FileInputStream(src).getChannel();
-            FileChannel outChannel = new FileOutputStream(dst).getChannel();
-
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-            inChannel.close();
-            outChannel.close();
-
-            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);*/
+            Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);
             return true;
-
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error copying .p12 to internal storage: " + e.getMessage());
             return false;
@@ -287,8 +279,9 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Encrypt passphrase for alias: " + alias);
             String encryptedPassphrase = PasswordEncryption.encryptString(passphrase);
 
-            if(encryptedPassphrase == null)
+            if(encryptedPassphrase == null) {
                 return false;
+            }
 
             Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  <sensitive>");
 
