@@ -11,14 +11,14 @@ import android.util.Log;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.util.SharedFileInputStream;
 
 import de.fau.cs.mad.smile_crypto.App;
 import de.fau.cs.mad.smile_crypto.DecryptMail;
@@ -56,23 +56,13 @@ public class SMimeService extends Service {
         final OutputStream outputStream = new ParcelFileDescriptor.AutoCloseOutputStream(output);
         final String recipient = data.getStringExtra(SMimeApi.EXTRA_RECIPIENT);
         final String sender = data.getStringExtra(SMimeApi.EXTRA_SENDER);
+        File encryptedFile = null;
 
         try {
-            /*MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
-            SMIMEEnveloped enveloped = new SMIMEEnveloped(mimeBodyPart);
-            Collection<RecipientInformation> recipients = enveloped.getRecipientInfos().getRecipients();
-
-            for(RecipientInformation recipient : recipients) {
-                RecipientId id = recipient.getRID();
-                //MimeBodyPart part = SMIMEUtil.toMimeBodyPart(recipient.getContent(null, "BC"));
-            }
-
-            */
-            File encryptedFile = copyToFile(inputStream);
+            encryptedFile = copyToFile(inputStream);
 
             final DecryptMail decryptMail = new DecryptMail();
-            InputStream encryptedStream = FileUtils.openInputStream(encryptedFile);
-            MimeBodyPart mimeBodyPart = new MimeBodyPart(encryptedStream);
+            MimeBodyPart mimeBodyPart = new MimeBodyPart(new SharedFileInputStream(encryptedFile));
             MimeBodyPart decryptedPart = decryptMail.decryptMail(recipient, mimeBodyPart);
             decryptedPart.writeTo(outputStream);
         } catch (Exception e) {
@@ -91,6 +81,10 @@ public class SMimeService extends Service {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+
+            if(encryptedFile != null) {
+                encryptedFile.delete();
             }
         }
 

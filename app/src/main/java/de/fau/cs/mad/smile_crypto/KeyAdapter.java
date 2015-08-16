@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.QuickContactBadge;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
     }
 
     public KeyAdapter() {
-        this.keylist = new ArrayList<>();
+        this.keylist = new ArrayList<KeyInfo>();
     }
 
     public KeyAdapter(List<KeyInfo> keylistist) {
