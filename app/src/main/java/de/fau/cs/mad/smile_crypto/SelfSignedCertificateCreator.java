@@ -70,7 +70,7 @@ public class SelfSignedCertificateCreator {
         //
         // subjects name - the same as we are self signed.
         //
-        String  subject = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate";
+        String  subject = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate, E=SMile@MAD.de, CN=SMile Group";
 
         //
         // create the certificate - version 1

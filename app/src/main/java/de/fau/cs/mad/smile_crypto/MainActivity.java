@@ -139,6 +139,8 @@ public class MainActivity extends ActionBarActivity {
                     Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
                     Toast.makeText(v.getContext(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+                /*SignatureCheck sc = new SignatureCheck();
+                sc.checkSignature("/storage/emulated/0/Download/mail-with-signature.eml");*/
             }
         });
         fabContainer.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -348,6 +350,11 @@ public class MainActivity extends ActionBarActivity {
             //Create a CardHeader
             CardHeader header = new CardHeader(this);
             //Add Header to card
+            if(keyInfo.contact != null) {
+                header.setTitle(keyInfo.contact);
+            } else {
+                header.setTitle("No contact information available.");
+            }
             card.addCardHeader(header);
             boolean contains = false;
 

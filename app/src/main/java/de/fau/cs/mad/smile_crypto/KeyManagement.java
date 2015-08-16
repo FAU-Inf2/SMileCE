@@ -7,6 +7,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.joda.time.DateTime;
+import org.spongycastle.asn1.x500.RDN;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x500.style.BCStyle;
+import org.spongycastle.asn1.x500.style.IETFUtils;
+import org.spongycastle.asn1.x509.X509Name;
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.X509Principal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -105,11 +113,19 @@ public class KeyManagement {
 
                     if(c.getType().equals("X.509")) {
                         X509Certificate cert = (X509Certificate) c;
-                        String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
-                        String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
+                        X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+                        RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
+                        String email = "Certificate does not contain an email address.";
+                        if(rdn_email.length > 0) {
+                            email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
+                        }
                         Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
                         keyInfo.mail = email;
-                        keyInfo.contact = cert.getSubjectX500Principal().getName();
+                        RDN[] cn = x500name.getRDNs(BCStyle.CN);
+                        if(cn.length > 0) {
+                            keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
+                        }
+                        keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
                         keyInfo.termination_date = new DateTime(cert.getNotAfter());
                         //keyInfo.trust; TODO
                         keyInfo.thumbprint = getThumbprint(cert);
@@ -173,13 +189,20 @@ public class KeyManagement {
                         }
                     } else {
                         // workaround...
-                        String issuerDN = ((X509Certificate) c).getIssuerDN().getName();
-                        String email = issuerDN.substring(issuerDN.lastIndexOf("E=") + 2).split(",")[0];
+                        X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+                        RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
+                        String email = "Certificate does not contain an email address.";
+                        if(rdn_email.length > 0) {
+                            email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
+                        }
                         Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
                         keyInfo.mail = email;
                     }
-
-                    keyInfo.contact = cert.getSubjectDN().getName();
+                    X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+                    RDN[] cn = x500name.getRDNs(BCStyle.CN);
+                    if(cn.length > 0) {
+                        keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
+                    }
                     keyInfo.termination_date = new DateTime(cert.getNotAfter());
                     //keyInfo.trust; TODO
                     keyInfo.thumbprint = getThumbprint(cert);

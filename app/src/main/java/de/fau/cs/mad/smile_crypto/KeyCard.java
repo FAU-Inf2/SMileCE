@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,12 @@ import android.widget.TextView;
 import org.joda.time.DateTime;
 import org.joda.time.Months;
 import org.joda.time.Years;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardHeader;
 
 public class KeyCard extends Card {
     TextView email;
@@ -70,14 +72,15 @@ public class KeyCard extends Card {
 
         if(keyInfo.termination_date != null) {
             DateTime valid = keyInfo.termination_date;
-            CharSequence displayDate = DateUtils.formatDateTime(getContext(), keyInfo.termination_date.getMillis(), 0);
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM, yyyy");
+            String displayDate= valid.toString(fmt);
             valid_until.setText(displayDate);
             DateTime today = new DateTime();
             Years years = Years.yearsBetween(today, valid);
             Months months = Months.monthsBetween(today, valid);
 
             if(valid.getMillis() <= today.getMillis()) {
-                validCircle0.getBackground().setColorFilter(getColorFilter("red"));
+                validCircle0.getBackground().setColorFilter(getColorFilter("#ff0000"));
                 validCircle1.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
@@ -113,10 +116,6 @@ public class KeyCard extends Card {
                 validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
             }
-        }
-
-        if(keyInfo.contact != null) {
-            setTitle(keyInfo.contact);
         }
     }
 
