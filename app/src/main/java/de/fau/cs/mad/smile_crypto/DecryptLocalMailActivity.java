@@ -136,6 +136,22 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                     }
                 } else {
                     mTextView.setText(getString(R.string.import_certificate_no_file));
+                    AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
+                    builder.setTitle(getResources().getString(R.string.error));
+                    builder.setMessage(getResources().getString(R.string.import_certificate_no_file));
+                    builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                        }
+                    });
+                    builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            showFileChooser();
+                        }
+                    });
+                    builder.create().show();
                 }
                 break;
         }
