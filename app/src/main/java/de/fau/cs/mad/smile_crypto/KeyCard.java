@@ -1,9 +1,17 @@
 package de.fau.cs.mad.smile_crypto;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +25,14 @@ import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+
+import javax.mail.Address;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -32,18 +48,23 @@ public class KeyCard extends Card {
     ImageView validCircle3;
     ImageView validCircle4;
     KeyInfo keyInfo;
+    Context context;
+
 
     public KeyCard(Context context) {
         this(context, R.layout.key);
+        this.context = context;
     }
 
     public KeyCard(Context context, int innerLayout) {
         super(context, innerLayout);
+        this.context = context;
     }
 
     public KeyCard(Context context, KeyInfo keyInfo) {
         this(context, R.layout.key);
         this.keyInfo = keyInfo;
+        this.context = context;
     }
 
     @Override
@@ -63,11 +84,63 @@ public class KeyCard extends Card {
         }
     }
 
+    private long getContactIDByEmail(String email) {
+        Uri uri = Uri.withAppendedPath(ContactsContract.CommonDataKinds.Email.CONTENT_FILTER_URI, Uri.encode(email));
+        String name = "?";
+        long contactId =0;
+
+        ContentResolver contentResolver = context.getContentResolver();
+        Cursor contactLookup = contentResolver.query(uri, new String[] {ContactsContract.Data.CONTACT_ID, ContactsContract.Data.DISPLAY_NAME }, null, null, null);
+
+        try {
+            if (contactLookup != null && contactLookup.getCount() > 0) {
+
+                contactLookup.moveToNext();
+                contactId = contactLookup.getLong(contactLookup.getColumnIndex(ContactsContract.Data.CONTACT_ID));
+
+            }
+        } finally {
+            if (contactLookup != null) {
+                contactLookup.close();
+            }
+        }
+
+        return contactId;
+    }
+
+    private void setContactBadge(String email) {
+        long contactID = getContactIDByEmail(email);
+        Log.e(SMileCrypto.LOG_TAG, "ContactID = " + contactID);
+        contact.assignContactFromEmail(email, false);
+        Bitmap photo = null;
+
+        try {
+            Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactID);
+            Log.e(SMileCrypto.LOG_TAG, "ContactUri = " + contactUri);
+            InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), contactUri, false);
+
+            if (inputStream != null) {
+                Log.e(SMileCrypto.LOG_TAG, "Image found");
+                photo = BitmapFactory.decodeStream(inputStream);
+                contact.setImageBitmap(photo);
+                inputStream.close();
+            } else {
+                Log.e(SMileCrypto.LOG_TAG, "Image not found");
+                contact.setImageToDefault();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setData(KeyInfo keyInfo) {
         if(keyInfo.mailAddresses.size() > 0) {
             email.setText(keyInfo.mailAddresses.get(0));
+            setContactBadge(keyInfo.mailAddresses.get(0));
         } else {
             email.setText(keyInfo.mail);
+            setContactBadge(keyInfo.mail);
         }
 
         if(keyInfo.termination_date != null) {
