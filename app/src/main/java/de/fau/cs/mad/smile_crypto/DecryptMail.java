@@ -122,7 +122,7 @@ public class DecryptMail {
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
             //Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
-            Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
+            //Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
 
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return dec;
