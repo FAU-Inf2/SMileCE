@@ -122,7 +122,7 @@ public class DecryptMail {
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
             //Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
-            //Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
+            Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
 
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return dec;
@@ -298,6 +298,12 @@ public class DecryptMail {
 
     public MimeMessage decodeMimeBodyParts(MimeBodyPart mimeBodyPart, Boolean decodeBase64Parts) {
         try {
+            Log.d(SMileCrypto.LOG_TAG, "Try to decode MimeBodyPart…");
+            if(decodeBase64Parts)
+                Log.d(SMileCrypto.LOG_TAG, "Will decode base64-text-parts if such parts exist.");
+            else
+                Log.d(SMileCrypto.LOG_TAG, "Will not decode base64-text-parts.");
+
             Properties props = System.getProperties();
             Session session = Session.getDefaultInstance(props, null);
             MimeMessage newMimeMessage = new MimeMessage(session);
@@ -310,76 +316,94 @@ public class DecryptMail {
             Boolean convert = false;
             InternetHeaders headers = null;
             String newContent = null;
+            Boolean isAttachment = false;
+            Boolean headerPossible = true;
             //int i = -1;
             for (String line : lines) {
                 line = line.replace("\r", "");
                 //i++;
-                //Log.d(SMileCrypto.LOG_TAG, i + "LINE is: " + line + "\n\n");
-                if (line.startsWith("------")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + "First case!" + "\n\n");
+                //Log.d(SMileCrypto.LOG_TAG, i + ". LINE is: " + line + "\n\n");
+                if (line.startsWith("------") || line.startsWith("--Apple-Mail=")) {
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". First case!" + "\n\n");
                     if (headers != null && newContent != null) {
                         MimeBodyPart bodyPart;
-                        //Log.d(SMileCrypto.LOG_TAG, i + "headers: " + headers.getAllHeaderLines().nextElement());
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". headers: " + headers.getAllHeaderLines().nextElement());
                         if (convert && decodeBase64Parts) {
-                            //Log.d(SMileCrypto.LOG_TAG, i + "Convert: " + newContent);
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". Convert: " + newContent);
                             byte[] decoded = Base64.decode(newContent, 0);
-                            //Log.d(SMileCrypto.LOG_TAG, i + "DECODED: " + new String(decoded));
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". DECODED: " + new String(decoded));
 
                             bodyPart = new MimeBodyPart(headers, decoded);
                         } else {
-                            //Log.d(SMileCrypto.LOG_TAG, i + "not convert: " + newContent);
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". not convert: " + newContent);
                             if (newContent.equals(""))
                                 newContent = "\n";
                             bodyPart = new MimeBodyPart(headers, newContent.getBytes());
                         }
-                        //Log.d(SMileCrypto.LOG_TAG, i + "clear all" + "\n\n");
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". clear all" + "\n\n");
                         multipart.addBodyPart(bodyPart);
                         headers = null;
                         convert = false;
                         possibleConvert = false;
                         newContent = null;
+                        isAttachment = false;
+                        headerPossible = true;
                     } else {
-                        //Log.d(SMileCrypto.LOG_TAG, i + "header null - continue!" + "\n\n");
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". header null -- continue!" + "\n\n");
+                        headerPossible = true;
                     }
                 } else if (line.contains("boundary=\"---")) {
                     continue;
-                } else if (line.startsWith("Content-Type")) {
+                } else if (headerPossible && line.startsWith("Content-Type")) {
                     if ((line.contains("text/plain") || line.contains("text/html")) && line.contains("utf-8")) {
                         possibleConvert = true;
                     } else if (line.contains("multipart/alternative"))
                         continue; //ignore
 
                     headers = new InternetHeaders();
-                    //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + line + "\n\n");
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
                     headers.addHeaderLine(line);
-                } else if (line.startsWith("Content-Transfer-Encoding")) {
+                } else if (headerPossible && line.startsWith("Content-Transfer-Encoding")) {
                     if (line.contains("base64")) {
                         if (possibleConvert && decodeBase64Parts) {
                             convert = true;
                             headers.addHeaderLine("Content-Transfer-Encoding: quoted-printable");
-                            //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + "Content-Transfer-Encoding: quoted-printable" + "\n\n");
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + "Content-Transfer-Encoding: quoted-printable" + "\n\n");
                             continue;
                         }
                     }
-                    //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + line + "\n\n");
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
-                } else if (line.startsWith("Content-Disposition")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + "add header line: " + line + "\n\n");
+                } else if (headerPossible && line.startsWith("Content-Disposition")) {
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    if (headers == null)
+                        headers = new InternetHeaders();
+                    headers.addHeaderLine(line);
+                    if(line.contains("attachment"))
+                        isAttachment = true;
+                } else if (headerPossible && line.contains("charset")) {
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    if (headers == null)
+                        headers = new InternetHeaders();
+                    headers.addHeaderLine(line);
+                } else if (headerPossible && isAttachment && (line.contains("filename=") || line.contains("name="))){
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (line.equals("\n") || line.equals("\r")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + "empty line" + "\n\n");
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". empty line" + "\n\n");
                     continue;
                 } else {
-                    //line = line.replaceAll("[\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}]", "");
-                    //Log.d(SMileCrypto.LOG_TAG, i + "old content " + newContent + "\n\n");
+                    headerPossible = false;
+                    line = line.replaceAll("[\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}]", "");
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". old content " + newContent + "\n\n");
                     if (newContent == null)
                         newContent = "";
                     newContent += line + "\n";
-                    //Log.d(SMileCrypto.LOG_TAG, i + "new content " + newContent + "\n\n");
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". new content " + newContent + "\n\n");
                 }
             }
             newMimeMessage.setContent(multipart);
@@ -404,9 +428,10 @@ public class DecryptMail {
                 Log.e(SMileCrypto.LOG_TAG, "Decrypt getDescription: " + b.getDescription());
 
             }*/
+            Log.d(SMileCrypto.LOG_TAG, "… finished decoding MimeBodyPart.");
             return newMimeMessage;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception decrypting parts: " + e.getMessage());
+            Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
@@ -449,6 +474,7 @@ public class DecryptMail {
             return result + bytes.toString();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
+            e.printStackTrace();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
@@ -538,17 +564,20 @@ public class DecryptMail {
         }
 
         try {
+            int i = 0;
+            Log.d(SMileCrypto.LOG_TAG, "Add headers from encrypted MimeMessage.");
             Enumeration allHeaders = encryptedMimeMessage.getAllHeaders();
             while (allHeaders.hasMoreElements()) {
                 Header header = (Header) allHeaders.nextElement();
-                Log.d(SMileCrypto.LOG_TAG, "Headername + value: " + header.getName() + header.getValue());
+                //Log.d(SMileCrypto.LOG_TAG, "Headername + value: " + header.getName() + " "+ header.getValue());
                 newMimeMessage.addHeader(header.getName(), header.getValue());
+                i++;
             }
+            Log.d(SMileCrypto.LOG_TAG, "Added " + i + " headers from encrypted MimeMessage.");
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in addOldHeaders:" + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
-
         return newMimeMessage;
     }
 
