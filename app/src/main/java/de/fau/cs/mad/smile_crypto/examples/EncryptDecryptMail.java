@@ -3,11 +3,19 @@ package de.fau.cs.mad.smile_crypto.examples;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
+
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
@@ -19,7 +27,9 @@ import de.fau.cs.mad.javax.activation.CommandMap;
 import de.fau.cs.mad.javax.activation.MailcapCommandMap;
 import de.fau.cs.mad.smile_crypto.DecryptMail;
 import de.fau.cs.mad.smile_crypto.EncryptMail;
+import de.fau.cs.mad.smile_crypto.KeyManagement;
 import de.fau.cs.mad.smile_crypto.SMileCrypto;
+import de.fau.cs.mad.smile_crypto.SignMessage;
 
 public class EncryptDecryptMail {
     final String content = "Content for MIME-Messages, üäÖß, México 42!";
@@ -30,6 +40,7 @@ public class EncryptDecryptMail {
             Log.d(SMileCrypto.LOG_TAG, "create new MimeMessage…");
             MimeMessage originalMimeMessage = new AsyncCreateMimeMessage().execute().get();
             MimeMessage encryptedMimeMessage = encrypt(originalMimeMessage);
+
             MimeBodyPart decrypted = decrypt(encryptedMimeMessage);
 
             //check
@@ -50,6 +61,12 @@ public class EncryptDecryptMail {
                         Log.e(SMileCrypto.LOG_TAG, i + ". " + content.charAt(i) + "!=" + decryptedResult.charAt(i));
                 }
             }
+
+
+            //TODO: how to sign encrypted message?
+            Log.e(SMileCrypto.LOG_TAG, "Start signing original message.");
+            sign(originalMimeMessage);
+            Log.e(SMileCrypto.LOG_TAG, "End signing.");
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
             e.printStackTrace();
@@ -61,6 +78,34 @@ public class EncryptDecryptMail {
 
         EncryptMail encryptMail = new EncryptMail();
         return encryptMail.encryptMessage(originalMimeMessage);
+    }
+
+    private MimeMultipart sign(MimeMessage original) throws Exception{
+        SignMessage signMessage = new SignMessage();
+
+        MimeBodyPart mimeBodyPart;
+        if(original.getContent() instanceof MimeMultipart) {
+            MimeMultipart multipart = (MimeMultipart) original.getContent();
+            mimeBodyPart = (MimeBodyPart) multipart.getBodyPart(0);
+        } else {
+            Log.e(SMileCrypto.LOG_TAG, "Type: " + original.getContent());
+            Log.e(SMileCrypto.LOG_TAG, "User other example.");
+            InternetHeaders headers = new InternetHeaders();
+            headers.addHeader("Content-Type", "text/plain");
+            headers.addHeader("Content-Transfer-Encoding", "quoted-printable");
+            String message = "MESSAGE TO BE SIGNED!";
+            mimeBodyPart = new MimeBodyPart(headers, message.getBytes());
+        }
+
+        MimeMultipart result = signMessage.sign(mimeBodyPart, new InternetAddress("fixmymail@gmx.de"));
+        for(int i = 0; i < result.getCount(); i++) {
+            Log.d(SMileCrypto.LOG_TAG, i + 1 + ". Part…");
+            MimeBodyPart part = (MimeBodyPart) result.getBodyPart(i);
+            Log.d(SMileCrypto.LOG_TAG, part.getContentType());
+            Log.d(SMileCrypto.LOG_TAG, part.getContent().toString());
+        }
+
+        return result;
     }
 
     private MimeBodyPart decrypt(MimeMessage mimeMessage) throws Exception {
@@ -105,4 +150,5 @@ public class EncryptDecryptMail {
             return null;
         }
     }
+
 }
