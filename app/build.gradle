@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "de.fau.cs.mad.smile_crypto"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
         versionName "0.1"
