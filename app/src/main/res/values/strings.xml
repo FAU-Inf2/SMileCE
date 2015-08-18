@@ -136,7 +136,7 @@
 
     <string name="faq_import_cert_q">How can I import a S/MIME-certificate?</string>
     <string name="faq_import_cert">First of all save your certificate somewhere on the phone. The
-        certificate must be a file of type pkcs12 (ends with .p12). Then open this app and click
+        certificate must be a file of type \"PKCS #12\" (ends with .p12 or .pfx). Then open this app and click
         on the Floating Action Button or navigate to
         \"Import S/MIME-Certificate\" in the sidebar. Use the opened file browser to select your
         certificate. Finally you have to enter your passphrase.</string>
