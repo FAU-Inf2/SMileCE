@@ -3,6 +3,7 @@ package de.fau.cs.mad.smile_crypto;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Animatable;
@@ -12,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -376,8 +378,80 @@ public class MainActivity extends ActionBarActivity {
 
             if(!contains) {
                 Log.e(SMileCrypto.LOG_TAG, "Items added");
-                mCardArrayAdapter.add(card);
+                card.setOnLongClickListener(new Card.OnLongCardClickListener() {
+
+                    @Override
+                    public boolean onLongClick(Card card, View view) {
+                        if (!(card instanceof KeyCard)) {
+                            return false;
+                        }
+                        final KeyCard kc = (KeyCard) card;
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                                card.getContext());
+                        if (kc.keyInfo.alias.startsWith("SMile_crypto_own")) {
+
+                            // set title
+                            alertDialogBuilder.setTitle(getString(R.string.alert_header_start) + kc.keyInfo.contact + getString(R.string.alert_header_end));
+
+                            // set dialog message
+                            alertDialogBuilder
+                                    .setMessage(getString(R.string.alert_content))
+                                    .setCancelable(false)
+                                    .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // if this button is clicked, close
+                                            // current activity
+                                            keyManager.deleteKey(kc.keyInfo.alias);
+                                            mCardArrayAdapter.remove(kc);
+                                            mCardArrayAdapter.notifyDataSetChanged();
+                                        }
+                                    })
+                                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // if this button is clicked, just close
+                                            // the dialog box and do nothing
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                            // create alert dialog
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+
+                            // show it
+                            alertDialog.show();
+                        } else {
+                            // set dialog message
+                            alertDialogBuilder
+                                    .setMessage(getString(R.string.alert_header_start) + kc.keyInfo.contact + getString(R.string.alert_header_end))
+                                    .setCancelable(false)
+                                    .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // if this button is clicked, close
+                                            // current activity
+                                            keyManager.deleteKey(kc.keyInfo.alias);
+                                            mCardArrayAdapter.remove(kc);
+                                            mCardArrayAdapter.notifyDataSetChanged();
+                                        }
+                                    })
+                                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // if this button is clicked, just close
+                                            // the dialog box and do nothing
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                            // create alert dialog
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+
+                            // show it
+                            alertDialog.show();
+                        }
+                        return true;
+                    }
+                });
+                    mCardArrayAdapter.add(card);
+                }
             }
-        }
     }
 }
