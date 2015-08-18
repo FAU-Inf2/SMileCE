@@ -171,8 +171,8 @@
     <string name="faq_colour_05"> &lt; 1 month valid</string>
     <string name="faq_colour_06"> Expired.</string>
 
-    <string name="alert_header_start"> Do you want to delete</string>
-    <string name="alert_header_end">\' s key?</string>
+    <string name="alert_header_start"> Do you want to delete&#160;</string>
+    <string name="alert_header_end">\'s key?</string>
     <string name="erase">ERASE</string>
     <string name="alert_content">If you delete this key, you won\'t be able to decrypt messages encrypted with this key. </string>
 </resources>
