@@ -333,14 +333,11 @@ public class DecryptMail {
             return null;
         }
 
-        for (Address a : addresses) {
-            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(a);
-            for(KeyInfo keyInfo : keyInfos) {
-                String alias = keyInfo.alias;
-                Log.e(SMileCrypto.LOG_TAG, alias);
-                if (alias != null) {
-                    aliases.add(alias);
-                }
+        ArrayList<KeyInfo> keyInfos = getKeyInfosByMimeMessage(mimeMessage);
+        for(KeyInfo keyInfo : keyInfos) {
+            String alias = keyInfo.alias;
+            if (alias != null) {
+                aliases.add(alias);
             }
         }
 
@@ -350,6 +347,27 @@ public class DecryptMail {
         return aliases;
     }
 
+    public ArrayList<KeyInfo> getKeyInfosByMimeMessage(MimeMessage mimeMessage) {
+        Address[] addresses = getMailAddressFromMimeMessage(mimeMessage);
+        if (addresses == null) {
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_RECIPIENTS_FOUND;
+            return null;
+        }
+
+        ArrayList<KeyInfo> result = new ArrayList<>();
+
+        for (Address a : addresses) {
+            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(a);
+            for(KeyInfo keyInfo : keyInfos) {
+                result.add(keyInfo);
+            }
+        }
+
+        if(result.size() == 0)
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
+
+        return result;
+    }
 
     private Address[] getMailAddressFromMimeMessage(MimeMessage mimeMessage) {
         try {

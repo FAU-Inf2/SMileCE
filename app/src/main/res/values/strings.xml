@@ -127,6 +127,7 @@
     <string name="save_encrypted_mime_message">Save encrypted MimeMessage</string>
     <string name="no_mime_message_saved">No MimeMessage was saved.</string>
     <string name="saved_mime_message">Saved MimeMessage as: &#160;</string>
+    <string name="multiple_certificates">Multiple certificate found, which should be used to decrypt message?</string>
     <string name="email_label">Email:</string>
     <string name="valid_label">Valid until:</string>
 

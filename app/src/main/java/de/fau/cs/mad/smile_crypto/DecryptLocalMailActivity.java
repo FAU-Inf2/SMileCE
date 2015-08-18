@@ -194,14 +194,54 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
 
-        ArrayList<String> aliases = decryptMail.getAliasesByMimeMessage(mimeMessage);
-        if(aliases.size() == 0) {
+        ArrayList<KeyInfo> keyInfos = decryptMail.getKeyInfosByMimeMessage(mimeMessage);
+        if(keyInfos.size() == 0) {
             showErrorPrompt();
             return;
         }
 
+        if(keyInfos.size() == 1) {
+            String alias = keyInfos.get(0).alias;
+            if(alias == null){
+                showErrorPrompt();
+                return;
+            }
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if(!preferences.contains(alias+"-passphrase")) {
+                showPassphrasePrompt(pathToFile);
+                return;
+            }
+
+            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
+            Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+
+            try {
+                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+                passphrase = PasswordEncryption.decryptString(encryptedPassphrase);
+
+                if (passphrase == null) {
+                    Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
+                    showPassphrasePrompt(pathToFile);
+                    return;
+                }
+
+                Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
+            } catch (Exception e) {
+                showPassphrasePrompt(pathToFile);
+                return;
+            }
+
+            decryptFile(pathToFile, passphrase);
+            options();
+        }
+
+        //TODO: case more than one certificate
         //TODO: show prompt to select correct certificate
-        String alias = aliases.get(0);
+        selectCertificate(pathToFile, keyInfos);
+    }
+
+
+    public void passphraseDecryptOrPromptAlias(String alias, String pathToFile) {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if(!preferences.contains(alias+"-passphrase")) {
@@ -212,6 +252,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
         Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
 
+        String passphrase;
         try {
             Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
             passphrase = PasswordEncryption.decryptString(encryptedPassphrase);
@@ -230,6 +271,37 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
         decryptFile(pathToFile, passphrase);
         options();
+    }
+
+    public void selectCertificate(final String pathToFile, final ArrayList<KeyInfo> keyInfos) {
+        String alias = keyInfos.get(0).alias;
+        if(alias == null){
+            showErrorPrompt();
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
+        builder.setTitle(getResources().getString(R.string.info));
+        String selection = getString(R.string.multiple_certificates);
+        int i = 0;
+        // TODO: Make list view or other view to be able to select one item
+        for(KeyInfo keyInfo : keyInfos) {
+            selection += "\n" + Integer.toString(i) + ". Name: " + keyInfo.contact + ", Thumbprint: " + keyInfo.thumbprint;
+            i++;
+        }
+        builder.setMessage(selection);
+        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // TODO: Use selected alias
+                String alias = keyInfos.get(0).alias;
+                if (alias == null) {
+                    showErrorPrompt();
+                } else {
+                    passphraseDecryptOrPromptAlias(alias, pathToFile);
+                }
+            }
+        });
+        builder.create().show();
     }
 
     @Nullable
