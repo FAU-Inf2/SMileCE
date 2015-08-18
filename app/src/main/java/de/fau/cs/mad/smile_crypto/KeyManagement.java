@@ -116,7 +116,7 @@ public class KeyManagement {
     }
 
     public ArrayList<KeyInfo> getOwnCertificates() {
-        ArrayList<KeyInfo> keylist = new ArrayList<>();
+        ArrayList<KeyInfo> keyList = new ArrayList<>();
         try {
             Log.d(SMileCrypto.LOG_TAG, "Find all own certificates…");
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
@@ -126,9 +126,11 @@ public class KeyManagement {
                 String alias = (String) e.nextElement();
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
 
-                if (alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias))) {
+                if(!alias.contains("_own_")) {
                     continue;
                 }
+                //if (alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias)))
+                //    continue;
 
                 Certificate c = ks.getCertificate(alias);
                 KeyStore.Entry entry = ks.getEntry(alias, null);
@@ -144,7 +146,7 @@ public class KeyManagement {
                         X509Certificate cert = (X509Certificate) c;
                         X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
                         RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
-                        String email = "Certificate does not contain an email address.";
+                        String email = "";
                         if (rdn_email.length > 0) {
                             email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
                         }
@@ -154,16 +156,15 @@ public class KeyManagement {
                         if (cn.length > 0) {
                             keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
                         }
-                        keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
                         keyInfo.termination_date = new DateTime(cert.getNotAfter());
                         //keyInfo.trust; TODO
                         keyInfo.thumbprint = getThumbprint(cert);
+                        keyList.add(keyInfo);
                     }
                 } else {
                     //--> no private key available for this certificate
-                    //currently there are no such entries because yet we cannot import the certs of
-                    //others, e.g. by using their signature.
-                    Log.d(SMileCrypto.LOG_TAG, "Not an instance of a PrivateKeyEntry");
+                    //this should not happen
+                    Log.e(SMileCrypto.LOG_TAG, "Not an instance of a PrivateKeyEntry");
                     Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
                     Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
                 }
@@ -173,7 +174,7 @@ public class KeyManagement {
             e.printStackTrace();
         }
 
-        return keylist;
+        return keyList;
     }
 
     public ArrayList<KeyInfo> getAllCertificates() {

@@ -59,8 +59,8 @@ public class MainActivity extends ActionBarActivity {
     private float offset2;
 
     // Name and email in HeaderView -- TODO: for SMile-UI -> get from resources
-    String mName;
-    String mEmail;
+    String mName = "";
+    String mEmail = "";
     //titles and icons for ListView
     int mIcons[] = {R.drawable.ic_add_black_24dp, R.drawable.ic_search_black_24dp,
             R.drawable.ic_info_black_24dp, R.drawable.ic_settings_black_24dp,
@@ -190,8 +190,31 @@ public class MainActivity extends ActionBarActivity {
         mTitles[2] = getResources().getString(R.string.navigation_drawer_info);
         mTitles[3] = getResources().getString(R.string.navigation_drawer_settings);
         mTitles[4] = getResources().getString(R.string.navigation_drawer_help);
-        mName = getResources().getString(R.string.navigation_drawer_header_name);
-        mEmail = getResources().getString(R.string.navigation_drawer_header_email_address);
+
+        ArrayList<KeyInfo> ownCertificates = new ArrayList<>();
+
+        try {
+            ownCertificates = new KeyManagement().getOwnCertificates();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+        }
+
+        if(ownCertificates.size() > 0) {
+            KeyInfo keyInfo = ownCertificates.get(0);
+            mName = keyInfo.contact;
+            Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
+            mEmail = keyInfo.mail;
+            Log.d(SMileCrypto.LOG_TAG, "mEmail: " + mEmail);
+        }
+
+        if(mName == null && mEmail == null) {
+            mName = getResources().getString(R.string.navigation_drawer_header_name);
+            mEmail = getResources().getString(R.string.navigation_drawer_header_email_address);
+        } else if(mName == null) {
+            mName = "";
+        } else if(mEmail == null) {
+            mEmail = null;
+        }
 
         mAdapter = new RecyclerViewAdapter(mTitles, mIcons, mName, mEmail);
         mRecyclerView.setAdapter(mAdapter);
