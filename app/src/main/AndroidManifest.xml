@@ -35,7 +35,7 @@
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".ImportCertificateActivity"
+            android:name=".ImportOwnCertificateActivity"
             android:label="@string/title_activity_import_certificate" >
         </activity>
         <activity

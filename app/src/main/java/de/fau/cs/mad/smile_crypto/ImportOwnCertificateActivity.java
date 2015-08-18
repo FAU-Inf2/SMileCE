@@ -22,7 +22,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
 
-public class ImportCertificateActivity extends ActionBarActivity {
+public class ImportOwnCertificateActivity extends ActionBarActivity {
 
     private Toolbar toolbar;
     protected final int FAB_FILE_CHOOSER_REQUEST_CODE = 0;
@@ -30,7 +30,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_import_certificate);
+        setContentView(R.layout.activity_import_own_certificate);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.navigation_drawer_import_certificate);
@@ -38,7 +38,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Log.d(SMileCrypto.LOG_TAG, "Started ImportCertificateActivity.");
+        Log.d(SMileCrypto.LOG_TAG, "Started ImportOwnCertificateActivity.");
         showFileChooser();
     }
 
@@ -91,7 +91,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
         } catch (android.content.ActivityNotFoundException anfe) {
             Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
-            AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(ImportOwnCertificateActivity.this);
             builder.setTitle(getResources().getString(R.string.error));
             builder.setMessage(getResources().getString(R.string.no_file_manager));
 
@@ -140,7 +140,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
     private void wrongPassphrase(final String pathToFile) {
         Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportOwnCertificateActivity.this);
         builder.setTitle(getResources().getString(R.string.error));
         builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
                 "\n" + getResources().getString(R.string.try_again));
@@ -161,7 +161,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
     }
 
     private void noFileSelected() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportOwnCertificateActivity.this);
         builder.setTitle(getResources().getString(R.string.error));
         builder.setMessage(getResources().getString(R.string.import_certificate_no_file));
 
@@ -183,7 +183,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
     private void importSuccessful() {
         Log.d(SMileCrypto.LOG_TAG, "Exit-Status: " + SMileCrypto.EXIT_STATUS);
         if (SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED) {
-            AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportCertificateActivity.this);
+            AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportOwnCertificateActivity.this);
             builderImported.setTitle(getResources().getString(R.string.info));
             builderImported.setMessage(getResources().getString(R.string.certificate_already_imported));
 
@@ -195,7 +195,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
             });
             builderImported.create().show();
         } else {
-            AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportCertificateActivity.this);
+            AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportOwnCertificateActivity.this);
             builderImported.setTitle(getResources().getString(R.string.info));
             builderImported.setMessage(getResources().getString(R.string.import_certificate_successful));
 

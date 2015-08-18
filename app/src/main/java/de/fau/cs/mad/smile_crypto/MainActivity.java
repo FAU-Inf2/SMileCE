@@ -33,10 +33,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
+import de.fau.cs.mad.smile_crypto.examples.EncryptDecryptMail;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
@@ -83,9 +83,6 @@ public class MainActivity extends ActionBarActivity {
         toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
 
-        /*getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
-
         ArrayList<Card> cards = new ArrayList<Card>();
 
         try {
@@ -130,7 +127,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 collapseFab();
                 expanded = false;
-                Intent i = new Intent(v.getContext(), ImportCertificateActivity.class);
+                Intent i = new Intent(v.getContext(), ImportOwnCertificateActivity.class);
                 startActivity(i);
                 updateCards();
             }
@@ -169,7 +166,7 @@ public class MainActivity extends ActionBarActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+                /*Intent i = new Intent(MainActivity.this, ImportOwnCertificateActivity.class);
                 startActivity(i);*/
                 /*fab.setSelected(!fab.isSelected());
                 fab.setImageResource(fab.isSelected() ? R.drawable.animated_plus : R.drawable.animated_minus);
@@ -228,7 +225,7 @@ public class MainActivity extends ActionBarActivity {
                         /*getSupportFragmentManager().beginTransaction().
                                 replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
                     } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
-                        Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+                        Intent i = new Intent(MainActivity.this, ImportOwnCertificateActivity.class);
                         startActivity(i);
                         return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
