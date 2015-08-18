@@ -197,10 +197,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         ArrayList<KeyInfo> keyInfos = decryptMail.getKeyInfosByMimeMessage(mimeMessage);
         if(keyInfos.size() == 0) {
             showErrorPrompt();
-            return;
-        }
-
-        if(keyInfos.size() == 1) {
+        } else if(keyInfos.size() == 1) {
             String alias = keyInfos.get(0).alias;
             if(alias == null){
                 showErrorPrompt();
@@ -233,11 +230,11 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
             decryptFile(pathToFile, passphrase);
             options();
+        } else {
+            //TODO: case more than one certificate
+            //TODO: show prompt to select correct certificate
+            selectCertificate(pathToFile, keyInfos);
         }
-
-        //TODO: case more than one certificate
-        //TODO: show prompt to select correct certificate
-        selectCertificate(pathToFile, keyInfos);
     }
 
 
@@ -282,7 +279,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
         builder.setTitle(getResources().getString(R.string.info));
         String selection = getString(R.string.multiple_certificates);
-        int i = 0;
+        int i = 1;
         // TODO: Make list view or other view to be able to select one item
         for(KeyInfo keyInfo : keyInfos) {
             selection += "\n" + Integer.toString(i) + ". Name: " + keyInfo.contact + ", Thumbprint: " + keyInfo.thumbprint;
