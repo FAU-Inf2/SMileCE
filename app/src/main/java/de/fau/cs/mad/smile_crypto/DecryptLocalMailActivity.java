@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -193,11 +194,14 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
 
-        String alias = decryptMail.getAliasByMimeMessage(mimeMessage);
-        if(alias == null) {
+        ArrayList<String> aliases = decryptMail.getAliasesByMimeMessage(mimeMessage);
+        if(aliases.size() == 0) {
             showErrorPrompt();
             return;
         }
+
+        //TODO: show prompt to select correct certificate
+        String alias = aliases.get(0);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if(!preferences.contains(alias+"-passphrase")) {

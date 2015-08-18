@@ -9,6 +9,7 @@ import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 
 import javax.mail.Address;
 import javax.mail.internet.MimeBodyPart;
@@ -52,7 +53,13 @@ public class SignMessage {
         X509Certificate certificate;
         try {
             keyManagement = new KeyManagement();
-            String alias = keyManagement.getAliasByAddress(signerAddress);
+            ArrayList<String> aliases = keyManagement.getAliasesByOwnAddress(signerAddress);
+            if(aliases.size() == 0) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
+                Log.e(SMileCrypto.LOG_TAG, "No certificate found for signer address: " + signerAddress);
+                return null;
+            }
+            String alias = aliases.get(0); //TODO: best fit --> check validity
             privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
             certificate = keyManagement.getCertificateForAlias(alias);
         } catch (Exception e) {

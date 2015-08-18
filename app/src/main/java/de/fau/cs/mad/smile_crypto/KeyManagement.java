@@ -267,12 +267,10 @@ public class KeyManagement {
 
             Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + mailAddress);
 
-            for (KeyInfo keyInfo : getAllCertificates()) {
-                if (keyInfo.hasPrivateKey) {
-                    for (String mail : keyInfo.mailAddresses) {
-                        if (mailAddress.equals(mail)) {
-                            return keyInfo.alias;
-                        }
+            for (KeyInfo keyInfo : getOwnCertificates()) {
+                for (String mail : keyInfo.mailAddresses) {
+                    if (mailAddress.equals(mail)) {
+                        return keyInfo.alias;
                     }
                 }
             }
@@ -319,6 +317,39 @@ public class KeyManagement {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public ArrayList<KeyInfo> getKeyInfosByOwnAddress(final Address emailAddress) {
+        ArrayList<KeyInfo> keyInfos = new ArrayList<>();
+        try {
+            String mailAddress = emailAddress.toString();
+            if (emailAddress instanceof InternetAddress) {
+                mailAddress = ((InternetAddress) emailAddress).getAddress();
+            }
+
+            Log.d(SMileCrypto.LOG_TAG, "Looking up alias for: " + mailAddress);
+
+            for (KeyInfo keyInfo : getOwnCertificates()) {
+                if (mailAddress.equals(keyInfo.mail)) {
+                    keyInfos.add(keyInfo);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
+            e.printStackTrace();
+        }
+        return keyInfos;
+    }
+
+    public ArrayList<String> getAliasesByOwnAddress(final Address emailAddress) {
+        ArrayList<KeyInfo> keyInfos = getKeyInfosByOwnAddress(emailAddress);
+        ArrayList<String> aliases = new ArrayList<>();
+        for(KeyInfo keyInfo : keyInfos) {
+            String alias = keyInfo.alias;
+            if(alias != null)
+                aliases.add(alias);
+        }
+        return aliases;
     }
 
     @NonNull
