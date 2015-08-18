@@ -21,6 +21,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -146,26 +148,33 @@ public class ImportCertificateActivity extends ActionBarActivity {
     }
 
     private void handleFile(String pathToFile) {
-        if(pathToFile.endsWith(".p12")) { //TODO: better differentiation
-            Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
-            showPassphrasePrompt(pathToFile);
+        FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        String mimeType = fileNameMap.getContentTypeFor(pathToFile);
+        switch (mimeType) {
+            case "application/x-pkcs12":
+                Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
+                showPassphrasePrompt(pathToFile);
 
-        } else if(pathToFile.endsWith(".crt") || pathToFile.endsWith(".cer")){
-            Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
-            X509Certificate certificate = getCertificate(pathToFile);
+                break;
+            case "application/x-x509-ca-cert":
+            case "application/x-x509-user-cert":
+                Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
+                X509Certificate certificate = getCertificate(pathToFile);
 
-            if(certificate == null) {
-                importError(getResources().getString(R.string.error_reading_certificate));
-                return;
-            }
+                if (certificate == null) {
+                    importError(getResources().getString(R.string.error_reading_certificate));
+                }
 
-            if(KeyManagement.addFriendsCertificate(certificate))
-                importSuccessful();
-            else
-                importError(getResources().getString(R.string.internal_error));
-        } else {
-            Log.d(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
-            importError(getResources().getString(R.string.unknown_filetype));
+                if (KeyManagement.addFriendsCertificate(certificate))
+                    importSuccessful();
+                else
+                    importError(getResources().getString(R.string.internal_error));
+                break;
+            default:
+                Log.e(SMileCrypto.LOG_TAG, "Unknown mime type: " + mimeType);
+                Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+                importError(getResources().getString(R.string.unknown_filetype));
+                break;
         }
     }
 
