@@ -39,7 +39,30 @@ public class ImportOwnCertificateActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Log.d(SMileCrypto.LOG_TAG, "Started ImportOwnCertificateActivity.");
-        showFileChooser();
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+
+        if(Intent.ACTION_VIEW.equals(action)){
+            Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
+            Uri uri = intent.getData();
+            String path = PathConverter.getPath(this, uri);
+            TextView textView = (TextView) findViewById(R.id.import_text_view);
+            textView.setText(getString(R.string.import_certificate_show_path) + path);
+            Log.d(SMileCrypto.LOG_TAG, "Path to file is " + path);
+            if(path == null)
+                showFileChooser();
+
+            if(path.endsWith(".p12")) {
+                showPassphrasePrompt(path);
+            } else {
+                Log.d(SMileCrypto.LOG_TAG, "Not a p12-file -- show file chooser.");
+                showFileChooser();
+            }
+        } else {
+            Log.d(SMileCrypto.LOG_TAG, "Intent was something else: " + action);
+            Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
+            showFileChooser();
+        }
     }
 
     @Override

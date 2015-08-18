@@ -22,6 +22,7 @@
     <string name="navigation_drawer_import_certificate">Import S/MIME-Certificate</string>
     <string name="navigation_drawer_key_chain">Get Cert from KeyChain</string>
     <string name="navigation_decrypt_local_mail">Decrypt locally saved mail</string>
+    <string name="navigation_import_other_certificate">Import public certificate</string>
 
     <string name="navigation_drawer_header_name">FAU is MAD!</string>
     <string name="navigation_drawer_header_email_address">fixmymail@i2.cs.fau.de</string>
@@ -97,7 +98,8 @@
     <string name="title_activity_info">InfoActivity</string>
     <string name="title_activity_help">HelpActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
-    <string name="title_activity_import_certificate">ImportCertificateActivity</string>
+    <string name="title_activity_import_own_certificate">Import private certificate</string>
+    <string name="title_activity_import_certificate">Import public certificate</string>
     <string name="title_activity_key_chain">KeyChainActivity</string>
     <string name="title_activity_decrypt_local_mail">DecryptLocalMailActivity</string>
 
