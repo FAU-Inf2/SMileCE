@@ -45,8 +45,6 @@
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.p12" />
                 <data android:pathPattern=".*\\.crt" />
-                <data android:pathPattern=".*\\.cer" />
-                <data android:pathPattern=".*\\.pem" />
             </intent-filter>
         </activity>
         <activity
