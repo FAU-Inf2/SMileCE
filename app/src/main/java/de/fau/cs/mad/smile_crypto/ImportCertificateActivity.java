@@ -150,6 +150,13 @@ public class ImportCertificateActivity extends ActionBarActivity {
     private void handleFile(String pathToFile) {
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(pathToFile);
+        if(mimeType == null) {
+            Log.e(SMileCrypto.LOG_TAG, "MimeType was null.");
+            Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+            importError(getResources().getString(R.string.unknown_filetype));
+            return;
+        }
+
         switch (mimeType) {
             case "application/x-pkcs12":
                 Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
