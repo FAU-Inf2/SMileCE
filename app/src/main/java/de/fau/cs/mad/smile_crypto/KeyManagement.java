@@ -389,6 +389,10 @@ public class KeyManagement {
                 androidKeyStore.deleteEntry(alias);
             }
 
+            if(alias.contains("_other_"))
+                return androidKeyStore.containsAlias(alias);
+
+            // just own keys have to be deleted from internal storage
             return deletePassphrase(alias) && deleteP12FromInternalDir(alias);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while deleting key: " + e.getMessage());
