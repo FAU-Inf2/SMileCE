@@ -116,9 +116,21 @@ public class DecryptMail {
                 return null;
             }
 
+            return decryptMailSynchronous(mimeMessage, privateKey, cert);
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            e.printStackTrace();
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            return null;
+        }
+    }
+
+    private MimeBodyPart decryptMailSynchronous(MimeMessage mimeMessage, PrivateKey privateKey, X509Certificate certificate) {
+        try {
+            encryptedMimeMessage = mimeMessage;
             SMIMEToolkit toolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
 
-            MimeBodyPart dec = toolkit.decrypt(mimeMessage, new JceKeyTransRecipientId(cert),
+            MimeBodyPart dec = toolkit.decrypt(mimeMessage, new JceKeyTransRecipientId(certificate),
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
             //Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
@@ -218,6 +230,36 @@ public class DecryptMail {
 
         try {
             return new AsyncDecryptMail().execute().get();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
+            return null;
+        }
+    }
+
+    public MimeBodyPart decryptMail(MimeMessage mimeMessage, PrivateKey privateKey, X509Certificate certificate) {
+        if (mimeMessage == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+
+        if (privateKey == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty privateKey.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+
+        if (certificate == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty certificate.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+
+        this.encryptedMimeMessage = mimeMessage;
+
+        try {
+            return new AsyncDecryptMailCertificate().execute(mimeMessage, privateKey, certificate).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -595,6 +637,13 @@ public class DecryptMail {
             }
 
             return decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
+        }
+    }
+
+    private class AsyncDecryptMailCertificate extends AsyncTask<Object, Void, MimeBodyPart> {
+
+        protected MimeBodyPart doInBackground(Object... params) {
+            return decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
         }
     }
 
