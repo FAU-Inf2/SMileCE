@@ -93,11 +93,18 @@ public class KeyManagement {
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
 
-            String alias = "SMile_crypto_other_" + getThumbprint(certificate);
+            String thumbprint = getThumbprint(certificate);
+            String alias = "SMile_crypto_other_" + thumbprint;
             Log.d(SMileCrypto.LOG_TAG, "Check whether certificate is stored for alias: " + alias);
 
             //Check whether cert is already there
             if (ks.containsAlias(alias)) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
+                return true;
+            }
+
+            //Check whether cert is already there because it's our own (= have private key)
+            if (ks.containsAlias("SMile_crypto_own_" + thumbprint)) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return true;
             }
