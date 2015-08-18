@@ -102,6 +102,7 @@ public class HelpActivity extends ActionBarActivity {
         // Adding child data
         listDataHeader.add(getString(R.string.faq_import_cert_q));
         listDataHeader.add(getString(R.string.faq_passphrase_saved_q));
+        listDataHeader.add(getString(R.string.faq_import_other_cert_q));
         listDataHeader.add(getString(R.string.faq_meaning_colour_q));
         listDataHeader.add(getString(R.string.faq_author));
         listDataHeader.add(getString(R.string.faq_license));
@@ -116,6 +117,11 @@ public class HelpActivity extends ActionBarActivity {
         Pair<Integer, String[]> pw = Pair.create(0, pwText);
         List<Pair<Integer, String[]>> pwList = new ArrayList<>();
         pwList.add(pw);
+
+        String[] otherCertText = {getString(R.string.faq_import_other_cert)};
+        Pair<Integer, String[]> otherCert = Pair.create(0, otherCertText);
+        List<Pair<Integer, String[]>> importOtherCert = new ArrayList<>();
+        importOtherCert.add(otherCert);
 
         String[] colorText = {getString(R.string.faq_meaning_colour)};
         Pair<Integer, String[]> col = Pair.create(0, colorText);
@@ -140,10 +146,11 @@ public class HelpActivity extends ActionBarActivity {
 
         listDataChild.put(listDataHeader.get(0), importCert);
         listDataChild.put(listDataHeader.get(1), pwList);
-        listDataChild.put(listDataHeader.get(2), colList);
-        listDataChild.put(listDataHeader.get(3), authorList);
-        listDataChild.put(listDataHeader.get(4), licenceList);
-        listDataChild.put(listDataHeader.get(5), othersList);
+        listDataChild.put(listDataHeader.get(2), importOtherCert);
+        listDataChild.put(listDataHeader.get(3), colList);
+        listDataChild.put(listDataHeader.get(4), authorList);
+        listDataChild.put(listDataHeader.get(5), licenceList);
+        listDataChild.put(listDataHeader.get(6), othersList);
 
     }
 }
