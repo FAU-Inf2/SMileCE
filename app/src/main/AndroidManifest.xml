@@ -35,18 +35,6 @@
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".ImportOwnCertificateActivity"
-            android:label="@string/title_activity_import_own_certificate" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file" />
-                <data android:mimeType="application/x-pkcs12" />
-                <data android:pathPattern=".*\\.p12" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".ImportCertificateActivity"
             android:label="@string/title_activity_import_certificate">
             <intent-filter>
@@ -55,6 +43,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="file" />
                 <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.p12" />
                 <data android:pathPattern=".*\\.crt" />
                 <data android:pathPattern=".*\\.cer" />
                 <data android:pathPattern=".*\\.pem" />

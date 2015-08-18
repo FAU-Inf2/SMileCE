@@ -7,9 +7,14 @@ import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.BufferedInputStream;
@@ -30,7 +35,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         setContentView(R.layout.activity_import_certificate);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.navigation_drawer_import_certificate); //TODO
+        toolbar.setTitle(R.string.navigation_drawer_import_certificate);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -73,7 +78,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
-        String[] mimeTypes = {"application/x-x509-user-cert", "application/x-x509-ca-cert"};
+        String[] mimeTypes = {"application/x-x509-user-cert", "application/x-x509-ca-cert", "application/x-pkcs12"};
         //TODO: more file types: pem? der?
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
 
@@ -141,54 +146,104 @@ public class ImportCertificateActivity extends ActionBarActivity {
     }
 
     private void handleFile(String pathToFile) {
-        Log.d(SMileCrypto.LOG_TAG, "Handle.");
+        if(pathToFile.endsWith(".p12")) { //TODO: better differentiation
+            Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
+            showPassphrasePrompt(pathToFile);
 
-        X509Certificate certificate = getCertificate(pathToFile);
-        Boolean success = KeyManagement.addFriendsCertificate(certificate);
-        if(success) {
-            importSuccessful();
-        }
-        else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
-            builder.setTitle(getResources().getString(R.string.error));
-            builder.setMessage(getResources().getString(R.string.internal_error));
+        } else if(pathToFile.endsWith(".crt") || pathToFile.endsWith(".cer")){
+            Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
+            X509Certificate certificate = getCertificate(pathToFile);
 
-            builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    finish();
-                }
-            });
-            builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    showFileChooser();
-                }
-            });
-            builder.create().show();
+            if(certificate == null) {
+                importError(getResources().getString(R.string.error_reading_certificate));
+                return;
+            }
+
+            if(KeyManagement.addFriendsCertificate(certificate))
+                importSuccessful();
+            else
+                importError(getResources().getString(R.string.internal_error));
+        } else {
+            Log.d(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+            importError(getResources().getString(R.string.unknown_filetype));
         }
+    }
+
+    private void showPassphrasePrompt(final String pathToFile) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View passphrasePromptView = layoutInflater.inflate(R.layout.passphrase_prompt, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(passphrasePromptView);
+
+        final EditText passphraseUserInput = (EditText) passphrasePromptView.
+                findViewById(R.id.passphraseUserInput);
+        passphraseUserInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        passphraseUserInput.setTransformationMethod(new PasswordTransformationMethod());
+
+        alertDialogBuilder.setCancelable(false).setNegativeButton(getResources().getString(R.string.go),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String passphrase = passphraseUserInput.getText().toString();
+                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
+                            wrongPassphrase(pathToFile);
+                        } else {
+                            importSuccessful();
+                        }
+                    }
+                })
+                .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //dialog.dismiss();
+                                finish();
+                            }
+                        }
+                );
+        alertDialogBuilder.create().show();
+    }
+
+    private void wrongPassphrase(final String pathToFile) {
+        Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
+                "\n" + getResources().getString(R.string.try_again));
+
+        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showPassphrasePrompt(pathToFile);
+            }
+        });
+        builder.create().show();
     }
 
     private X509Certificate getCertificate(String pathToFile) {
         try {
-            File file = new File(pathToFile);
-            int size = (int) file.length();
-            byte[] bytes = new byte[size];
+            File certificateFile = new File(pathToFile);
+            int size = (int) certificateFile.length();
+            byte[] certificateBytes = new byte[size];
             X509Certificate x509cert;
             try {
-                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-                buf.read(bytes, 0, bytes.length);
+                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(certificateFile));
+                buf.read(certificateBytes, 0, certificateBytes.length);
                 buf.close();
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Log.e(SMileCrypto.LOG_TAG, "Error reading certificate file.");
+                return null;
             }
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            ByteArrayInputStream bias = new ByteArrayInputStream(bytes);
+            ByteArrayInputStream bias = new ByteArrayInputStream(certificateBytes);
             x509cert = (X509Certificate) factory.generateCertificate(bias);
             return x509cert;
         } catch (CertificateException e) {
-            Log.e(SMileCrypto.LOG_TAG, e.getMessage());
+            Log.e(SMileCrypto.LOG_TAG, "CertificateException: " + e.getMessage());
             return null;
         }
     }
@@ -222,4 +277,23 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
     }
 
+    private void importError(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(message);
+
+        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showFileChooser();
+            }
+        });
+        builder.create().show();
+    }
 }

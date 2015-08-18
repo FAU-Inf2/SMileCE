@@ -79,7 +79,7 @@ public class ListOwnCertificatesFragment extends Fragment {
             public void onClick(View v) {
                 collapseFab();
                 expanded = false;
-                Intent i = new Intent(getActivity(), ImportOwnCertificateActivity.class);
+                Intent i = new Intent(getActivity(), ImportCertificateActivity.class);
                 startActivity(i);
             }
         });
