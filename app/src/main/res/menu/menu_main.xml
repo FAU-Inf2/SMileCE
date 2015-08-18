@@ -15,7 +15,6 @@
         app:showAsAction="ifRoom"
         ></item>
 
-
     <item
         android:id="@+id/decrypt_local_mail"
         android:orderInCategory="200"

@@ -4,9 +4,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
-import android.security.KeyChain;
 import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
@@ -17,15 +16,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.FileNameMap;
+import java.net.URLConnection;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 public class ImportCertificateActivity extends ActionBarActivity {
-
     private Toolbar toolbar;
-    protected final int FAB_FILE_CHOOSER_REQUEST_CODE = 0;
+    protected final int FILE_CHOOSER_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +43,22 @@ public class ImportCertificateActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Log.d(SMileCrypto.LOG_TAG, "Started ImportCertificateActivity.");
-        showFileChooser();
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+
+        if(Intent.ACTION_VIEW.equals(action)){
+            Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
+            Uri uri = intent.getData();
+            String path = PathConverter.getPath(this, uri);
+            TextView textView = (TextView)findViewById(R.id.import_text_view);
+            textView.setText(getString(R.string.import_certificate_show_path) + path);
+            Log.d(SMileCrypto.LOG_TAG, "Path to file is " + path);
+            handleFile(path);
+        } else {
+            Log.d(SMileCrypto.LOG_TAG, "Intent was something else: " + action);
+            Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
+            showFileChooser();
+        }
     }
 
     @Override
@@ -51,43 +70,25 @@ public class ImportCertificateActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
+        finish();
+        return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FAB_FILE_CHOOSER_REQUEST_CODE:
-                //receive result from file manager (--> uri of certificate)
-                if (resultCode == RESULT_OK) {
-                    // Get the Uri of the selected file
-                    Uri uri = data.getData();
-                    String path = PathConverter.getPath(this, uri);
-                    Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
-                    TextView textView = (TextView) this.findViewById(R.id.import_text_view);
-                    textView.setText(getString(R.string.import_certificate_show_path) + path);
-                    showPassphrasePrompt(path);
-                } else {
-                    noFileSelected();
-                }
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     private void showFileChooser() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("application/x-pkcs12"); //TODO: more file types?
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        String[] mimeTypes = {"application/x-x509-user-cert", "application/x-x509-ca-cert", "application/x-pkcs12"};
+        //TODO: more file types: pem? der?
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
 
         try {
             Log.d(SMileCrypto.LOG_TAG, "Call file manager to choose certificate file.");
             startActivityForResult(Intent.createChooser(intent,
                             getResources().getString(R.string.fab_select_import_certificate)),
-                    FAB_FILE_CHOOSER_REQUEST_CODE);
+                    FILE_CHOOSER_REQUEST_CODE);
 
         } catch (android.content.ActivityNotFoundException anfe) {
             Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
@@ -105,7 +106,79 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
     }
 
-    public void showPassphrasePrompt(final String pathToFile) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FILE_CHOOSER_REQUEST_CODE:
+                //receive result from file manager (--> uri of certificate)
+                if (resultCode == RESULT_OK) {
+                    // Get the Uri of the selected file
+                    Uri uri = data.getData();
+                    String path = PathConverter.getPath(this, uri);
+                    Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
+                    TextView textView = (TextView) this.findViewById(R.id.import_text_view);
+                    textView.setText(getString(R.string.import_certificate_show_path) + path);
+                    handleFile(path);
+                } else {
+                    noFileSelected();
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void noFileSelected() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(getResources().getString(R.string.import_certificate_no_file));
+
+        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showFileChooser();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void handleFile(String pathToFile) {
+        FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        String mimeType = fileNameMap.getContentTypeFor(pathToFile);
+        switch (mimeType) {
+            case "application/x-pkcs12":
+                Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
+                showPassphrasePrompt(pathToFile);
+
+                break;
+            case "application/x-x509-ca-cert":
+            case "application/x-x509-user-cert":
+                Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
+                X509Certificate certificate = getCertificate(pathToFile);
+
+                if (certificate == null) {
+                    importError(getResources().getString(R.string.error_reading_certificate));
+                }
+
+                if (KeyManagement.addFriendsCertificate(certificate))
+                    importSuccessful();
+                else
+                    importError(getResources().getString(R.string.internal_error));
+                break;
+            default:
+                Log.e(SMileCrypto.LOG_TAG, "Unknown mime type: " + mimeType);
+                Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+                importError(getResources().getString(R.string.unknown_filetype));
+                break;
+        }
+    }
+
+    private void showPassphrasePrompt(final String pathToFile) {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         View passphrasePromptView = layoutInflater.inflate(R.layout.passphrase_prompt, null);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -160,24 +233,28 @@ public class ImportCertificateActivity extends ActionBarActivity {
         builder.create().show();
     }
 
-    private void noFileSelected() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
-        builder.setTitle(getResources().getString(R.string.error));
-        builder.setMessage(getResources().getString(R.string.import_certificate_no_file));
-
-        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
+    private X509Certificate getCertificate(String pathToFile) {
+        try {
+            File certificateFile = new File(pathToFile);
+            int size = (int) certificateFile.length();
+            byte[] certificateBytes = new byte[size];
+            X509Certificate x509cert;
+            try {
+                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(certificateFile));
+                buf.read(certificateBytes, 0, certificateBytes.length);
+                buf.close();
+            } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error reading certificate file.");
+                return null;
             }
-        });
-        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                showFileChooser();
-            }
-        });
-        builder.create().show();
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            ByteArrayInputStream bias = new ByteArrayInputStream(certificateBytes);
+            x509cert = (X509Certificate) factory.generateCertificate(bias);
+            return x509cert;
+        } catch (CertificateException e) {
+            Log.e(SMileCrypto.LOG_TAG, "CertificateException: " + e.getMessage());
+            return null;
+        }
     }
 
     private void importSuccessful() {
@@ -209,25 +286,23 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
     }
 
-    /*depreciated -- can be deleted later (stays here to see how KeyChain works*/
-    @Deprecated
-    private void addCertificateToKeyChain(String pathToFile) {
-        try {
-            File file = new File(pathToFile);
-            byte[] p12 = new byte[(int) file.length()];
-            FileInputStream fileInputStream = new FileInputStream(file);
-            fileInputStream.read(p12);
-            fileInputStream.close();
+    private void importError(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(message);
 
-            Log.d(SMileCrypto.LOG_TAG, "Import certificate to keychain.");
-            Intent importKey = KeyChain.createInstallIntent();
-            importKey.putExtra(KeyChain.EXTRA_PKCS12, p12);
-            startActivity(importKey);
-
-        } catch (Exception e){
-            Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
-            Toast.makeText(this, R.string.error + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showFileChooser();
+            }
+        });
+        builder.create().show();
     }
-
 }

@@ -33,7 +33,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
@@ -82,9 +81,6 @@ public class MainActivity extends ActionBarActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
-
-        /*getSupportFragmentManager().beginTransaction().
-                replace(R.id.currentFragment, new ListOwnCertificatesFragment()).commit();*/
 
         ArrayList<Card> cards = new ArrayList<Card>();
 

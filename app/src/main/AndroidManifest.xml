@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="de.fau.cs.mad.smile_crypto">
+    package="de.fau.cs.mad.smile_crypto" >
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -36,7 +36,16 @@
         </activity>
         <activity
             android:name=".ImportCertificateActivity"
-            android:label="@string/title_activity_import_certificate" >
+            android:label="@string/title_activity_import_certificate">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.p12" />
+                <data android:pathPattern=".*\\.crt" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".KeyChainActivity"
@@ -46,12 +55,13 @@
             android:name=".DecryptLocalMailActivity"
             android:label="@string/title_activity_decrypt_local_mail" >
         </activity>
+
         <service
             android:name=".remote.SMimeService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote_api"
-            tools:ignore="ExportedService">
+            tools:ignore="ExportedService" >
             <intent-filter>
                 <action android:name="de.fau.cs.mad.ISMimeService" />
             </intent-filter>
