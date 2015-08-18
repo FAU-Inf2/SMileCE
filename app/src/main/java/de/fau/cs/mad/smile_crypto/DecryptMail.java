@@ -50,23 +50,11 @@ public class DecryptMail {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
-    private final String certificateDirectory;
     private final KeyManagement keyManagement;
-
-    //TODO: parameter for AsyncTask
-    private String alias;
-    private MimeMessage encryptedMimeMessage;
-    private String pathToFile;
-    private String passphrase;
-
-    //MimeBodyPart messagePart;
+    private MimeMessage encryptedMimeMessage = null;
 
     public DecryptMail() throws KeyStoreException, IOException, NoSuchAlgorithmException,
             CertificateException {
-        final Context context = App.getContext();
-        this.certificateDirectory = context.getDir(
-                context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
-                getAbsolutePath();
         keyManagement = new KeyManagement();
     }
 
@@ -147,13 +135,8 @@ public class DecryptMail {
     }
 
     public MimeBodyPart decryptMail(String pathToFile, String passphrase) {
-        this.alias = null;
-        this.encryptedMimeMessage = null;
-        this.pathToFile = pathToFile;
-        this.passphrase = passphrase;
-
         try {
-            return new AsyncDecryptMail().execute().get();
+            return new AsyncDecryptMail().execute(pathToFile, passphrase).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -171,11 +154,11 @@ public class DecryptMail {
             return null;
         }
 
-        this.alias = keyManagement.getAliasByAddress(new InternetAddress(senderAddress));
+        String alias = keyManagement.getAliasByAddress(new InternetAddress(senderAddress));
 
         Log.d(SMileCrypto.LOG_TAG, "Check whether passphrase is available for alias: " + senderAddress);
-        this.passphrase = keyManagement.getPassphraseForAlias(this.alias);
-        if (this.passphrase == null) {
+        String passphrase = keyManagement.getPassphraseForAlias(alias);
+        if (passphrase == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail without passphrase.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_PASSPHRASE_AVAILABLE;
             return null;
@@ -224,12 +207,10 @@ public class DecryptMail {
             }
         }
 
-        this.alias = alias;
         this.encryptedMimeMessage = mimeMessage;
-        this.passphrase = passphrase;
 
         try {
-            return new AsyncDecryptMail().execute().get();
+            return new AsyncDecryptMail().execute(mimeMessage, alias, passphrase).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -259,7 +240,7 @@ public class DecryptMail {
         this.encryptedMimeMessage = mimeMessage;
 
         try {
-            return new AsyncDecryptMailCertificate().execute(mimeMessage, privateKey, certificate).get();
+            return new AsyncDecryptMail().execute(mimeMessage, privateKey, certificate).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -279,13 +260,8 @@ public class DecryptMail {
     }
 
     public MimeMessage decryptEncodeMail(String pathToFile, String passphrase) {
-        this.alias = null;
-        this.encryptedMimeMessage = null;
-        this.pathToFile = pathToFile;
-        this.passphrase = passphrase;
-
         try {
-            return new AsyncDecryptEncodeMail().execute().get();
+            return new AsyncDecryptEncodeMail().execute(pathToFile, passphrase).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -629,35 +605,40 @@ public class DecryptMail {
         return preferences.contains(alias + "-passphrase");
     }
 
-    private class AsyncDecryptMail extends AsyncTask<Void, Void, MimeBodyPart> {
+    private class AsyncDecryptEncodeMail extends AsyncTask<Object, Void, MimeMessage> {
 
-        protected MimeBodyPart doInBackground(Void... params) {
-            if (alias == null || encryptedMimeMessage == null) {
-                return decryptMailSynchronous(pathToFile, passphrase);
-            }
-
-            return decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
-        }
-    }
-
-    private class AsyncDecryptMailCertificate extends AsyncTask<Object, Void, MimeBodyPart> {
-
-        protected MimeBodyPart doInBackground(Object... params) {
-            return decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
-        }
-    }
-
-    private class AsyncDecryptEncodeMail extends AsyncTask<Void, Void, MimeMessage> {
-
-        protected MimeMessage doInBackground(Void... params) {
-            MimeBodyPart mimeBodyPart;
-            if (alias == null || encryptedMimeMessage == null) {
-                mimeBodyPart = decryptMailSynchronous(pathToFile, passphrase);
-            } else {
-                mimeBodyPart = decryptMailSynchronous(alias, encryptedMimeMessage, passphrase);
+        protected MimeMessage doInBackground(Object... params) {
+            MimeBodyPart mimeBodyPart = null;
+            if(params.length == 2) {
+                mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1]);
+                //pathToFile, passphrase
+            } else if (params.length == 3)  {
+                if(params[1] instanceof String)
+                    mimeBodyPart = decryptMailSynchronous((String) params[1], (MimeMessage) params[0], (String) params[2]);
+                    //alias, encryptedMimeMessage, passphrase
+                else
+                    mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
             }
 
             return addOldHeaders(decodeMimeBodyParts(mimeBodyPart));
+        }
+    }
+
+    private class AsyncDecryptMail extends AsyncTask<Object, Void, MimeBodyPart> {
+
+        protected MimeBodyPart doInBackground(Object... params) {
+            MimeBodyPart mimeBodyPart = null;
+            if(params.length == 2) {
+                mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1]);
+                //pathToFile, passphrase
+            } else if (params.length == 3)  {
+                if(params[1] instanceof String)
+                    mimeBodyPart = decryptMailSynchronous((String) params[1], (MimeMessage) params[0], (String) params[2]);
+                    //alias, encryptedMimeMessage, passphrase
+                else
+                    mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
+            }
+            return mimeBodyPart;
         }
     }
 }
