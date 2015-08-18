@@ -430,6 +430,7 @@ public class MainActivity extends ActionBarActivity {
                                             // current activity
                                             keyManager.deleteKey(kc.keyInfo.alias);
                                             mCardArrayAdapter.remove(kc);
+                                            assert !mCardArrayAdapter.contains(kc);
                                             mCardArrayAdapter.notifyDataSetChanged();
                                         }
                                     })

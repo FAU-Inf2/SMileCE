@@ -43,9 +43,6 @@ import javax.mail.internet.InternetAddress;
 
 public class KeyManagement {
 
-    private static ArrayList<KeyInfo> knownOwnKeys = new ArrayList<>();
-    private static ArrayList<KeyInfo> knownAllKeys = new ArrayList<>();
-
     private final String certificateDirectory;
     private final KeyStore androidKeyStore;
 
@@ -162,10 +159,6 @@ public class KeyManagement {
                         //keyInfo.trust; TODO
                         keyInfo.thumbprint = getThumbprint(cert);
                     }
-
-                    if (!knownOwnKeys.contains(keyInfo)) {
-                        keylist.add(keyInfo);
-                    }
                 } else {
                     //--> no private key available for this certificate
                     //currently there are no such entries because yet we cannot import the certs of
@@ -180,11 +173,11 @@ public class KeyManagement {
             e.printStackTrace();
         }
 
-        knownOwnKeys.addAll(keylist);
         return keylist;
     }
 
     public ArrayList<KeyInfo> getAllCertificates() {
+        ArrayList<KeyInfo> erg = new ArrayList<>();
         try {
             Log.d(SMileCrypto.LOG_TAG, "Find all own certificates…");
 
@@ -198,20 +191,14 @@ public class KeyManagement {
 
                 KeyInfo keyInfo = getKeyInfo(alias);
 
-                if (androidKeyStore.isKeyEntry(alias) && !knownOwnKeys.contains(keyInfo)) {
-                    knownOwnKeys.add(keyInfo);
-                }
-
-                if (!knownAllKeys.contains(keyInfo)) {
-                    knownAllKeys.add(keyInfo);
-                }
+                erg.add(keyInfo);
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
             e.printStackTrace();
         }
 
-        return knownAllKeys;
+        return erg;
     }
 
     public final X509Certificate getCertificateForAlias(final String alias) throws KeyStoreException {
