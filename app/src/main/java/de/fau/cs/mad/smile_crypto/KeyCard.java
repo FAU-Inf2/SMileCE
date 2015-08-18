@@ -209,19 +209,15 @@ public class KeyCard extends Card {
 
     @Override
     public boolean equals(Object o) {
-        Log.e(SMileCrypto.LOG_TAG, "KeyCard equals called");
         if(keyInfo == null) {
-            Log.e(SMileCrypto.LOG_TAG, "KeyCard != o");
             return false;
         }
         if(o instanceof KeyCard) {
             KeyCard kc = (KeyCard) o;
             if(keyInfo.equals(kc.keyInfo)) {
-                Log.e(SMileCrypto.LOG_TAG, "KeyCard == o");
                 return true;
             }
         }
-        Log.e(SMileCrypto.LOG_TAG, "KeyCard != o");
         return false;
     }
 

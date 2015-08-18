@@ -369,9 +369,7 @@ public class MainActivity extends ActionBarActivity {
 
             for(int i = 0; i < mCardArrayAdapter.getItemCount(); ++i) {
                 KeyCard kc = (KeyCard) mCardArrayAdapter.getItem(i);
-                Log.e(SMileCrypto.LOG_TAG, "Testing item.");
                 if(kc.equals(card)) {
-                    Log.e(SMileCrypto.LOG_TAG, "Items are equal");
                     contains = true;
                 }
             }

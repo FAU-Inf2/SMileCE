@@ -28,19 +28,16 @@ public class KeyInfo {
 
     @Override
     public boolean equals(Object o) {
-        Log.e(SMileCrypto.LOG_TAG, "Equals");
+        //Log.e(SMileCrypto.LOG_TAG, "Equals");
         if(!(o instanceof KeyInfo)) {
             return false;
         }
 
         KeyInfo other = (KeyInfo) o;
-        Log.e(SMileCrypto.LOG_TAG, "This.thumbprint = " + this.thumbprint + " o.thumbprint = " + other.thumbprint);
         if (other.thumbprint.equals(this.thumbprint)) {
-            Log.e(SMileCrypto.LOG_TAG, "This.thumbprint == o.thumbprint");
             return true;
         }
 
-        Log.e(SMileCrypto.LOG_TAG, "This.thumbprint != o.thumbprint");
         return false;
     }
 }
