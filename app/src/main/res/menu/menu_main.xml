@@ -22,4 +22,12 @@
         android:title="@string/navigation_decrypt_local_mail"
         app:showAsAction="never"
         ></item>
+
+    <item
+        android:id="@+id/import_other_certificate"
+        android:orderInCategory="200"
+        android:title="@string/navigation_import_other_certificate"
+        app:showAsAction="never"
+        ></item>
+
 </menu>

@@ -98,6 +98,7 @@ public class KeyManagement {
 
             //Check whether cert is already there
             if (ks.containsAlias(alias)) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return true;
             }
 

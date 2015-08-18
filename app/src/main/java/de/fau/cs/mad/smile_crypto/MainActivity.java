@@ -307,6 +307,10 @@ public class MainActivity extends ActionBarActivity {
             Intent i = new Intent(MainActivity.this, DecryptLocalMailActivity.class);
             startActivity(i);
             return true;
+        } else if (id == R.id.import_other_certificate) {
+            Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
+            startActivity(i);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
