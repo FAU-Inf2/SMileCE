@@ -4,11 +4,13 @@
     android:layout_height="wrap_content"
     android:id="@+id/card_inner_layout">
 
-    <QuickContactBadge
+    <Button
         android:id="@+id/badge"
         android:layout_width="48dp"
-        android:layout_height="48dp">
-    </QuickContactBadge>
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:background="@drawable/contact_badge_round"
+        />
 
     <TextView
         android:layout_width="wrap_content"
