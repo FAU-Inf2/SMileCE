@@ -143,7 +143,7 @@ public class KeyCard extends Card {
             setContactBadge(keyInfo.mail);
         }
 
-        if(keyInfo.termination_date != null) {
+        if(keyInfo.termination_date != null && keyInfo.valid_after != null) {
             DateTime valid = keyInfo.termination_date;
             DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM, yyyy");
             String displayDate= valid.toString(fmt);
@@ -158,6 +158,12 @@ public class KeyCard extends Card {
                 validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+            } else if (keyInfo.valid_after.getMillis() > today.getMillis()) {
+                validCircle0.getBackground().setColorFilter(getColorFilter("#0000ff"));
+                validCircle1.getBackground().setColorFilter(getColorFilter("#0000ff"));
+                validCircle2.getBackground().setColorFilter(getColorFilter("#0000ff"));
+                validCircle3.getBackground().setColorFilter(getColorFilter("#0000ff"));
+                validCircle4.getBackground().setColorFilter(getColorFilter("#0000ff"));
             } else if(years.getYears() > 1 || (years.getYears() == 1 && months.getMonths() > 0)) {
                 validCircle0.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 validCircle1.getBackground().setColorFilter(getColorFilter("#00ff00"));

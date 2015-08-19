@@ -1,6 +1,8 @@
 package de.fau.cs.mad.smile_crypto;
 
 
+import android.security.KeyPairGeneratorSpec;
+import android.support.v4.util.Pair;
 import android.util.Log;
 
 import org.spongycastle.asn1.x500.X500Name;
@@ -16,21 +18,30 @@ import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.security.auth.x500.X500Principal;
 
 public class SelfSignedCertificateCreator {
 
@@ -41,8 +52,8 @@ public class SelfSignedCertificateCreator {
     private X509v1CertificateBuilder v1CertGen;
     private PrivateKey key;
 
-    public SelfSignedCertificateCreator() throws OperatorCreationException, IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
-        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+    public SelfSignedCertificateCreator() throws OperatorCreationException, IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+        /*AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
         RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
                 new BigInteger("b4a7e46170574f16a97082b22be58b6a2a629798419be12872a4bdba626cfae9900f76abfb12139dce5de56564fab2b6543165a040c606887420e33d91ed7ed7", 16),
@@ -61,7 +72,14 @@ public class SelfSignedCertificateCreator {
         KeyFactory kf = KeyFactory.getInstance("RSA", "SC");
         PrivateKey privKey = kf.generatePrivate(privKeySpec);
         PublicKey pubKey = kf.generatePublic(pubKeySpec);
-        key = privKey;
+        key = privKey;*/
+        SecureRandom random = new SecureRandom();
+        RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(4096, RSAKeyGenParameterSpec.F4);
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA", "SC");
+        generator.initialize(spec, random);
+        KeyPair pair = generator.generateKeyPair();
+        key = pair.getPrivate();
+
         //
         // signers name
         //
@@ -76,8 +94,8 @@ public class SelfSignedCertificateCreator {
         // create the certificate - version 1
         //
         v1CertGen = new JcaX509v1CertificateBuilder(new X500Name(issuer), BigInteger.valueOf(1),
-                new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30)),
-                new X500Name(subject), pubKey);
+                new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30 * 12 * 2)),
+                new X500Name(subject), pair.getPublic());
     }
 
     public void create() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, OperatorCreationException, NoSuchProviderException {
@@ -94,5 +112,12 @@ public class SelfSignedCertificateCreator {
         Log.e(SMileCrypto.LOG_TAG, "Alias created: " + alias);
         ks.setKeyEntry(alias, key, null, new Certificate[]{c});
         Log.e(SMileCrypto.LOG_TAG, "KeyEntry set");
+    }
+
+    public Pair<PrivateKey, X509Certificate> createForTest() throws OperatorCreationException, CertificateException {
+        X509CertificateHolder ch = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(key));
+        Log.e(SMileCrypto.LOG_TAG, "Holder created");
+        X509Certificate c = new JcaX509CertificateConverter().setProvider( "SC" ).getCertificate(ch);
+        return Pair.create(key, c);
     }
 }

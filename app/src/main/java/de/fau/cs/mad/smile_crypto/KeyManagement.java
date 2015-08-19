@@ -157,6 +157,7 @@ public class KeyManagement {
                             keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
                         }
                         keyInfo.termination_date = new DateTime(cert.getNotAfter());
+                        keyInfo.valid_after = new DateTime((cert.getNotBefore()));
                         //keyInfo.trust; TODO
                         keyInfo.thumbprint = getThumbprint(cert);
                         keyList.add(keyInfo);
@@ -375,6 +376,7 @@ public class KeyManagement {
             }
 
             keyInfo.termination_date = new DateTime(cert.getNotAfter());
+            keyInfo.valid_after = new DateTime((cert.getNotBefore()));
             //keyInfo.trust; TODO
             keyInfo.thumbprint = getThumbprint(cert);
         }

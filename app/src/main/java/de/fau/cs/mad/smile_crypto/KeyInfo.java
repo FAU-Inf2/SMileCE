@@ -20,6 +20,7 @@ public class KeyInfo {
     protected String thumbprint = "0";
     protected DateTime termination_date = new DateTime();
     protected Boolean hasPrivateKey = false;
+    protected DateTime valid_after = new DateTime();
 
     public KeyInfo() {
         mailAddresses = new ArrayList<String>();

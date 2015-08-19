@@ -164,7 +164,7 @@
     <string name="faq_meaning_colour">The colours are an easy way to see for how long the certificate
     will be valid: </string>
 
-    <string name="faq_colour_00"> Not valid yet. (TODO: not implemented)</string>
+    <string name="faq_colour_00"> Not valid yet.</string>
     <string name="faq_colour_01"> &gt; 1 year valid</string>
     <string name="faq_colour_02"> &gt; 6 months and &lt; 1 year valid</string>
     <string name="faq_colour_03"> &gt; 3 months and &lt; 6 months valid</string>

@@ -31,6 +31,7 @@ import android.widget.Toast;
 import org.spongycastle.operator.OperatorCreationException;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -143,7 +144,7 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     new SelfSignedCertificateCreator().create();
                     updateCards();
-                } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException e) {
+                } catch (OperatorCreationException | IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
                     Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
                     Toast.makeText(v.getContext(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
