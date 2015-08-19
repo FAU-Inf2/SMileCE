@@ -176,4 +176,7 @@
     <string name="alert_header_end">\'s key?</string>
     <string name="erase">ERASE</string>
     <string name="alert_content">If you delete this key, you won\'t be able to decrypt messages encrypted with this key. </string>
+    <string name="new_contact_begin">"Do you wish to add "</string>
+    <string name="new_contact_end">" to your address book?"</string>
+    <string name="add">ADD</string>
 </resources>
