@@ -59,9 +59,12 @@ public class DecryptMail {
         keyManagement = new KeyManagement();
     }
 
-    private MimeBodyPart decryptMailSynchronous(String pathToFile, String passphrase) {
+    private MimeBodyPart decryptMailSynchronous(String pathToFile, String alias, String passphrase) {
         try {
             MimeMessage mimeMessage = getMimeMessageFromFile(pathToFile);
+            if(alias != null) {
+                return decryptMailSynchronous(alias, mimeMessage, passphrase);
+            }
 
             Address[] recipients = getMailAddressFromMimeMessage(mimeMessage);
             if (recipients == null) {
@@ -75,8 +78,8 @@ public class DecryptMail {
                 if(aliases.size() == 0) {
                     continue;
                 }
-                for(String alias : aliases) { //try all aliases until one fits
-                    MimeBodyPart result = decryptMailSynchronous(alias, mimeMessage, passphrase);
+                for(String foundAlias : aliases) { //try all aliases until one fits
+                    MimeBodyPart result = decryptMailSynchronous(foundAlias, mimeMessage, passphrase);
                     if (result != null) // message was decrypted
                         return result;
                 }
@@ -127,12 +130,20 @@ public class DecryptMail {
             //Log.d(SMileCrypto.LOG_TAG, "MESSAGE: " + mimeMessage.getContent());
             //Log.d(SMileCrypto.LOG_TAG, "DECRYPT: " + convertMimeBodyPartToString(dec));
 
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
+            if(dec == null) {
+                Log.d(SMileCrypto.LOG_TAG, "Decrypted MimeBodyPart is null.");
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_DECRYPTION_FAILED;
+            } else {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
+            }
             return dec;
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             e.printStackTrace();
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            if(e.getMessage().contains("CMS processing failure"))
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE;
+            else
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
     }
@@ -302,9 +313,9 @@ public class DecryptMail {
         return null;
     }
 
-    public MimeMessage decryptEncodeMail(String pathToFile, String passphrase) {
+    public MimeMessage decryptEncodeMail(String pathToFile, String alias, String passphrase) {
         try {
-            return new AsyncDecryptEncodeMail().execute(pathToFile, passphrase).get();
+            return new AsyncDecryptEncodeMail().execute(pathToFile, alias, passphrase).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -677,16 +688,18 @@ public class DecryptMail {
 
         protected MimeMessage doInBackground(Object... params) {
             MimeBodyPart mimeBodyPart = null;
-            if(params.length == 2) {
-                mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1]);
-                //pathToFile, passphrase
-            } else if (params.length == 3)  {
-                if(params[1] instanceof String)
+            if(params.length == 3) {
+                if(params[0] instanceof String && params[2] instanceof String)
+                    mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1], (String) params[2]);
+                    //pathToFile, alias [null possible], passphrase
+                else if(params[0] instanceof MimeMessage && params[2] instanceof String)
                     mimeBodyPart = decryptMailSynchronous((String) params[1], (MimeMessage) params[0], (String) params[2]);
                     //alias, encryptedMimeMessage, passphrase
-                else
+                else if(params[0] instanceof MimeMessage && params[2] instanceof X509Certificate)
                     mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
             }
+            if(mimeBodyPart == null)
+                return null;
 
             return addOldHeaders(decodeMimeBodyParts(mimeBodyPart));
         }
@@ -696,14 +709,14 @@ public class DecryptMail {
 
         protected MimeBodyPart doInBackground(Object... params) {
             MimeBodyPart mimeBodyPart = null;
-            if(params.length == 2) {
-                mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1]);
-                //pathToFile, passphrase
-            } else if (params.length == 3)  {
-                if(params[1] instanceof String)
+            if(params.length == 3) {
+                if(params[0] instanceof String && params[2] instanceof String)
+                mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1], (String) params[2]);
+                //pathToFile, alias [null possible], passphrase
+                else if(params[0] instanceof MimeMessage && params[2] instanceof String)
                     mimeBodyPart = decryptMailSynchronous((String) params[1], (MimeMessage) params[0], (String) params[2]);
                     //alias, encryptedMimeMessage, passphrase
-                else
+                else if(params[0] instanceof MimeMessage && params[2] instanceof X509Certificate)
                     mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
             }
             return mimeBodyPart;

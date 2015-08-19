@@ -112,13 +112,16 @@
     <string name="certificate_already_imported">The selected certificate is already imported.</string>
     <string name="not_eml">The selected file was not an .eml-file.</string>
     <string name="decrypt_file_show_path">File to be decrypted:&#160;</string>
+    <string name="title_select_certificate">Select your certificate</string>
 
     <string name="enter_passphrase">Please enter the passphrase to unlock:</string>
     <string name="enter_passphrase_wrong">The entered passphrase is wrong.</string>
     <string name="something_went_wrong">Sorry, something went wrong. Maybe wrong passphrase or invalid file?</string>
     <string name="no_certificate_for_recipients">No certificate was found for the recipient. Please import your certificate.</string>
+    <string name="decryption_failed">Decrypting this message was unsuccessful.</string>
     <string name="no_recipients">MimeMessage did not contain valid recipients.</string>
     <string name="no_valid_mime_message">The selected file does not contain a valid MimeMessage.</string>
+    <string name="no_valid_decrypted_mime_message">The selected file does not contain a valid decrypted MimeMessage.</string>
     <string name="internal_error">An internal error occurred. Sorry for that. Please check the logfile.</string>
     <string name="error_reading_certificate">An error occurred while extracting the certificate from the selected file.</string>
     <string name="unknown_filetype">Selected file has an unknown filetype.</string>

@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile_crypto;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.text.format.DateFormat;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -22,9 +24,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,7 +39,9 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -186,7 +195,6 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
 
-        String passphrase;
         MimeMessage mimeMessage = decryptMail.getMimeMessageFromFile(pathToFile);
 
         if(mimeMessage == null) {
@@ -195,59 +203,32 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         }
 
         ArrayList<KeyInfo> keyInfos = decryptMail.getKeyInfosByMimeMessage(mimeMessage);
-        if(keyInfos.size() == 0) {
+        if(keyInfos == null || keyInfos.size() == 0) {
             showErrorPrompt();
         } else if(keyInfos.size() == 1) {
             String alias = keyInfos.get(0).alias;
-            if(alias == null){
-                showErrorPrompt();
-                return;
-            }
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            if(!preferences.contains(alias+"-passphrase")) {
-                showPassphrasePrompt(pathToFile);
-                return;
-            }
-
-            String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-            Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
-
-            try {
-                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
-                passphrase = PasswordEncryption.decryptString(encryptedPassphrase);
-
-                if (passphrase == null) {
-                    Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
-                    showPassphrasePrompt(pathToFile);
-                    return;
-                }
-
-                Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
-            } catch (Exception e) {
-                showPassphrasePrompt(pathToFile);
-                return;
-            }
-
-            decryptFile(pathToFile, passphrase);
-            options();
+            passphraseDecryptOrPromptAlias(alias, pathToFile);
         } else {
-            //TODO: case more than one certificate
-            //TODO: show prompt to select correct certificate
+            //case more than one certificate --> show prompt to select correct certificate
             selectCertificate(pathToFile, keyInfos);
         }
     }
 
 
     public void passphraseDecryptOrPromptAlias(String alias, String pathToFile) {
+        if(alias == null){
+            showErrorPrompt();
+            return;
+        }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if(!preferences.contains(alias+"-passphrase")) {
-            showPassphrasePrompt(pathToFile);
+            showPassphrasePrompt(pathToFile, alias);
             return;
         }
 
         String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-        Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
+        Log.d(SMileCrypto.LOG_TAG, "Passphrase: <sensitive>");
 
         String passphrase;
         try {
@@ -256,26 +237,59 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
             if (passphrase == null) {
                 Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
-                showPassphrasePrompt(pathToFile);
+                showPassphrasePrompt(pathToFile, alias);
                 return;
             }
 
             Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
         } catch (Exception e) {
-            showPassphrasePrompt(pathToFile);
+            showPassphrasePrompt(pathToFile, alias);
             return;
         }
 
-        decryptFile(pathToFile, passphrase);
+        Boolean success = decryptFile(pathToFile, alias, passphrase);
+        if(!success)
+            showErrorPrompt();
         options();
     }
 
     public void selectCertificate(final String pathToFile, final ArrayList<KeyInfo> keyInfos) {
-        String alias = keyInfos.get(0).alias;
-        if(alias == null){
-            showErrorPrompt();
-            return;
+        Log.d(SMileCrypto.LOG_TAG, "More than one certificate found for this mail address, show dialog to select certificate.");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getResources().getString(R.string.title_select_certificate));
+
+        int size = keyInfos.size();
+        ListView modeList = new ListView(this);
+        String[] stringArray = new String[size];
+        for(int i = 0; i < size; i++) {
+            KeyInfo keyInfo = keyInfos.get(i);
+            DateTime valid = keyInfo.termination_date;
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("MMMM dd, yyyy");
+            String displayDate = valid.toString(fmt);
+            String info = "Name:\t\t\t\t\t" + keyInfo.contact +
+                    "\nValid until:\t\t" + displayDate +
+                    "\nThumbprint: " + keyInfo.thumbprint;
+            stringArray[i] = info;
         }
+        Log.d(SMileCrypto.LOG_TAG, size + " certificates to decide.");
+        ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2,
+                android.R.id.text1, stringArray);
+        modeList.setAdapter(modeAdapter);
+        builder.setView(modeList);
+        final Dialog dialog = builder.create();
+        modeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(SMileCrypto.LOG_TAG, "Selected certificate at position: " + position);
+                String alias = keyInfos.get(position).alias;
+                Log.d(SMileCrypto.LOG_TAG, "Selected alias is: " + alias);
+                passphraseDecryptOrPromptAlias(alias, pathToFile);
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+
+        /*
         AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
         builder.setTitle(getResources().getString(R.string.info));
         String selection = getString(R.string.multiple_certificates);
@@ -298,7 +312,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                 }
             }
         });
-        builder.create().show();
+        builder.create().show(); */
     }
 
     @Nullable
@@ -324,7 +338,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         return decryptMail;
     }
 
-    public void showPassphrasePrompt(final String pathToFile) {
+    public void showPassphrasePrompt(final String pathToFile, final String alias) {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         View passphrasePromptView = layoutInflater.inflate(R.layout.passphrase_prompt, null);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -338,7 +352,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         alertDialogBuilder.setCancelable(false).setNegativeButton(getResources().getString(R.string.go),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        if (!decryptFile(pathToFile, passphraseUserInput.getText().toString())) {
+                        if (!decryptFile(pathToFile, alias, passphraseUserInput.getText().toString())) {
 
                             if (!(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_WRONG_PASSPHRASE)) {
                                 showErrorPrompt();
@@ -355,7 +369,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                             builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
-                                    showPassphrasePrompt(pathToFile);
+                                    showPassphrasePrompt(pathToFile, alias);
                                 }
                             });
                             builder.create().show();
@@ -376,10 +390,14 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         builder.setTitle(getResources().getString(R.string.error));
         if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE_IN_FILE) {
             builder.setMessage(getResources().getString(R.string.no_valid_mime_message));
+        } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE) {
+            builder.setMessage(getResources().getString(R.string.no_valid_decrypted_mime_message));
         } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_RECIPIENTS_FOUND) {
             builder.setMessage(getResources().getString(R.string.no_recipients));
         } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_NO_CERTIFICATE_FOUND) {
             builder.setMessage(getResources().getString(R.string.no_certificate_for_recipients));
+        } else if(SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_DECRYPTION_FAILED) {
+            builder.setMessage(getResources().getString(R.string.decryption_failed));
         } else {
             Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
             builder.setMessage(getResources().getString(R.string.internal_error));
@@ -393,13 +411,17 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         builder.create().show();
     }
 
-    private Boolean decryptFile(String pathToFile, String passphrase) {
+    private Boolean decryptFile(String pathToFile, String alias, String passphrase) {
         DecryptMail decryptMail = getDecryptMail();
         if(decryptMail == null) {
             return false;
         }
 
-        decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, passphrase);
+        decryptedMimeMessage = decryptMail.decryptEncodeMail(pathToFile, alias, passphrase);
+        if (decryptedMimeMessage == null) {
+            return false;
+        }
+
         mimeBodyPartsString = decryptMail.convertMimeMessageToString(decryptedMimeMessage);
         if (mimeBodyPartsString == null) {
             return false;
