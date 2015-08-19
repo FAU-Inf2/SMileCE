@@ -13,7 +13,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.text.format.DateFormat;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -39,11 +38,8 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
 public class DecryptLocalMailActivity extends ActionBarActivity {
@@ -257,6 +253,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, "More than one certificate found for this mail address, show dialog to select certificate.");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.title_select_certificate));
+        //R.string.multiple_certificates?
 
         int size = keyInfos.size();
         ListView modeList = new ListView(this);
@@ -288,31 +285,6 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             }
         });
         dialog.show();
-
-        /*
-        AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
-        builder.setTitle(getResources().getString(R.string.info));
-        String selection = getString(R.string.multiple_certificates);
-        int i = 1;
-        // TODO: Make list view or other view to be able to select one item
-        for(KeyInfo keyInfo : keyInfos) {
-            selection += "\n" + Integer.toString(i) + ". Name: " + keyInfo.contact + ", Thumbprint: " + keyInfo.thumbprint;
-            i++;
-        }
-        builder.setMessage(selection);
-        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // TODO: Use selected alias
-                String alias = keyInfos.get(0).alias;
-                if (alias == null) {
-                    showErrorPrompt();
-                } else {
-                    passphraseDecryptOrPromptAlias(alias, pathToFile);
-                }
-            }
-        });
-        builder.create().show(); */
     }
 
     @Nullable
