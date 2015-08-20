@@ -2,6 +2,7 @@ package de.fau.cs.mad.smile.android.encryption;
 
 import org.joda.time.DateTime;
 
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class KeyInfo {
     protected DateTime termination_date = new DateTime();
     protected Boolean hasPrivateKey = false;
     protected DateTime valid_after = new DateTime();
+    protected X509Certificate certificate = null;
 
     public KeyInfo() {
         mailAddresses = new ArrayList<String>();

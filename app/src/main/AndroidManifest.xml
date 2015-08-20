@@ -9,13 +9,13 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
-        android:name="de.fau.cs.mad.smile.android.encryption.App"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_smile_orange"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,24 +24,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.InfoActivity"
+            android:name=".InfoActivity"
             android:label="@string/title_activity_info" >
         </activity>
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.HelpActivity"
+            android:name=".HelpActivity"
             android:label="@string/title_activity_help" >
         </activity>
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.ImportCertificateActivity"
-            android:label="@string/title_activity_import_certificate">
+            android:name=".ImportCertificateActivity"
+            android:label="@string/title_activity_import_certificate" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.p12" />
@@ -49,16 +51,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.KeyChainActivity"
+            android:name=".KeyChainActivity"
             android:label="@string/title_activity_key_chain" >
         </activity>
         <activity
-            android:name="de.fau.cs.mad.smile.android.encryption.DecryptLocalMailActivity"
+            android:name=".DecryptLocalMailActivity"
             android:label="@string/title_activity_decrypt_local_mail" >
         </activity>
 
         <service
-            android:name="de.fau.cs.mad.smile.android.encryption.remote.SMimeService"
+            android:name=".remote.SMimeService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote_api"
@@ -67,6 +69,11 @@
                 <action android:name="de.fau.cs.mad.ISMimeService" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name=".DisplayCertificateInformationActivity"
+            android:label="@string/title_activity_display_certificate_information" >
+        </activity>
     </application>
 
 </manifest>

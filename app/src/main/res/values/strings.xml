@@ -9,6 +9,7 @@
     <string name="done">Done</string>
     <string name="info">Info</string>
     <string name="okay">Okay</string>
+    <string name="delete">DELETE</string>
     <string name="try_again">Please try again.</string>
     <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
@@ -182,4 +183,7 @@
     <string name="new_contact_begin">"Do you wish to add "</string>
     <string name="new_contact_end">" to your address book?"</string>
     <string name="add">ADD</string>
+    <string name="title_activity_display_certificate_information">
+        DisplayCertificateInformationActivity
+    </string>
 </resources>

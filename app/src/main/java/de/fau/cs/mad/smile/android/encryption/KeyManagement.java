@@ -351,7 +351,7 @@ public class KeyManagement {
     }
 
     @NonNull
-    private final KeyInfo getKeyInfo(final String alias) throws KeyStoreException,
+    public final KeyInfo getKeyInfo(final String alias) throws KeyStoreException,
             CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         Certificate c = androidKeyStore.getCertificate(alias); // maybe hand in certificate?
         KeyInfo keyInfo = new KeyInfo();
@@ -363,6 +363,7 @@ public class KeyManagement {
 
         if (c.getType().equals("X.509")) {
             X509Certificate cert = (X509Certificate) c;
+            keyInfo.certificate = cert;
             keyInfo.mailAddresses.addAll(getNamesFromCert(cert));
             keyInfo.hasPrivateKey = androidKeyStore.isKeyEntry(alias);
 
