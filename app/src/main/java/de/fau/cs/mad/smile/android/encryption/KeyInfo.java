@@ -15,14 +15,16 @@ public class KeyInfo {
     protected String hash = "";
     protected String trust = "0";
     protected String thumbprint = "0";
-    protected DateTime termination_date = new DateTime();
+    protected DateTime termination_date;
     protected Boolean hasPrivateKey = false;
-    protected DateTime valid_after = new DateTime();
+    protected DateTime valid_after;
     protected X509Certificate certificate = null;
+
 
     public KeyInfo() {
         mailAddresses = new ArrayList<String>();
         termination_date = new DateTime();
+        valid_after = new DateTime();
     }
 
     @Override

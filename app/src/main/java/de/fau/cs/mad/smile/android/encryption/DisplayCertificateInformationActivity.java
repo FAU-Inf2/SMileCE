@@ -15,6 +15,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.spongycastle.asn1.x500.RDN;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x500.style.BCStyle;
+import org.spongycastle.asn1.x500.style.IETFUtils;
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
+
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -115,17 +123,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             setSupportActionBar(toolbar);
         }
 
-        listDataHeader = new ArrayList<>();
-        listDataHeader.add("Personal");
-        listDataChild = new HashMap<>();
-        HashMap<String, String> data = new HashMap<>();
-        data.put("Name", keyInfo.contact);
-        data.put("Email", keyInfo.mail);
-        ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
-        PersonalInformationItem persI = new PersonalInformationItem();
-        persI.build(data);
-        pers.add(persI);
-        listDataChild.put(listDataHeader.get(0), pers);
+        generatePersonalInformation(keyInfo);
 
         String print = "Name:\t\t" + keyInfo.contact +
                 "\nEmail address:\t" + keyInfo.mail +
@@ -139,6 +137,44 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getIssuerDN().getName());
         Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getSubjectDN().getName());
         Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getPublicKey().toString());
+    }
+
+    private void generatePersonalInformation(KeyInfo keyInfo) {
+        listDataHeader = new ArrayList<>();
+        listDataHeader.add("Personal");
+        listDataChild = new HashMap<>();
+        HashMap<String, String> data = new HashMap<>();
+        data.put("Name", keyInfo.contact);
+        data.put("Email", keyInfo.mail);
+        X509Certificate cert = keyInfo.certificate;
+        X500Name x500name = null;
+        try {
+            x500name = new JcaX509CertificateHolder(cert).getSubject();
+            RDN[] L = x500name.getRDNs(BCStyle.L);
+            if (L.length > 0) {
+                 data.put("L", IETFUtils.valueToString(L[0].getFirst().getValue()));
+            }
+            RDN[] DC = x500name.getRDNs(BCStyle.DC);
+            if (DC.length > 0) {
+                data.put("DC", IETFUtils.valueToString(DC[0].getFirst().getValue()));
+            }
+            RDN[] O = x500name.getRDNs(BCStyle.O);
+            if (O.length > 0) {
+                data.put("O", IETFUtils.valueToString(O[0].getFirst().getValue()));
+            }
+            RDN[] OU = x500name.getRDNs(BCStyle.DC);
+            if (OU.length > 0) {
+                data.put("OU", IETFUtils.valueToString(OU[0].getFirst().getValue()));
+            }
+            ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
+            PersonalInformationItem persI = new PersonalInformationItem();
+            persI.build(data);
+            pers.add(persI);
+            listDataChild.put(listDataHeader.get(0), pers);
+        } catch (CertificateEncodingException e) {
+            Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+            Toast.makeText(App.getContext(), "Failed to extract personal information.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void deleteKey(final KeyInfo keyInfo) {

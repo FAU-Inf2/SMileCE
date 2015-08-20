@@ -373,6 +373,14 @@ public class KeyManagement {
                 keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
             }
 
+            RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
+            String email = "";
+            if (rdn_email.length > 0) {
+                email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
+            }
+            Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
+            keyInfo.mail = email;
+
             keyInfo.termination_date = new DateTime(cert.getNotAfter());
             keyInfo.valid_after = new DateTime((cert.getNotBefore()));
             //keyInfo.trust; TODO
