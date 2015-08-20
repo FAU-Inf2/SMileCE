@@ -10,11 +10,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +45,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_display_certificate_information);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(this.name); //TODO: set later if name == null
+        toolbar.setTitle(this.name); //if (name == null) --> set later
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -116,29 +118,69 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
 
         listDataHeader = new ArrayList<>();
-        listDataHeader.add("Personal");
+        listDataHeader.add(getString(R.string.personal));
         listDataChild = new HashMap<>();
-        HashMap<String, String> data = new HashMap<>();
-        data.put("Name", keyInfo.contact);
-        data.put("Email", keyInfo.mail);
+        HashMap<String, String> personalInfo = new HashMap<>();
+        personalInfo.put("Name", keyInfo.contact);
+        personalInfo.put("Email", keyInfo.mail);
         ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
-        PersonalInformationItem persI = new PersonalInformationItem();
-        persI.build(data);
-        pers.add(persI);
+        PersonalInformationItem personalInformationItem = new PersonalInformationItem();
+        personalInformationItem.build(personalInfo);
+        pers.add(personalInformationItem);
         listDataChild.put(listDataHeader.get(0), pers);
 
-        String print = "Name:\t\t" + keyInfo.contact +
-                "\nEmail address:\t" + keyInfo.mail +
-                "\nThumbprint: \t" + keyInfo.thumbprint +
-                "\nSignature Algorithm: " + keyInfo.certificate.getSigAlgName() +
-                "\nIssuer DN: " + keyInfo.certificate.getIssuerDN().getName() +
-                "\nSubject DN: " + keyInfo.certificate.getSubjectDN().getName() +
-                "\n" + keyInfo.certificate.getPublicKey().toString();
-        
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getSigAlgName());
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getIssuerDN().getName());
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getSubjectDN().getName());
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getPublicKey().toString());
+        listDataHeader.add(getString(R.string.validity));
+        HashMap<String, String> validity = new HashMap<>();
+        validity.put("Startdate", keyInfo.valid_after.toString());
+        validity.put("Enddate", keyInfo.termination_date.toString());
+        ArrayList<AbstractCertificateInfoItem> val = new ArrayList<>();
+        ValidityItem validityItem  = new ValidityItem();
+        validityItem.build(validity);
+        val.add(validityItem);
+        listDataChild.put(listDataHeader.get(1), val);
+
+        listDataHeader.add(getString(R.string.certificate));
+        HashMap<String, String> certificateInfo = new HashMap<>();
+        certificateInfo.put("Thumbprint", keyInfo.thumbprint);
+        BigInteger serialNumber = keyInfo.certificate.getSerialNumber();
+        certificateInfo.put("Serial number", serialNumber.toString(16));
+        certificateInfo.put("Version", Integer.toString(keyInfo.certificate.getVersion()));
+        ArrayList<AbstractCertificateInfoItem> cert = new ArrayList<>();
+        CertificateInformationItem certificateInformationItem = new CertificateInformationItem();
+        certificateInformationItem.build(certificateInfo);
+        cert.add(certificateInformationItem);
+        listDataChild.put(listDataHeader.get(2), cert);
+
+        listDataHeader.add(getString(R.string.cryptographic));
+        HashMap<String, String> cryptographicInfo = new HashMap<>();
+        PublicKey publicKey = keyInfo.certificate.getPublicKey();
+        if(publicKey instanceof  RSAPublicKey) {
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            String modulus = rsaPublicKey.getModulus().toString(16);
+            String exponent = rsaPublicKey.getPublicExponent().toString(16);
+            cryptographicInfo.put("Public Key", "RSAPublicKey");
+            cryptographicInfo.put("Modulus", modulus);
+            cryptographicInfo.put("Exponent", exponent);
+            cryptographicInfo.put("Signature Algorithm", keyInfo.certificate.getSigAlgName());
+            cryptographicInfo.put("Signature", keyInfo.certificate.getSigAlgOID());
+        } else {
+            Log.d(SMileCrypto.LOG_TAG, "Not an instance of RSAPublicKey.");
+            cryptographicInfo.put("Public Key", keyInfo.certificate.getPublicKey().toString());
+            cryptographicInfo.put("Signature Algorithm", keyInfo.certificate.getSigAlgName());
+            cryptographicInfo.put("Signature", new String(keyInfo.certificate.getSignature()));
+        }
+        ArrayList<AbstractCertificateInfoItem> crypto = new ArrayList<>();
+        CryptographicInformationItem cryptographicInformationItem = new CryptographicInformationItem();
+        cryptographicInformationItem.build(cryptographicInfo);
+        crypto.add(cryptographicInformationItem);
+        listDataChild.put(listDataHeader.get(3), crypto);
+
+        /*
+        * · Personal: Name, Email, SubjectDN
+        · Validity: start date, end date
+        · Certificate: Version, Serial Number, Thumbprint
+        · Issuer: IssuerDN (splitted)
+        · Cryptographic: Public Key, Signature algo, Signature */
     }
 
     private void deleteKey(final KeyInfo keyInfo) {

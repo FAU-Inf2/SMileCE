@@ -6,7 +6,7 @@
         android:id="@+id/column_left"
         android:layout_height="wrap_content"
         android:layout_width="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.4"
         android:text="@string/hello_world"
         android:textColor="@android:color/black"
         />
@@ -14,7 +14,7 @@
         android:id="@+id/column_right"
         android:layout_height="wrap_content"
         android:layout_width="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.6"
         android:text="@string/hello_world"
         android:textColor="@android:color/black"
         />
