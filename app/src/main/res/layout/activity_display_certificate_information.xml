@@ -18,6 +18,10 @@
             layout="@layout/toolbar">
         </include>
 
+        <ExpandableListView
+            android:id="@+id/lvExp"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
         <TextView
             android:id="@+id/text_view_display_info"
             android:layout_width="wrap_content"

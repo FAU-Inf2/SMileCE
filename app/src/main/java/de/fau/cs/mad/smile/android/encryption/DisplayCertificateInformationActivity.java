@@ -9,15 +9,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private Toolbar toolbar;
     private String name;
     private String alias;
     private KeyInfo keyInfo;
+    private HashMap<String, List<AbstractCertificateInfoItem>> listDataChild;
+    private List<String> listDataHeader;
+    ExpandableCertificateListAdapter listAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +47,15 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        ExpandableListView expListView = (ExpandableListView) findViewById(R.id.lvExp);
+
+        // preparing list data
         getKeyInfo();
+
+        listAdapter = new ExpandableCertificateListAdapter(this, listDataHeader, listDataChild);
+
+        // setting list adapter
+        expListView.setAdapter(listAdapter);
     }
 
     @Override
@@ -80,6 +97,12 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
     private void getKeyInfo() {
         try {
+            listDataHeader = new ArrayList<>();
+            listDataHeader.add("Personal");
+            listDataHeader.add("Certificate");
+            listDataChild = new HashMap<>();
+            listDataChild.put(listDataHeader.get(0), new ArrayList<AbstractCertificateInfoItem>());
+            listDataChild.put(listDataHeader.get(1), new ArrayList<AbstractCertificateInfoItem>());
             KeyManagement keyManagement = new KeyManagement();
             KeyInfo keyInfo = keyManagement.getKeyInfo(this.alias);
             this.keyInfo = keyInfo;
