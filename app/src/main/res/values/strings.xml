@@ -163,6 +163,14 @@
         It is also possible to import a certificate by clicking on the file in your file browser
     and selecting SMile-crypto in the list of \"Open with\".</string>
 
+    <string name="faq_additional_certificate_info_q">How can I retrieve all information from the certificate?</string>
+    <string name="faq_additional_certificate_info">Just tap on the card and the Activity, which
+    shows you all kind of information about the certificate, will be started.</string>
+
+    <string name="faq_delete_certificate_q">How can I delete a certificate?</string>
+    <string name="faq_delete_certificate">Longpress on the card will delete this certificate. You
+        can also tap on the card to open the Activity which gives you additional information about the
+        certificate and use the delete functionality in the toolbar.</string>
 
     <string name="faq_meaning_colour_q">What is the meaning of the colours next to the certificates?</string>
     <string name="faq_meaning_colour">The colours are an easy way to see for how long the certificate

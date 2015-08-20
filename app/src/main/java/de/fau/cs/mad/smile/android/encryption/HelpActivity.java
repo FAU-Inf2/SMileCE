@@ -97,6 +97,8 @@ public class HelpActivity extends ActionBarActivity {
         listDataHeader.add(getString(R.string.faq_passphrase_saved_q));
         listDataHeader.add(getString(R.string.faq_import_other_cert_q));
         listDataHeader.add(getString(R.string.faq_meaning_colour_q));
+        listDataHeader.add(getString(R.string.faq_additional_certificate_info_q));
+        listDataHeader.add(getString(R.string.faq_delete_certificate_q));
         listDataHeader.add(getString(R.string.faq_author));
         listDataHeader.add(getString(R.string.faq_license));
         listDataHeader.add(getString(R.string.faq_other_projects));
@@ -122,6 +124,16 @@ public class HelpActivity extends ActionBarActivity {
         colList.add(col);
         colList.addAll(setColours());
 
+        String[] certInfoText = {getString(R.string.faq_additional_certificate_info)};
+        Pair<Integer, String[]> certInfo = Pair.create(0, certInfoText);
+        List<Pair<Integer, String[]>> certInfoList = new ArrayList<>();
+        certInfoList.add(certInfo);
+
+        String[] deleteText = {getString(R.string.faq_delete_certificate)};
+        Pair<Integer, String[]> del = Pair.create(0, deleteText);
+        List<Pair<Integer, String[]>> delList = new ArrayList<>();
+        delList.add(del);
+
         String[] authorText = {getString(R.string.author_text)};
         Pair<Integer, String[]> author = Pair.create(0, authorText);
         List<Pair<Integer, String[]>> authorList = new ArrayList<>();
@@ -141,9 +153,11 @@ public class HelpActivity extends ActionBarActivity {
         listDataChild.put(listDataHeader.get(1), pwList);
         listDataChild.put(listDataHeader.get(2), importOtherCert);
         listDataChild.put(listDataHeader.get(3), colList);
-        listDataChild.put(listDataHeader.get(4), authorList);
-        listDataChild.put(listDataHeader.get(5), licenceList);
-        listDataChild.put(listDataHeader.get(6), othersList);
+        listDataChild.put(listDataHeader.get(4), certInfoList);
+        listDataChild.put(listDataHeader.get(5), delList);
+        listDataChild.put(listDataHeader.get(6), authorList);
+        listDataChild.put(listDataHeader.get(7), licenceList);
+        listDataChild.put(listDataHeader.get(8), othersList);
 
     }
 }
