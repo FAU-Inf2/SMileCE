@@ -18,12 +18,9 @@
             layout="@layout/toolbar">
         </include>
 
-        <TextView
-            android:id="@+id/text_view_display_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/hello_world">
-        </TextView>
+        <ExpandableListView
+            android:id="@+id/lvExp"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
