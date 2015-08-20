@@ -18,6 +18,22 @@
             android:id="@+id/row02"
             layout="@layout/table_row">
         </include>
+        <include
+            android:id="@+id/row03"
+            layout="@layout/table_row">
+        </include>
+        <include
+            android:id="@+id/row04"
+            layout="@layout/table_row">
+        </include>
+        <include
+            android:id="@+id/row05"
+            layout="@layout/table_row">
+        </include>
+        <include
+            android:id="@+id/row06"
+            layout="@layout/table_row">
+        </include>
     </TableLayout>
 
 </LinearLayout>

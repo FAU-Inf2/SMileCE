@@ -33,6 +33,38 @@ public class PersonalInformationItem extends AbstractCertificateInfoItem {
         ((TextView)name.findViewById(R.id.column_right)).setText(data.get("Name"));
         ((TextView)mail.findViewById(R.id.column_left)).setText(App.getContext().getString(R.string.email));
         ((TextView)mail.findViewById(R.id.column_right)).setText(data.get("Email"));
+        if(data.containsKey("L")) {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row03);
+            ((TextView)tr.findViewById(R.id.column_left)).setText("L");
+            ((TextView)tr.findViewById(R.id.column_right)).setText(data.get("L"));
+        } else {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row03);
+            ((ViewGroup) tr.getParent()).removeView(tr);
+        }
+        if(data.containsKey("DC")) {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row04);
+            ((TextView)tr.findViewById(R.id.column_left)).setText("DC");
+            ((TextView)tr.findViewById(R.id.column_right)).setText(data.get("DC"));
+        } else {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row04);
+            ((ViewGroup) tr.getParent()).removeView(tr);
+        }
+        if(data.containsKey("O")) {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row05);
+            ((TextView)tr.findViewById(R.id.column_left)).setText("O");
+            ((TextView)tr.findViewById(R.id.column_right)).setText(data.get("O"));
+        } else {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row05);
+            ((ViewGroup) tr.getParent()).removeView(tr);
+        }
+        if(data.containsKey("OU")) {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row06);
+            ((TextView)tr.findViewById(R.id.column_left)).setText("OU");
+            ((TextView)tr.findViewById(R.id.column_right)).setText(data.get("OU"));
+        } else {
+            TableRow tr = (TableRow) convertView.findViewById(R.id.row06);
+            ((ViewGroup) tr.getParent()).removeView(tr);
+        }
         return convertView;
     }
 }
