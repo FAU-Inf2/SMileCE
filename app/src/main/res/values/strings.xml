@@ -186,4 +186,15 @@
     <string name="title_activity_display_certificate_information">
         DisplayCertificateInformationActivity
     </string>
+    <string name="name">Name: </string>
+    <string name="email">Email: </string>
+    <string name="issuer_dn">IssuerDN: </string>
+    <string name="subject_dn">SubjectDN: </string>
+    <string name="start_date">Start date: </string>
+    <string name="end_date">End date: </string>
+    <string name="pub_key">Public Key: </string>
+    <string name="thumbprint">Thumbprint: </string>
+    <string name="serial_nr">Serial number: </string>
+    <string name="signature">Signature: </string>
+    <string name="signature_algorithm">Signature Algorithm: </string>
 </resources>

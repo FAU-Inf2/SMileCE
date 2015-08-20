@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,8 +51,8 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
         item.setActionView(R.layout.item_delete);
         RelativeLayout r = (RelativeLayout) item.getActionView();
-        ImageView imageView = (ImageView) r.findViewById(R.id.actionbar_delete);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        TextView textView = (TextView) r.findViewById(R.id.actionbar_delete);
+        textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(DisplayCertificateInformationActivity.this, "Delete certificate…", Toast.LENGTH_SHORT).show();

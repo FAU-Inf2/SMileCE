@@ -21,9 +21,43 @@
         <TextView
             android:id="@+id/text_view_display_info"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TableLayout
+            android:id="@+id/table01"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/hello_world">
-        </TextView>
+            android:layout_weight="0"
+            android:padding="5dp">
+
+            <include
+                android:id="@+id/row01"
+                layout="@layout/table_row">
+            </include>
+            <include
+                android:id="@+id/row02"
+                layout="@layout/table_row">
+            </include>
+            <include
+                android:id="@+id/row03"
+                layout="@layout/table_row">
+            </include>
+        </TableLayout>
+
+        <TableLayout
+            android:id="@+id/table02"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:padding="5dp">
+            <include
+                android:id="@+id/row01"
+                layout="@layout/table_row">
+            </include>
+            <include
+                android:id="@+id/row02"
+                layout="@layout/table_row">
+            </include>
+        </TableLayout>
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

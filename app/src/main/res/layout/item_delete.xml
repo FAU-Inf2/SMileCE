@@ -3,11 +3,12 @@
     android:layout_height="wrap_content"
     android:padding="10sp">
 
-<ImageView
-    android:id="@+id/actionbar_delete"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/ic_delete_white_36dp"
-    />
-
+    <TextView
+        android:id="@+id/actionbar_delete"
+        android:text="@string/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF4444"
+        android:textSize="16sp"
+        />
 </RelativeLayout>
