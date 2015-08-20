@@ -364,6 +364,19 @@ public class MainActivity extends ActionBarActivity {
                     }
                 });
 
+                card.setOnClickListener(new Card.OnCardClickListener() {
+                    @Override
+                    public void onClick(Card card, View view) {
+                        if (!(card instanceof KeyCard)) {
+                            return;
+                        }
+                        final KeyCard kc = (KeyCard) card;
+                        Intent i = new Intent(MainActivity.this, DisplayCertificateInformationActivity.class);
+                        i.putExtra("Alias", kc.keyInfo.alias);
+                        startActivity(i);
+                    }
+                });
+
                 mCardArrayAdapter.add(card);
             }
         }
