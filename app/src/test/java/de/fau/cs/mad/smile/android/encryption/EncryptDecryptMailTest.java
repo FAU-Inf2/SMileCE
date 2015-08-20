@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile.android.encryption;
 
 import android.os.AsyncTask;
+import android.support.v4.util.Pair;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
@@ -54,11 +56,16 @@ public class EncryptDecryptMailTest {
 
     @Test
     public void testDecryptMail() throws Exception {
-        /*MimeMessage originalMimeMessage = new AsyncCreateMimeMessage().execute().get();
+        /*Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
+        MimeMessage originalMimeMessage = new AsyncCreateMimeMessage().execute().get();
         Pair<PrivateKey, X509Certificate> cert = new SelfSignedCertificateCreator().createForTest();
         MimeMessage encryptedMimeMessage = encrypt(originalMimeMessage, cert.first, cert.second);
 
         MimeBodyPart decrypted = decrypt(encryptedMimeMessage, cert.first, cert.second);
+
+        if(decrypted == null) {
+            fail("Decrypted is null.");
+        }
 
         MimeMultipart multipart = (MimeMultipart) decrypted.getContent();
         BodyPart part = multipart.getBodyPart(0);
@@ -95,12 +102,19 @@ public class EncryptDecryptMailTest {
     private class AsyncCreateMimeMessage extends AsyncTask<Void, Void, MimeMessage> {
         protected MimeMessage doInBackground(Void... params) {
             try {
+                Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
                 MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
                 mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
                 mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
                 mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
                 mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
                 mc.addMailcap("message/rfc822;; x-java-content- handler=com.sun.mail.handlers.message_rfc822");
+                mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.spongyCastle.mail.smime.handlers.pkcs7_signature");
+                mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.spongyCastle.mail.smime.handlers.pkcs7_mime");
+                mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.spongyCastle.mail.smime.handlers.x_pkcs7_signature");
+                mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.spongyCastle.mail.smime.handlers.x_pkcs7_mime");
+                mc.addMailcap("multipart/signed;; x-java-content-handler=org.spongyCastle.mail.smime.handlers.multipart_signed");
+
 
                 Properties props = System.getProperties();
                 Session session = Session.getDefaultInstance(props, null);
