@@ -9,13 +9,13 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
-        android:name=".App"
+        android:name="de.fau.cs.mad.smile.android.encryption.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_smile_orange"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,19 +24,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".InfoActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.InfoActivity"
             android:label="@string/title_activity_info" >
         </activity>
         <activity
-            android:name=".HelpActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.HelpActivity"
             android:label="@string/title_activity_help" >
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".ImportCertificateActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.ImportCertificateActivity"
             android:label="@string/title_activity_import_certificate">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -49,16 +49,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".KeyChainActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.KeyChainActivity"
             android:label="@string/title_activity_key_chain" >
         </activity>
         <activity
-            android:name=".DecryptLocalMailActivity"
+            android:name="de.fau.cs.mad.smile.android.encryption.DecryptLocalMailActivity"
             android:label="@string/title_activity_decrypt_local_mail" >
         </activity>
 
         <service
-            android:name=".remote.SMimeService"
+            android:name="de.fau.cs.mad.smile.android.encryption.remote.SMimeService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote_api"
