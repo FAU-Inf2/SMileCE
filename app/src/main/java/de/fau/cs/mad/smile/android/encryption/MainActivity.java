@@ -53,8 +53,8 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton fab;
 
     // Name and email in HeaderView -- TODO: for SMile-UI -> get from resources
-    String mName = "";
-    String mEmail = "";
+    String mName;
+    String mEmail;
     //titles and icons for ListView
     int mIcons[] = {R.drawable.ic_add_black_24dp, R.drawable.ic_search_black_24dp,
             R.drawable.ic_info_black_24dp, R.drawable.ic_settings_black_24dp,
@@ -131,12 +131,14 @@ public class MainActivity extends ActionBarActivity {
             Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
         }
 
-        if(ownCertificates.size() > 0) {
-            KeyInfo keyInfo = ownCertificates.get(0);
+        int i = 0;
+        while(mName == null && i < ownCertificates.size()) { // use first certificate with name set
+            KeyInfo keyInfo = ownCertificates.get(i);
             mName = keyInfo.contact;
             Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
             mEmail = keyInfo.mail;
             Log.d(SMileCrypto.LOG_TAG, "mEmail: " + mEmail);
+            i++;
         }
 
         if(mName == null && mEmail == null) {
