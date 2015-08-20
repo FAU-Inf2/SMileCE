@@ -35,7 +35,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 public class ListOwnCertificatesFragment extends Fragment {
     public ListOwnCertificatesFragment() {

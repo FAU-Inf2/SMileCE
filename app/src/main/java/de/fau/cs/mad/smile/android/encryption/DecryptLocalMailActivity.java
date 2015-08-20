@@ -42,7 +42,6 @@ import java.util.ArrayList;
 
 import javax.mail.internet.MimeMessage;
 
-import de.fau.cs.mad.smile_crypto.R;
 
 public class DecryptLocalMailActivity extends ActionBarActivity {
     private Toolbar toolbar;

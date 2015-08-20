@@ -38,7 +38,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
+
 import it.gmariotti.cardslib.library.internal.Card;
 
 public class KeyCard extends Card {

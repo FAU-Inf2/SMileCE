@@ -12,7 +12,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 
 /*depreciated -- can be deleted later (stays here to see how KeyChain works*/

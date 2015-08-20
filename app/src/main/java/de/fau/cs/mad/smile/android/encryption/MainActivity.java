@@ -39,7 +39,7 @@ import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
@@ -474,8 +474,9 @@ public class MainActivity extends ActionBarActivity {
                         return true;
                     }
                 });
-                    mCardArrayAdapter.add(card);
-                }
+
+                mCardArrayAdapter.add(card);
             }
+        }
     }
 }

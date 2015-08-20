@@ -1,7 +1,6 @@
-package de.fau.cs.mad.smile_crypto_tests;
+package de.fau.cs.mad.smile.android.encryption;
 
 import android.os.AsyncTask;
-import android.support.v4.util.Pair;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +32,6 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import javax.mail.Address;
-import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
@@ -46,7 +44,6 @@ import de.fau.cs.mad.javax.activation.CommandMap;
 import de.fau.cs.mad.javax.activation.MailcapCommandMap;
 import de.fau.cs.mad.smile.android.encryption.DecryptMail;
 import de.fau.cs.mad.smile.android.encryption.EncryptMail;
-import de.fau.cs.mad.smile.android.encryption.SelfSignedCertificateCreator;
 
 import static org.junit.Assert.*;
 

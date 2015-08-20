@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 public class DividerItemDecoration extends RecyclerView.ItemDecoration{
     private Drawable mDivider;

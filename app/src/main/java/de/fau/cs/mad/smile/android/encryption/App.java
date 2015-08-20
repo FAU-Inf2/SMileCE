@@ -15,7 +15,7 @@ import java.util.GregorianCalendar;
 
 import javax.security.auth.x500.X500Principal;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 public class App extends Application {
 

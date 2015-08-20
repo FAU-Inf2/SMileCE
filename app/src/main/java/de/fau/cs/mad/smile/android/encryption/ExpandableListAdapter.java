@@ -18,7 +18,7 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-import de.fau.cs.mad.smile_crypto.R;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
