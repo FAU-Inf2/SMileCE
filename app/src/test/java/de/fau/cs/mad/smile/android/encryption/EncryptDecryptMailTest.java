@@ -1,6 +1,7 @@
 package de.fau.cs.mad.smile.android.encryption;
 
 import android.os.AsyncTask;
+import android.support.v4.util.Pair;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
@@ -59,6 +61,10 @@ public class EncryptDecryptMailTest {
         MimeMessage encryptedMimeMessage = encrypt(originalMimeMessage, cert.first, cert.second);
 
         MimeBodyPart decrypted = decrypt(encryptedMimeMessage, cert.first, cert.second);
+
+        if(decrypted == null) {
+            fail("Decrypted is null.");
+        }
 
         MimeMultipart multipart = (MimeMultipart) decrypted.getContent();
         BodyPart part = multipart.getBodyPart(0);

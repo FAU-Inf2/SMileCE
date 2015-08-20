@@ -40,16 +40,15 @@ import de.fau.cs.mad.smile.android.encryption.R;
 
 public class KeyManagement {
 
-    private final String certificateDirectory;
-    private final KeyStore androidKeyStore;
+    private KeyStore androidKeyStore;
 
     public KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        final Context context = App.getContext();
-        this.certificateDirectory = context.getDir(
-                context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
-                getAbsolutePath();
-        this.androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
-        androidKeyStore.load(null);
+        try {
+            this.androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
+            androidKeyStore.load(null);
+        } catch (KeyStoreException e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error getting keystore" + e.getMessage());
+        }
     }
 
     public static Boolean addPrivateKeyFromP12ToKeyStore(String pathToFile, String passphrase) {
@@ -206,6 +205,10 @@ public class KeyManagement {
 
     public PrivateKey getPrivateKeyForAlias(final String alias, final String passphrase) throws KeyStoreException {
         KeyStore p12 = KeyStore.getInstance("pkcs12");
+        final Context context = App.getContext();
+        final String certificateDirectory = context.getDir(
+                context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
+                getAbsolutePath();
         String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
         Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
         File p12File = new File(pathTop12File);
