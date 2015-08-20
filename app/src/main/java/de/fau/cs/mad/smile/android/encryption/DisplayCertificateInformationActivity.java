@@ -124,34 +124,20 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             toolbar.setTitle(this.name);
             setSupportActionBar(toolbar);
         }
-
         generatePersonalInformation(keyInfo);
-
-        String print = "Name:\t\t" + keyInfo.contact +
-                "\nEmail address:\t" + keyInfo.mail +
-                "\nThumbprint: \t" + keyInfo.thumbprint +
-                "\nSignature Algorithm: " + keyInfo.certificate.getSigAlgName() +
-                "\nIssuer DN: " + keyInfo.certificate.getIssuerDN().getName() +
-                "\nSubject DN: " + keyInfo.certificate.getSubjectDN().getName() +
-                "\n" + keyInfo.certificate.getPublicKey().toString();
-        
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getSigAlgName());
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getIssuerDN().getName());
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getSubjectDN().getName());
-        Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getPublicKey().toString());
     }
 
     private void generatePersonalInformation(KeyInfo keyInfo) {
         listDataHeader = new ArrayList<>();
-        listDataHeader.add("Personal");
+        listDataHeader.add(getString(R.string.personal));
         listDataChild = new HashMap<>();
         HashMap<String, String> data = new HashMap<>();
         data.put("Name", keyInfo.contact);
         data.put("Email", keyInfo.mail);
-        X509Certificate cert = keyInfo.certificate;
+        X509Certificate certificate = keyInfo.certificate;
         X500Name x500name = null;
         try {
-            x500name = new JcaX509CertificateHolder(cert).getSubject();
+            x500name = new JcaX509CertificateHolder(certificate).getSubject();
             RDN[] L = x500name.getRDNs(BCStyle.L);
             if (L.length > 0) {
                  data.put("L", IETFUtils.valueToString(L[0].getFirst().getValue()));
@@ -177,6 +163,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
             Toast.makeText(App.getContext(), "Failed to extract personal information.", Toast.LENGTH_SHORT).show();
         }
+
         listDataHeader.add(getString(R.string.validity));
         HashMap<String, String> validity = new HashMap<>();
         validity.put("Startdate", keyInfo.valid_after.toString());
