@@ -16,8 +16,10 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.mail.Address;
+import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -99,7 +101,10 @@ public class EncryptMail {
 
             MimeBodyPart encryptedContent = envelopedGenerator.generate(message, encryptor);
 
-            MimeMessage result = new MimeMessage(message);
+            Properties props = System.getProperties();
+            Session session = Session.getDefaultInstance(props, null);
+            MimeMessage result = new MimeMessage(session);
+            //MimeMessage result = new MimeMessage(message);
             result.setContent(encryptedContent.getContent(), encryptedContent.getContentType());
             result.saveChanges();
 
@@ -127,7 +132,10 @@ public class EncryptMail {
 
             MimeBodyPart encryptedContent = envelopedGenerator.generate(message, encryptor);
 
-            MimeMessage result = new MimeMessage(message);
+            Properties props = System.getProperties();
+            Session session = Session.getDefaultInstance(props, null);
+            MimeMessage result = new MimeMessage(session);
+            //MimeMessage result = new MimeMessage(message);
             result.setContent(encryptedContent.getContent(), encryptedContent.getContentType());
             result.saveChanges();
 

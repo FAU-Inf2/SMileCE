@@ -31,9 +31,10 @@ public class EncryptDecryptMail {
             Log.d(SMileCrypto.LOG_TAG, "create new MimeMessage…");
             MimeMessage originalMimeMessage = new AsyncCreateMimeMessage().execute().get();
             MimeMessage encryptedMimeMessage = encrypt(originalMimeMessage);
+            encryptedMimeMessage.addFrom(new Address[]{new InternetAddress("fixmymail@t-online.de")});
+            encryptedMimeMessage.addRecipients(Message.RecipientType.TO, "fixmymail@gmx.de");
 
             MimeBodyPart decrypted = decrypt(encryptedMimeMessage);
-
             //check
             Log.d(SMileCrypto.LOG_TAG, "check decrypted part…");
             MimeMultipart multipart = (MimeMultipart) decrypted.getContent();
