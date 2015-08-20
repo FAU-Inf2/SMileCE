@@ -97,12 +97,6 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
     private void getKeyInfo() {
         try {
-            listDataHeader = new ArrayList<>();
-            listDataHeader.add("Personal");
-            listDataHeader.add("Certificate");
-            listDataChild = new HashMap<>();
-            listDataChild.put(listDataHeader.get(0), new ArrayList<AbstractCertificateInfoItem>());
-            listDataChild.put(listDataHeader.get(1), new ArrayList<AbstractCertificateInfoItem>());
             KeyManagement keyManagement = new KeyManagement();
             KeyInfo keyInfo = keyManagement.getKeyInfo(this.alias);
             this.keyInfo = keyInfo;
@@ -121,6 +115,18 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             setSupportActionBar(toolbar);
         }
 
+        listDataHeader = new ArrayList<>();
+        listDataHeader.add("Personal");
+        listDataChild = new HashMap<>();
+        HashMap<String, String> data = new HashMap<>();
+        data.put("Name", keyInfo.contact);
+        data.put("Email", keyInfo.mail);
+        ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
+        PersonalInformationItem persI = new PersonalInformationItem();
+        persI.build(data);
+        pers.add(persI);
+        listDataChild.put(listDataHeader.get(0), pers);
+
         String print = "Name:\t\t" + keyInfo.contact +
                 "\nEmail address:\t" + keyInfo.mail +
                 "\nThumbprint: \t" + keyInfo.thumbprint +
@@ -128,8 +134,6 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
                 "\nIssuer DN: " + keyInfo.certificate.getIssuerDN().getName() +
                 "\nSubject DN: " + keyInfo.certificate.getSubjectDN().getName() +
                 "\n" + keyInfo.certificate.getPublicKey().toString();
-        TextView textView = (TextView) findViewById(R.id.text_view_display_info);
-        textView.setText(print);
         
         Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getSigAlgName());
         Log.d(SMileCrypto.LOG_TAG, keyInfo.certificate.getIssuerDN().getName());

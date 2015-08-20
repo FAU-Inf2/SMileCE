@@ -87,7 +87,7 @@ public class ExpandableCertificateListAdapter extends BaseExpandableListAdapter{
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         final AbstractCertificateInfoItem item = (AbstractCertificateInfoItem) getChild(groupPosition, childPosition);
-        return item.getView();
+        return item.getView(parent);
     }
 
     @Override
