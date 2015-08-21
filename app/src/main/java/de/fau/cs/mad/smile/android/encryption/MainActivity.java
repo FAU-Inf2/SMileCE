@@ -1,13 +1,8 @@
 package de.fau.cs.mad.smile.android.encryption;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -24,25 +19,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import org.spongycastle.operator.OperatorCreationException;
-
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.fau.cs.mad.smile.android.encryption.R;
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
 import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
 
@@ -274,8 +261,14 @@ public class MainActivity extends ActionBarActivity {
             //Create a Card
             KeyCard card = new KeyCard(this, keyInfo);
 
+            KeyCardHeader header;
             //Create a CardHeader
-            CardHeader header = new CardHeader(this);
+            if(keyInfo.alias.contains("_own_")) {
+                header = new KeyCardHeader(this, true);
+            } else {
+                header = new KeyCardHeader(this, false);
+            }
+
             //Add Header to card
             if(keyInfo.contact != null) {
                 header.setTitle(keyInfo.contact);
