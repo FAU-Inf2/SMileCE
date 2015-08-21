@@ -59,10 +59,16 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         // preparing list data
         getKeyInfo();
 
-        listAdapter = new ExpandableCertificateListAdapter(this, listDataHeader, listDataChild);
+        //TODO: workaround to prevent crash
+        if(listDataHeader == null || listDataChild == null) {
+            Log.e(SMileCrypto.LOG_TAG, "ListDataHeader/ListDataChild was null.");
+            finish();
+        } else {
+            listAdapter = new ExpandableCertificateListAdapter(this, listDataHeader, listDataChild);
 
-        // setting list adapter
-        expListView.setAdapter(listAdapter);
+            // setting list adapter
+            expListView.setAdapter(listAdapter);
+        }
     }
 
     @Override
@@ -114,6 +120,10 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         data.put("Name", keyInfo.contact);
         data.put("Email", keyInfo.mail);
         X509Certificate certificate = keyInfo.certificate;
+        if(certificate == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Certificate was null -- abort.");
+            return;
+        }
         X500Name x500name = null;
         try {
             x500name = new JcaX509CertificateHolder(certificate).getSubject();
