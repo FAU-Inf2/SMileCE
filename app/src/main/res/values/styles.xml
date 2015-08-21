@@ -7,7 +7,6 @@
     </style>
     <style name="FloatingActionButton" parent="android:Widget.Material.Button">
         <item name="android:background">@drawable/fab_background</item>
-        <item name="android:stateListAnimator">@anim/fab_state_list_animator</item>
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
     </style>
@@ -15,6 +14,11 @@
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:layout_margin">8dp</item>
+    </style>
+    <style name="EditText" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlActivated">@android:color/white</item>
+        <item name="colorControlHighlight">@color/accent_material_dark</item>
     </style>
 
     <!--Style for simple title inner header view - TODO: does not work? -->
