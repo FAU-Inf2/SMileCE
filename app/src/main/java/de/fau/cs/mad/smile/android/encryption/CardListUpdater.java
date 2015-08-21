@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
 
 public class CardListUpdater {
@@ -41,8 +39,8 @@ public class CardListUpdater {
             //Create a Card
             KeyCard card = new KeyCard(ac, keyInfo);
 
-            KeyCardHeader header;
             //Create a CardHeader
+            KeyCardHeader header;
             if(keyInfo.alias.contains("_own_")) {
                 header = new KeyCardHeader(ac, true);
             } else {
