@@ -5,9 +5,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -29,14 +34,21 @@ public class SearchActivity extends ActionBarActivity {
     private ArrayList<Card> cards;
 
     private Toolbar toolbar;
+    private String searchQuery;
+    private EditText searchEt;
+    private ArrayList<Card> cardsFiltered;
+    private String queryText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         toolbar = (Toolbar) findViewById(R.id.search_toolbar);
+        toolbar.setTitle(R.string.title_activity_search);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         cards = new ArrayList<>();
+        queryText = "";
 
         try {
             keyManager = new KeyManagement();
@@ -59,6 +71,20 @@ public class SearchActivity extends ActionBarActivity {
         updater = new CardListUpdater(keyManager, this, mCardArrayAdapter, cards);
 
         updater.updateCards();
+        searchEt = (EditText) toolbar.findViewById(R.id.search_bar);
+        searchEt.addTextChangedListener(new SearchWatcher());
+        searchEt.setText(queryText);
+        searchEt.requestFocus();
+
+        ImageView image = (ImageView) toolbar.findViewById(R.id.remove_search);
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchEt.setText("");
+                updater.updateCards();
+            }
+        });
+
     }
 
     @Override
@@ -75,5 +101,70 @@ public class SearchActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class SearchWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence c, int i, int i2, int i3) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence c, int i, int i2, int i3) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            searchQuery = searchEt.getText().toString();
+            Log.d(SMileCrypto.LOG_TAG, "Search for: " + searchQuery);
+            cardsFiltered = performSearch(cards, searchQuery);
+            updater.updateCards(cardsFiltered);
+        }
+
+    }
+
+
+    private ArrayList<Card> performSearch(ArrayList<Card> cardList, String query) {
+
+        String[] queryByWords = query.toLowerCase().split("\\s+");
+
+        ArrayList<Card> cardsFiltered = new ArrayList<Card>();
+
+        for (Card card : cardList) {
+            if (!(card instanceof KeyCard)) {
+                continue;
+            }
+            KeyCard kc = (KeyCard) card;
+            KeyInfo ki = kc.keyInfo;
+            String content = (
+                    ki.contact + " " +
+                            ki.mail + " " +
+                            String.valueOf(ki.termination_date) + " " +
+                            String.valueOf(ki.valid_after)
+            ).toLowerCase();
+
+            for (String word : queryByWords) {
+                Log.d(SMileCrypto.LOG_TAG, "Search for " + word + " in " + content);
+
+                int numberOfMatches = queryByWords.length;
+
+                if (content.contains(word)) {
+                    numberOfMatches--;
+                } else {
+                    break;
+                }
+
+                if (numberOfMatches == 0) {
+                    Log.d(SMileCrypto.LOG_TAG, "found");
+                    cardsFiltered.add(card);
+                }
+
+            }
+
+        }
+
+        return cardsFiltered;
     }
 }

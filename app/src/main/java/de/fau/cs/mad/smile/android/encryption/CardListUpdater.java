@@ -19,13 +19,19 @@ public class CardListUpdater {
     private KeyManagement keyManager;
     private Activity ac;
     private CardArrayRecyclerViewAdapter mCardArrayAdapter;
-    ArrayList<Card> cards;
+    private ArrayList<Card> cards;
 
     public CardListUpdater(KeyManagement keyManager, Activity ac, CardArrayRecyclerViewAdapter mCardArrayAdapter, ArrayList<Card> cards) {
         this.keyManager = keyManager;
         this.ac = ac;
         this.mCardArrayAdapter = mCardArrayAdapter;
         this.cards = cards;
+    }
+
+    public void updateCards(ArrayList<Card> cards) {
+        this.cards = cards;
+        mCardArrayAdapter.setCards(cards);
+        mCardArrayAdapter.notifyDataSetChanged();
     }
 
     public void updateCards() {

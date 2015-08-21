@@ -18,7 +18,7 @@
             android:layout_alignParentRight="true"/>
         <EditText
             android:id="@+id/search_bar"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@id/remove_search"
             android:theme="@style/EditText"
