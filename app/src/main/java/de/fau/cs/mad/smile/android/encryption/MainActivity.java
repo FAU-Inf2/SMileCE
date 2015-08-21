@@ -388,7 +388,7 @@ public class MainActivity extends ActionBarActivity {
         ArrayList<Card> toDelete = new ArrayList<>();
         for(Card c : cards) {
             if (!(c instanceof KeyCard)) {
-                return;
+                continue;
             }
             final KeyCard kc = (KeyCard) c;
             if(!kis.contains(kc.keyInfo)) {
