@@ -189,6 +189,7 @@ public class MainActivity extends ActionBarActivity {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
                         Intent i = new Intent(MainActivity.this, SearchActivity.class);
                         startActivity(i);
+                        return true;
                     }
                     toolbar.setTitle(title);
                     updater.updateCards();
