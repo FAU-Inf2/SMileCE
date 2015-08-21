@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +25,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -242,7 +242,8 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
         RDN[] C = x500name.getRDNs(BCStyle.C);
         if (C.length > 0) {
-            data.put("C", IETFUtils.valueToString(C[0].getFirst().getValue()));
+            String iso2country = IETFUtils.valueToString(C[0].getFirst().getValue());
+            data.put("C", new Locale("en", iso2country).getDisplayCountry());
         }
         RDN[] COF = x500name.getRDNs(BCStyle.COUNTRY_OF_CITIZENSHIP);
         if (COF.length > 0) {
