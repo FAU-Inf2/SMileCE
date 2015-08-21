@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import de.fau.cs.mad.smile.android.encryption.R;
-
 
 public class HelpActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -86,6 +84,15 @@ public class HelpActivity extends ActionBarActivity {
         return colList;
     }
 
+    private List<Pair<Integer, String[]>> getKeys() {
+        List<Pair<Integer, String[]>> colList = new ArrayList<>();
+        String[] c0 = {Integer.toString(R.drawable.ic_public_key_black_48dp), getString(R.string.faq_public_key_saved)};
+        colList.add(Pair.create(2, c0));
+
+        String[] c1 = {Integer.toString(R.drawable.ic_private_key_black_48dp), getString(R.string.faq_private_key_saved)};
+        colList.add(Pair.create(2, c1));
+        return colList;
+    }
 
     private void prepareListData() {
         listDataHeader = new ArrayList<String>();
@@ -96,6 +103,7 @@ public class HelpActivity extends ActionBarActivity {
         listDataHeader.add(getString(R.string.faq_passphrase_saved_q));
         listDataHeader.add(getString(R.string.faq_import_other_cert_q));
         listDataHeader.add(getString(R.string.faq_meaning_colour_q));
+        listDataHeader.add(getString(R.string.faq_meaning_coloured_keys_q));
         listDataHeader.add(getString(R.string.faq_additional_certificate_info_q));
         listDataHeader.add(getString(R.string.faq_delete_certificate_q));
         listDataHeader.add(getString(R.string.faq_author));
@@ -122,6 +130,12 @@ public class HelpActivity extends ActionBarActivity {
         List<Pair<Integer, String[]>> colList = new ArrayList<>();
         colList.add(col);
         colList.addAll(setColours());
+
+        String[] colorKey = {getString(R.string.faq_meaning_coloured_keys)};
+        Pair<Integer, String[]> colK = Pair.create(0, colorKey);
+        List<Pair<Integer, String[]>> colKList = new ArrayList<>();
+        colKList.add(colK);
+        colKList.addAll(getKeys());
 
         String[] certInfoText = {getString(R.string.faq_additional_certificate_info)};
         Pair<Integer, String[]> certInfo = Pair.create(0, certInfoText);
@@ -152,11 +166,12 @@ public class HelpActivity extends ActionBarActivity {
         listDataChild.put(listDataHeader.get(1), pwList);
         listDataChild.put(listDataHeader.get(2), importOtherCert);
         listDataChild.put(listDataHeader.get(3), colList);
-        listDataChild.put(listDataHeader.get(4), certInfoList);
-        listDataChild.put(listDataHeader.get(5), delList);
-        listDataChild.put(listDataHeader.get(6), authorList);
-        listDataChild.put(listDataHeader.get(7), licenceList);
-        listDataChild.put(listDataHeader.get(8), othersList);
+        listDataChild.put(listDataHeader.get(4), colKList);
+        listDataChild.put(listDataHeader.get(5), certInfoList);
+        listDataChild.put(listDataHeader.get(6), delList);
+        listDataChild.put(listDataHeader.get(7), authorList);
+        listDataChild.put(listDataHeader.get(8), licenceList);
+        listDataChild.put(listDataHeader.get(9), othersList);
 
     }
 }

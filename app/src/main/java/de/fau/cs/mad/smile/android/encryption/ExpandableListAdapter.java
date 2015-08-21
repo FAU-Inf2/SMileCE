@@ -115,6 +115,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 validCircle4.getBackground().setColorFilter(getColorFilter(data[4]));
                 text.setText(data[5]);
             }
+        } else if(item.first.equals((Integer.valueOf(2)))) {
+            LayoutInflater layoutInflater = (LayoutInflater) this.context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = layoutInflater.inflate(R.layout.image_text, parent, false);
+            String[] data = item.second;
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_part);
+            imageView.setImageDrawable(context.getResources().getDrawable(Integer.parseInt(data[0])));
+            TextView text = (TextView) convertView.findViewById(R.id.text_part);
+            text.setText(data[1]);
         } else {
             Log.d(SMileCrypto.LOG_TAG, "This case shouldn't occur. Check if you forgot to add a new case.");
         }

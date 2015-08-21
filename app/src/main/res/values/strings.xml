@@ -173,7 +173,7 @@
         can also tap on the card to open the Activity which gives you additional information about the
         certificate and use the delete functionality in the toolbar.</string>
 
-    <string name="faq_meaning_colour_q">What is the meaning of the colours next to the certificates?</string>
+    <string name="faq_meaning_colour_q">What is the meaning of the coloured circles next to the certificates?</string>
     <string name="faq_meaning_colour">The colours are an easy way to see for how long the certificate
     will be valid: </string>
 
@@ -184,6 +184,12 @@
     <string name="faq_colour_04"> &gt; 1 months and &lt; 3 months valid</string>
     <string name="faq_colour_05"> &lt; 1 month valid</string>
     <string name="faq_colour_06"> Expired.</string>
+
+    <string name="faq_meaning_coloured_keys_q">What is the meaning of the coloured keys next to the certificates?</string>
+    <string name="faq_meaning_coloured_keys">The keys indicate which parts are available: </string>
+    <string name="faq_public_key_saved">Public Key is imported.</string>
+    <string name="faq_private_key_saved">Private Key is imported.</string>
+
 
     <string name="alert_header_start"> Do you want to delete&#160;</string>
     <string name="alert_header_end">\'s key?</string>
