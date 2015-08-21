@@ -38,6 +38,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.R;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -49,6 +50,7 @@ public class MainActivity extends ActionBarActivity {
 
     private CardArrayRecyclerViewAdapter mCardArrayAdapter;
     private KeyManagement keyManager;
+    private ArrayList<Card> cards;
 
     private ImageButton fab;
 
@@ -78,7 +80,7 @@ public class MainActivity extends ActionBarActivity {
         toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
 
-        ArrayList<Card> cards = new ArrayList<Card>();
+        cards = new ArrayList<Card>();
 
         try {
             keyManager = new KeyManagement();
@@ -266,7 +268,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void updateCards() {
-        for(KeyInfo keyInfo : keyManager.getAllCertificates()) {
+        List<KeyInfo> kis =  keyManager.getAllCertificates();
+        for(KeyInfo keyInfo : kis) {
 
             //Create a Card
             KeyCard card = new KeyCard(this, keyInfo);
@@ -382,5 +385,17 @@ public class MainActivity extends ActionBarActivity {
                 mCardArrayAdapter.add(card);
             }
         }
+        ArrayList<Card> toDelete = new ArrayList<>();
+        for(Card c : cards) {
+            if (!(c instanceof KeyCard)) {
+                return;
+            }
+            final KeyCard kc = (KeyCard) c;
+            if(!kis.contains(kc.keyInfo)) {
+                toDelete.add(c);
+            }
+        }
+        cards.removeAll(toDelete);
+        mCardArrayAdapter.notifyDataSetChanged();
     }
 }
