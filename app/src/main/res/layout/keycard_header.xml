@@ -8,6 +8,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/card_header_inner_simple_title"
         android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:layout_alignParentStart="true"
         style="@style/card.header_simple_title"/>
 
     <ImageView
