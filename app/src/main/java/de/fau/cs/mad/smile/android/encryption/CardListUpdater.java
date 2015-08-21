@@ -35,8 +35,13 @@ public class CardListUpdater {
             //Create a Card
             KeyCard card = new KeyCard(ac, keyInfo);
 
+            KeyCardHeader header;
             //Create a CardHeader
-            CardHeader header = new CardHeader(ac);
+            if(keyInfo.alias.contains("_own_")) {
+                header = new KeyCardHeader(ac, true);
+            } else {
+                header = new KeyCardHeader(ac, false);
+            }
             //Add Header to card
             if(keyInfo.contact != null) {
                 header.setTitle(keyInfo.contact);
