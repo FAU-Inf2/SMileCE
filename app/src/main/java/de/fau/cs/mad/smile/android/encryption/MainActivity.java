@@ -173,26 +173,20 @@ public class MainActivity extends ActionBarActivity {
                     } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
-                        return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
-                        return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_help))) {
                         Intent i = new Intent(MainActivity.this, HelpActivity.class);
                         startActivity(i);
-                        return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_info))) {
                         Intent i = new Intent(MainActivity.this, InfoActivity.class);
                         startActivity(i);
-                        return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
                         Intent i = new Intent(MainActivity.this, SearchActivity.class);
                         startActivity(i);
-                        return true;
+                        updater.updateCards();
                     }
-                    toolbar.setTitle(title);
-                    updater.updateCards();
                     return true;
                 }
                 return false;
