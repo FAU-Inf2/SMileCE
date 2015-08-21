@@ -62,7 +62,6 @@ public class HelpActivity extends ActionBarActivity {
 
     private List<Pair<Integer, String[]>> setColours() {
         List<Pair<Integer, String[]>> colList = new ArrayList<>();
-        // TODO: not implemented
         String[] c0 = {"#0000ff", "#0000ff", "#0000ff", "#0000ff", "#0000ff", getString(R.string.faq_colour_00)};
         colList.add(Pair.create(1, c0));
 

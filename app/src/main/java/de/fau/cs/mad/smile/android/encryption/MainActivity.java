@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import de.fau.cs.mad.smile.android.encryption.R;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -51,6 +53,8 @@ public class MainActivity extends ActionBarActivity {
     private CardArrayRecyclerViewAdapter mCardArrayAdapter;
     private KeyManagement keyManager;
     private ArrayList<Card> cards;
+
+    private CardListUpdater updater;
 
     private ImageButton fab;
 
@@ -80,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
         toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
 
-        cards = new ArrayList<Card>();
+        cards = new ArrayList<>();
 
         try {
             keyManager = new KeyManagement();
@@ -100,8 +104,9 @@ public class MainActivity extends ActionBarActivity {
         gRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mCardArrayAdapter = new CardArrayRecyclerViewAdapter(this, cards);
         gRecyclerView.setAdapter(mCardArrayAdapter);
+        updater = new CardListUpdater(keyManager, this, mCardArrayAdapter, cards);
 
-        updateCards();
+        updater.updateCards();
 
         final ViewGroup fabContainer = (ViewGroup) this.findViewById(R.id.fab_container);
         fab = (ImageButton) this.findViewById(R.id.fab);
@@ -110,7 +115,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent i = new Intent(v.getContext(), ImportCertificateActivity.class);
                 startActivity(i);
-                updateCards();
+                updater.updateCards();
             }
         });
 
@@ -199,11 +204,11 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(i);
                         return true;
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
-                        /*getSupportFragmentManager().beginTransaction().
-                                replace(R.id.currentFragment, new SearchFragment()).commit();*/
+                        Intent i = new Intent(MainActivity.this, SearchActivity.class);
+                        startActivity(i);
                     }
                     toolbar.setTitle(title);
-                    updateCards();
+                    updater.updateCards();
                     return true;
                 }
                 return false;
@@ -241,7 +246,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onResume() {
-        updateCards();
+        updater.updateCards();
         super.onResume();
     }
 
@@ -255,9 +260,8 @@ public class MainActivity extends ActionBarActivity {
             startActivity(i);
             return true;
         } else if (id == R.id.action_search) {
-            // TODO
-            Toast.makeText(this, R.string.navigation_drawer_search,
-                    Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(MainActivity.this, SearchActivity.class);
+            startActivity(i);
             return true;
         } else if (id == R.id.decrypt_local_mail) {
             Intent i = new Intent(MainActivity.this, DecryptLocalMailActivity.class);
@@ -265,137 +269,5 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void updateCards() {
-        List<KeyInfo> kis =  keyManager.getAllCertificates();
-        for(KeyInfo keyInfo : kis) {
-
-            //Create a Card
-            KeyCard card = new KeyCard(this, keyInfo);
-
-            //Create a CardHeader
-            CardHeader header = new CardHeader(this);
-            //Add Header to card
-            if(keyInfo.contact != null) {
-                header.setTitle(keyInfo.contact);
-            } else {
-                header.setTitle("No contact information available.");
-            }
-
-            card.addCardHeader(header);
-            boolean contains = false;
-
-            for(int i = 0; i < mCardArrayAdapter.getItemCount(); ++i) {
-                KeyCard kc = (KeyCard) mCardArrayAdapter.getItem(i);
-                if(kc.equals(card)) {
-                    contains = true;
-                }
-            }
-
-            if(!contains) {
-                Log.e(SMileCrypto.LOG_TAG, "Items added");
-                card.setOnLongClickListener(new Card.OnLongCardClickListener() {
-
-                    @Override
-                    public boolean onLongClick(Card card, View view) {
-                        if (!(card instanceof KeyCard)) {
-                            return false;
-                        }
-                        final KeyCard kc = (KeyCard) card;
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                                card.getContext());
-                        if (kc.keyInfo.alias.startsWith("SMile_crypto_own")) {
-
-                            // set title
-                            alertDialogBuilder.setTitle(getString(R.string.alert_header_start) + kc.keyInfo.contact + getString(R.string.alert_header_end));
-
-                            // set dialog message
-                            alertDialogBuilder
-                                    .setMessage(getString(R.string.alert_content))
-                                    .setCancelable(false)
-                                    .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, close
-                                            // current activity
-                                            keyManager.deleteKey(kc.keyInfo.alias);
-                                            mCardArrayAdapter.remove(kc);
-                                            mCardArrayAdapter.notifyDataSetChanged();
-                                        }
-                                    })
-                                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, just close
-                                            // the dialog box and do nothing
-                                            dialog.cancel();
-                                        }
-                                    });
-
-                            // create alert dialog
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-
-                            // show it
-                            alertDialog.show();
-                        } else {
-                            // set dialog message
-                            alertDialogBuilder
-                                    .setMessage(getString(R.string.alert_header_start) + kc.keyInfo.contact + getString(R.string.alert_header_end))
-                                    .setCancelable(false)
-                                    .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, close
-                                            // current activity
-                                            keyManager.deleteKey(kc.keyInfo.alias);
-                                            mCardArrayAdapter.remove(kc);
-                                            assert !mCardArrayAdapter.contains(kc);
-                                            mCardArrayAdapter.notifyDataSetChanged();
-                                        }
-                                    })
-                                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, just close
-                                            // the dialog box and do nothing
-                                            dialog.cancel();
-                                        }
-                                    });
-
-                            // create alert dialog
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-
-                            // show it
-                            alertDialog.show();
-                        }
-                        return true;
-                    }
-                });
-
-                card.setOnClickListener(new Card.OnCardClickListener() {
-                    @Override
-                    public void onClick(Card card, View view) {
-                        if (!(card instanceof KeyCard)) {
-                            return;
-                        }
-                        final KeyCard kc = (KeyCard) card;
-                        Intent i = new Intent(MainActivity.this, DisplayCertificateInformationActivity.class);
-                        i.putExtra("Alias", kc.keyInfo.alias);
-                        startActivity(i);
-                    }
-                });
-
-                mCardArrayAdapter.add(card);
-            }
-        }
-        ArrayList<Card> toDelete = new ArrayList<>();
-        for(Card c : cards) {
-            if (!(c instanceof KeyCard)) {
-                continue;
-            }
-            final KeyCard kc = (KeyCard) c;
-            if(!kis.contains(kc.keyInfo)) {
-                toDelete.add(c);
-            }
-        }
-        cards.removeAll(toDelete);
-        mCardArrayAdapter.notifyDataSetChanged();
     }
 }
