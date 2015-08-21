@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -186,12 +187,12 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             cryptographicInfo.put("Modulus", modulus);
             cryptographicInfo.put("Exponent", exponent);
             cryptographicInfo.put("Signature Algorithm", keyInfo.certificate.getSigAlgName());
-            cryptographicInfo.put("Signature", keyInfo.certificate.getSigAlgOID());
+            cryptographicInfo.put("Signature", new BigInteger(keyInfo.certificate.getSignature()).toString(16));
         } else {
             Log.d(SMileCrypto.LOG_TAG, "Not an instance of RSAPublicKey.");
             cryptographicInfo.put("Public Key", keyInfo.certificate.getPublicKey().toString());
             cryptographicInfo.put("Signature Algorithm", keyInfo.certificate.getSigAlgName());
-            cryptographicInfo.put("Signature", new String(keyInfo.certificate.getSignature()));
+            cryptographicInfo.put("Signature", new BigInteger(keyInfo.certificate.getSignature()).toString(16));
         }
         ArrayList<AbstractCertificateInfoItem> crypto = new ArrayList<>();
         CryptographicInformationItem cryptographicInformationItem = new CryptographicInformationItem();
