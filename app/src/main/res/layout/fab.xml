@@ -13,7 +13,7 @@
         <ImageButton
             android:id="@+id/fab"
             style="@style/FloatingActionButton"
-            android:src="@drawable/ic_file_download_white_24dp"
+            android:src="@drawable/ic_add_white_24dp"
             android:contentDescription="@null"
             android:visibility="visible"
             android:layout_alignParentBottom="true"

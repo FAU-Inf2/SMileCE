@@ -9,7 +9,7 @@
     <string name="done">Done</string>
     <string name="info">Info</string>
     <string name="okay">Okay</string>
-    <string name="delete">DELETE</string>
+    <string name="delete">Delete</string>
     <string name="try_again">Please try again.</string>
     <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
@@ -134,6 +134,7 @@
     <string name="multiple_certificates">Multiple certificate found, which should be used to decrypt message?</string>
     <string name="email_label">Email:</string>
     <string name="valid_label">Valid until:</string>
+    <string name="certificate_deleted">Certificate was deleted.</string>
 
     <string name="faq_author">Who is the author of SMile?</string>
     <string name="faq_license">Which license does SMile have?</string>
