@@ -424,7 +424,7 @@ public class KeyManagement {
             }
 
             if(alias.contains("_other_"))
-                return androidKeyStore.containsAlias(alias);
+                return !androidKeyStore.containsAlias(alias);
 
             // just own keys have to be deleted from internal storage
             return deletePassphrase(alias) && deleteP12FromInternalDir(alias);

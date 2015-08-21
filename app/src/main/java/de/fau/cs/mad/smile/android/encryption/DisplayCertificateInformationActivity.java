@@ -8,10 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.math.BigInteger;
@@ -71,23 +68,6 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_display_certificate_information, menu);
-
-        MenuItem item = menu.findItem(R.id.action_delete);
-        if(item == null)
-            return true;
-
-        item.setActionView(R.layout.item_delete);
-        RelativeLayout r = (RelativeLayout) item.getActionView();
-        TextView textView = (TextView) r.findViewById(R.id.actionbar_delete);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(DisplayCertificateInformationActivity.this, "Delete certificate…", Toast.LENGTH_SHORT).show();
-                //TODO: delete
-                deleteKey(keyInfo);
-            }
-        });
-
         return true;
     }
 
@@ -99,7 +79,6 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             finish();
             return true;
         } else if(id == R.id.action_delete) {
-            Toast.makeText(this, "Delete certificate…", Toast.LENGTH_SHORT).show();
             deleteKey(this.keyInfo);
         }
         return super.onOptionsItemSelected(item);
@@ -235,11 +214,10 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
                     .setCancelable(false)
                     .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            // if this button is clicked, close
-                            // current activity
-                            keyManagement.deleteKey(keyInfo.alias);
-                            Toast.makeText(DisplayCertificateInformationActivity.this, R.string.delete, Toast.LENGTH_SHORT);
-                            //TODO
+                            Boolean success = keyManagement.deleteKey(keyInfo.alias);
+                            if(success)
+                                Toast.makeText(App.getContext(),
+                                        R.string.certificate_deleted, Toast.LENGTH_LONG).show();
                             finish();
                         }
                     })
@@ -251,15 +229,15 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
            alertDialogBuilder.create().show();
         } else {
-            // set dialog message
             alertDialogBuilder
                     .setMessage(getString(R.string.alert_header_start) + keyInfo.contact + getString(R.string.alert_header_end))
                     .setCancelable(false)
                     .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            keyManagement.deleteKey(keyInfo.alias);
-                            Toast.makeText(DisplayCertificateInformationActivity.this, R.string.delete, Toast.LENGTH_SHORT);
-                            //TODO
+                            Boolean success = keyManagement.deleteKey(keyInfo.alias);
+                            if(success)
+                                Toast.makeText(App.getContext(),
+                                        R.string.certificate_deleted, Toast.LENGTH_LONG).show();
                             finish();
                         }
                     })
