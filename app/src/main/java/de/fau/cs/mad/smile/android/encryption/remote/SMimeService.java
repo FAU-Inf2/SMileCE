@@ -44,6 +44,11 @@ public class SMimeService extends Service {
         }
     };
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

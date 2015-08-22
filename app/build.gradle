@@ -1,14 +1,13 @@
 apply plugin: 'com.android.application'
 
 def appSourcesDir = file('src/main/java')
-def commonSourcesDir = rootProject.file('../kwikshop-common/src/main/java')
 
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "de.fau.cs.mad.smile_crypto"
+        applicationId "de.fau.cs.mad.smile.android.encryption"
         minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
@@ -41,7 +40,6 @@ android {
         main {
             java {
                 srcDir appSourcesDir
-                srcDir commonSourcesDir
             }
         }
     }

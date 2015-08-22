@@ -36,8 +36,6 @@ import java.util.List;
 import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 
-import de.fau.cs.mad.smile.android.encryption.R;
-
 public class KeyManagement {
 
     private final String certificateDirectory;
@@ -114,62 +112,10 @@ public class KeyManagement {
 
     public ArrayList<KeyInfo> getOwnCertificates() {
         ArrayList<KeyInfo> keyList = new ArrayList<>();
-        try {
-            Log.d(SMileCrypto.LOG_TAG, "Find all own certificates…");
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
-            Enumeration e = ks.aliases();
-            while (e.hasMoreElements()) {
-                String alias = (String) e.nextElement();
-                Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
-
-                if(!alias.contains("_own_")) {
-                    continue;
-                }
-                //if (alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias)))
-                //    continue;
-
-                Certificate c = ks.getCertificate(alias);
-                KeyStore.Entry entry = ks.getEntry(alias, null);
-                if (entry instanceof KeyStore.PrivateKeyEntry) {
-                    KeyInfo keyInfo = new KeyInfo();
-                    keyInfo.alias = alias;
-                    Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
-                    Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                    keyInfo.type = c.getType();
-                    keyInfo.hash = Integer.toHexString(c.hashCode());
-
-                    if (c.getType().equals("X.509")) {
-                        X509Certificate cert = (X509Certificate) c;
-                        X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
-                        RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
-                        String email = "";
-                        if (rdn_email.length > 0) {
-                            email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
-                        }
-                        Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
-                        keyInfo.mail = email;
-                        RDN[] cn = x500name.getRDNs(BCStyle.CN);
-                        if (cn.length > 0) {
-                            keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
-                        }
-                        keyInfo.termination_date = new DateTime(cert.getNotAfter());
-                        keyInfo.valid_after = new DateTime((cert.getNotBefore()));
-                        //keyInfo.trust; TODO
-                        keyInfo.thumbprint = getThumbprint(cert);
-                        keyList.add(keyInfo);
-                    }
-                } else {
-                    //--> no private key available for this certificate
-                    //this should not happen
-                    Log.e(SMileCrypto.LOG_TAG, "Not an instance of a PrivateKeyEntry");
-                    Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
-                    Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-                }
+        for (KeyInfo keyInfo : getAllCertificates()) {
+            if(keyInfo.hasPrivateKey) {
+                keyList.add(keyInfo);
             }
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
-            e.printStackTrace();
         }
 
         return keyList;
@@ -267,48 +213,12 @@ public class KeyManagement {
 
             for (KeyInfo keyInfo : getOwnCertificates()) {
                 for (String mail : keyInfo.mailAddresses) {
-                    if (mailAddress.equals(mail)) {
+                    if (mailAddress.equalsIgnoreCase(mail)) {
                         return keyInfo.alias;
                     }
                 }
             }
-/*
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
-            Enumeration e = ks.aliases();
-            while (e.hasMoreElements()) {
-                String alias = (String) e.nextElement();
-                Log.d(SMileCrypto.LOG_TAG, "checking alias: " + alias);
-                if (alias.contains("_other_")) {//no private key available
-                    continue;
-                }
 
-                X509Certificate c = (X509Certificate) ks.getCertificate(alias);
-                //Log.d(SMileCrypto.LOG_TAG, c.toString());
-
-                Collection<List<?>> alternateNames = c.getSubjectAlternativeNames();
-
-                if (alternateNames != null) {
-                    //seems to be always null...
-                    for (List<?> names : alternateNames) {
-                        for (Object name : names) {
-                            if (name instanceof String) {
-                                if (mailAddress.toString().equals(name.toString())) {
-                                    Log.d(SMileCrypto.LOG_TAG, "matching mailaddresses");
-                                    return alias;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //TODO: handle case if one mailaddress has more than one certificate
-                if (c.getSubjectDN().getName().contains("E=" + mailAddress.toString())) {
-                    Log.d(SMileCrypto.LOG_TAG, "alias found: " + alias);
-                    return alias;
-                }
-            }
-*/
             return null;
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
@@ -317,7 +227,7 @@ public class KeyManagement {
         }
     }
 
-    public ArrayList<KeyInfo> getKeyInfosByOwnAddress(final Address emailAddress) {
+    public ArrayList<KeyInfo> getKeyInfoByOwnAddress(final Address emailAddress) {
         ArrayList<KeyInfo> keyInfos = new ArrayList<>();
         try {
             String mailAddress = emailAddress.toString();
@@ -340,12 +250,13 @@ public class KeyManagement {
     }
 
     public ArrayList<String> getAliasesByOwnAddress(final Address emailAddress) {
-        ArrayList<KeyInfo> keyInfos = getKeyInfosByOwnAddress(emailAddress);
+        ArrayList<KeyInfo> keyInfos = getKeyInfoByOwnAddress(emailAddress);
         ArrayList<String> aliases = new ArrayList<>();
         for(KeyInfo keyInfo : keyInfos) {
             String alias = keyInfo.alias;
-            if(alias != null)
+            if(alias != null) {
                 aliases.add(alias);
+            }
         }
         return aliases;
     }

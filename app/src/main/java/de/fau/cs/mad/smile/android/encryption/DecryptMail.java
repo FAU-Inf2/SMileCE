@@ -287,7 +287,7 @@ public class DecryptMail {
     }
 
     public MimeBodyPart decryptMail(Address emailAddress, MimeMessage mimeMessage, String passphrase) {
-        ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(emailAddress);
+        ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(emailAddress);
         if (keyInfos.size() == 0) {
             Log.e(SMileCrypto.LOG_TAG, "Could not find certificate for given email address in decryptMail.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
@@ -363,7 +363,7 @@ public class DecryptMail {
         ArrayList<KeyInfo> result = new ArrayList<>();
 
         for (Address a : addresses) {
-            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(a);
+            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(a);
             for(KeyInfo keyInfo : keyInfos) {
                 result.add(keyInfo);
             }

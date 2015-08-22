@@ -35,7 +35,7 @@ public class SignMessage {
         X509Certificate certificate;
         try {
             keyManagement = new KeyManagement();
-            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(signerAddress);
+            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(signerAddress);
             if(keyInfos.size() == 0) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 Log.e(SMileCrypto.LOG_TAG, "No certificate found for signer address: " + signerAddress);
@@ -175,7 +175,7 @@ public class SignMessage {
         X509Certificate certificate;
         try {
             keyManagement = new KeyManagement();
-            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(signerAddress);
+            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(signerAddress);
             if(keyInfos.size() == 0) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 Log.e(SMileCrypto.LOG_TAG, "No certificate found for signer address: " + signerAddress);
