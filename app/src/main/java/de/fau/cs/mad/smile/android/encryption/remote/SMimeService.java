@@ -70,8 +70,13 @@ public class SMimeService extends Service {
             final DecryptMail decryptMail = new DecryptMail();
             MimeBodyPart mimeBodyPart = new MimeBodyPart(new SharedFileInputStream(encryptedFile));
             MimeBodyPart decryptedPart = decryptMail.decryptMail(recipient, mimeBodyPart);
-            decryptedPart.writeTo(outputStream);
-            result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
+            if(decryptedPart != null) {
+                decryptedPart.writeTo(outputStream);
+                result.putExtra(SMimeApi.RESULT_TYPE, SMimeApi.RESULT_TYPE_ENCRYPTED);
+                result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
+            } else {
+                // TODO: not encrypted/decrypt failed
+            }
         } catch (Exception e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
             e.printStackTrace();
