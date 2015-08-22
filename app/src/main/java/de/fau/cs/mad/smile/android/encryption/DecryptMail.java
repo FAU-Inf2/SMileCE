@@ -475,6 +475,11 @@ public class DecryptMail {
                     headers.addHeaderLine(line);
                     if(line.contains("attachment"))
                         isAttachment = true;
+                } else if (headerPossible && line.startsWith("Content-Description")) {
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    if (headers == null)
+                        headers = new InternetHeaders();
+                    headers.addHeaderLine(line);
                 } else if (headerPossible && line.contains("charset")) {
                     //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
                     if (headers == null)
