@@ -3,6 +3,7 @@ package de.fau.cs.mad.smile.android.encryption;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.joda.time.DateTime;
 import org.spongycastle.cms.SignerInfoGenerator;
 import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
@@ -17,24 +18,6 @@ import javax.mail.internet.MimeMultipart;
 
 public class SignMessage {
     public SignMessage() {}
-
-    public MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
-        SMIMEToolkit smimeToolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
-        MimeMultipart signedMimeMultipart = null;
-        try {
-            Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
-
-            SignerInfoGenerator signerInfoGenerator = new
-                    JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").build("SHA256WITHRSA", privateKey, certificate);
-
-            signedMimeMultipart = smimeToolkit.sign(mimeBodyPart, signerInfoGenerator);
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return signedMimeMultipart;
-    }
 
     public MimeMultipart sign(MimeBodyPart mimeBodyPart, Address signerAddress) {
         if(mimeBodyPart == null) {
@@ -52,13 +35,21 @@ public class SignMessage {
         X509Certificate certificate;
         try {
             keyManagement = new KeyManagement();
-            ArrayList<String> aliases = keyManagement.getAliasesByOwnAddress(signerAddress);
-            if(aliases.size() == 0) {
+            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(signerAddress);
+            if(keyInfos.size() == 0) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
                 Log.e(SMileCrypto.LOG_TAG, "No certificate found for signer address: " + signerAddress);
                 return null;
             }
-            String alias = aliases.get(0); //TODO: best fit --> check validity
+            String alias = "";
+            DateTime termination = new DateTime(0);
+            for(KeyInfo keyInfo : keyInfos) { // use cert with longest validity
+                DateTime terminationDate = keyInfo.termination_date;
+                if(terminationDate.isAfter(termination)) {
+                    alias = keyInfo.alias;
+                    termination = terminationDate;
+                };
+            }
             privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
             certificate = keyManagement.getCertificateForAlias(alias);
         } catch (Exception e) {
@@ -69,7 +60,33 @@ public class SignMessage {
         return sign(mimeBodyPart, privateKey, certificate);
     }
 
-    public MimeMultipart sign(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
+    public MimeMultipart sign(MimeBodyPart mimeBodyPart, String alias) {
+        if(mimeBodyPart == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+        if(alias == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not sign, alias was null.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+        KeyManagement keyManagement;
+        PrivateKey privateKey;
+        X509Certificate certificate;
+        try {
+            keyManagement = new KeyManagement();
+            privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
+            certificate = keyManagement.getCertificateForAlias(alias);
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error getting info from KeyManagement: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            return null;
+        }
+        return sign(mimeBodyPart, privateKey, certificate);
+    }
+
+    private MimeMultipart sign(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -114,6 +131,91 @@ public class SignMessage {
         }
 
         return signedMimeBodyPart;
+    }
+
+    public MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, String alias) {
+        if(mimeBodyPart == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+        if(alias == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not sign, alias was null.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+        KeyManagement keyManagement;
+        PrivateKey privateKey;
+        X509Certificate certificate;
+        try {
+            keyManagement = new KeyManagement();
+            privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
+            certificate = keyManagement.getCertificateForAlias(alias);
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error getting info from KeyManagement: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            return null;
+        }
+        return signSynchronous(mimeBodyPart, privateKey, certificate);
+    }
+
+    public MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, Address signerAddress) {
+        if(mimeBodyPart == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+        if(signerAddress == null) {
+            Log.e(SMileCrypto.LOG_TAG, "Could not sign, signerAddress was null.");
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            return null;
+        }
+        KeyManagement keyManagement;
+        PrivateKey privateKey;
+        X509Certificate certificate;
+        try {
+            keyManagement = new KeyManagement();
+            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfosByOwnAddress(signerAddress);
+            if(keyInfos.size() == 0) {
+                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
+                Log.e(SMileCrypto.LOG_TAG, "No certificate found for signer address: " + signerAddress);
+                return null;
+            }
+            String alias = "";
+            DateTime termination = new DateTime(0);
+            for(KeyInfo keyInfo : keyInfos) { // use cert with longest validity
+                DateTime terminationDate = keyInfo.termination_date;
+                if(terminationDate.isAfter(termination)) {
+                    alias = keyInfo.alias;
+                    termination = terminationDate;
+                };
+            }
+            privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
+            certificate = keyManagement.getCertificateForAlias(alias);
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error getting info from KeyManagement: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            return null;
+        }
+        return signSynchronous(mimeBodyPart, privateKey, certificate);
+    }
+
+    private MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
+        SMIMEToolkit smimeToolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
+        MimeMultipart signedMimeMultipart = null;
+        try {
+            Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
+
+            SignerInfoGenerator signerInfoGenerator = new
+                    JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").build("SHA256WITHRSA", privateKey, certificate);
+
+            signedMimeMultipart = smimeToolkit.sign(mimeBodyPart, signerInfoGenerator);
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return signedMimeMultipart;
     }
 
     private class AsyncSign extends AsyncTask<Object, Void, MimeMultipart> {
