@@ -388,7 +388,7 @@ public class DecryptMail {
         return decodeMimeBodyParts(mimeBodyPart, true);
     }
 
-    public MimeMessage decodeMimeBodyParts(MimeBodyPart mimeBodyPart, Boolean decodeBase64Parts) {
+    public MimeMessage decodeMimeBodyParts(String decryptedPart, Boolean decodeBase64Parts) {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Try to decode MimeBodyPart…");
             if(decodeBase64Parts)
@@ -401,8 +401,6 @@ public class DecryptMail {
             MimeMessage newMimeMessage = new MimeMessage(session);
 
             Multipart multipart = new MimeMultipart("alternative");
-
-            String decryptedPart = convertMimeBodyPartToString(mimeBodyPart);
             String[] lines = decryptedPart.split("\n");
             Boolean possibleConvert = false;
             Boolean convert = false;
@@ -527,6 +525,17 @@ public class DecryptMail {
             }*/
             Log.d(SMileCrypto.LOG_TAG, "… finished decoding MimeBodyPart.");
             return newMimeMessage;
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public MimeMessage decodeMimeBodyParts(MimeBodyPart mimeBodyPart, Boolean decodeBase64Parts) {
+        try {
+            return decodeMimeBodyParts(convertMimeBodyPartToString(mimeBodyPart), decodeBase64Parts);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
