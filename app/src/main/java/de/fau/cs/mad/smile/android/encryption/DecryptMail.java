@@ -336,7 +336,7 @@ public class DecryptMail {
         ArrayList<String> aliases = new ArrayList<>();
         if (addresses == null) {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_RECIPIENTS_FOUND;
-            return null;
+            return aliases;
         }
 
         ArrayList<KeyInfo> keyInfos = getKeyInfosByMimeMessage(mimeMessage);
