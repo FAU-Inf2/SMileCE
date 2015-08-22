@@ -86,7 +86,7 @@ public class HelpActivity extends ActionBarActivity {
 
     private List<Pair<Integer, String[]>> getKeys() {
         List<Pair<Integer, String[]>> colList = new ArrayList<>();
-        String[] c0 = {Integer.toString(R.drawable.ic_public_key_black_48dp), getString(R.string.faq_public_key_saved)};
+        String[] c0 = {Integer.toString(R.drawable.ic_public_key_silver_48dp), getString(R.string.faq_public_key_saved)};
         colList.add(Pair.create(2, c0));
 
         String[] c1 = {Integer.toString(R.drawable.ic_private_key_black_48dp), getString(R.string.faq_private_key_saved)};
