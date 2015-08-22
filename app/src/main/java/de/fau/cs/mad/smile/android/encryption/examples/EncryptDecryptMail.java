@@ -3,11 +3,24 @@ package de.fau.cs.mad.smile.android.encryption.examples;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.spongycastle.cms.SignerInformation;
+import org.spongycastle.cms.SignerInformationStore;
+import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.spongycastle.mail.smime.SMIMESignedParser;
+import org.spongycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.spongycastle.util.Store;
+
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
@@ -53,26 +66,33 @@ public class EncryptDecryptMail {
                         Log.e(SMileCrypto.LOG_TAG, i + ". " + content.charAt(i) + "!=" + decryptedResult.charAt(i));
                 }
             }
+            //TODO: sign encrypted message?
 
 
-            //TODO: how to sign encrypted message?
             Log.e(SMileCrypto.LOG_TAG, "Start signing original message.");
-            sign(originalMimeMessage);
+            Multipart signedMultipart = sign(originalMimeMessage);
             Log.e(SMileCrypto.LOG_TAG, "End signing.");
+
+            //TODO: check signature
+            Log.e(SMileCrypto.LOG_TAG, "Start checking signature.");
+            Log.e(SMileCrypto.LOG_TAG, "nope, because it will crash…");
+            //new AsyncCheckSignature().execute(signedMultipart).get();
+            Log.e(SMileCrypto.LOG_TAG, "End checking signature.");
+
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private MimeMessage encrypt(MimeMessage originalMimeMessage)  throws Exception{
+    private MimeMessage encrypt(MimeMessage originalMimeMessage) throws Exception {
         System.out.println("Start encrypt.");
 
         EncryptMail encryptMail = new EncryptMail();
         return encryptMail.encryptMessage(originalMimeMessage);
     }
 
-    private MimeMultipart sign(MimeMessage original) throws Exception{
+    private Multipart sign(MimeMessage original) throws Exception {
         SignMessage signMessage = new SignMessage();
 
         MimeBodyPart mimeBodyPart;
@@ -80,6 +100,9 @@ public class EncryptDecryptMail {
             MimeMultipart multipart = (MimeMultipart) original.getContent();
             mimeBodyPart = (MimeBodyPart) multipart.getBodyPart(0);
         } else {
+            // TODO: ...
+
+            //just a test
             Log.e(SMileCrypto.LOG_TAG, "Type: " + original.getContent());
             Log.e(SMileCrypto.LOG_TAG, "User other example.");
             InternetHeaders headers = new InternetHeaders();
@@ -89,7 +112,7 @@ public class EncryptDecryptMail {
             mimeBodyPart = new MimeBodyPart(headers, message.getBytes());
         }
 
-        MimeMultipart result = signMessage.sign(mimeBodyPart, new InternetAddress("fixmymail@gmx.de"));
+        Multipart result = signMessage.sign(mimeBodyPart, new InternetAddress("fixmymail@gmx.de"));
         for(int i = 0; i < result.getCount(); i++) {
             Log.d(SMileCrypto.LOG_TAG, i + 1 + ". Part…");
             MimeBodyPart part = (MimeBodyPart) result.getBodyPart(i);
@@ -143,4 +166,84 @@ public class EncryptDecryptMail {
         }
     }
 
+    private class AsyncCheckSignature extends AsyncTask<Multipart, Void, Void> {
+        protected Void doInBackground(Multipart... params) {
+            try {
+                Multipart multipart = params[0];
+                Log.e(SMileCrypto.LOG_TAG, "Content-type of Multipart: " + multipart.getContentType());
+                Properties props = System.getProperties();
+                Session session = Session.getDefaultInstance(props, null);
+                MimeMessage msg = new MimeMessage(session);
+                msg.setContent(multipart);
+                msg.saveChanges();
+
+                // this will crash :-(
+                if (msg.isMimeType("multipart/signed")) {
+                    Log.d(SMileCrypto.LOG_TAG, "multipart/signed");
+                    SMIMESignedParser s = new SMIMESignedParser(new JcaDigestCalculatorProviderBuilder().build(),
+                            (MimeMultipart) msg.getContent());
+
+                    Log.d(SMileCrypto.LOG_TAG, "Status:");
+                    verify(s);
+                } else if (msg.isMimeType("application/pkcs7-mime")) {
+                    Log.d(SMileCrypto.LOG_TAG, "application/pkcs7-mime");
+                    //
+                    // in this case the content is wrapped in the signature block.
+                    //
+                    SMIMESignedParser s = new SMIMESignedParser(new JcaDigestCalculatorProviderBuilder().build(), msg);
+
+                    Log.d(SMileCrypto.LOG_TAG, "Status:");
+                    verify(s);
+                } else {
+                    Log.e(SMileCrypto.LOG_TAG, "Not a signed message!");
+                }
+            } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        /**
+         * verify the signature (assuming the cert is contained in the message)
+         */
+        private void verify(SMIMESignedParser s) throws Exception {
+            //
+            // extract the information to verify the signatures.
+            //
+
+            //
+            // certificates and crls passed in the signature - this must happen before
+            // s.getSignerInfos()
+            //
+            Store certs = s.getCertificates();
+            //
+            // SignerInfo blocks which contain the signatures
+            //
+            SignerInformationStore signers = s.getSignerInfos();
+
+            Collection c = signers.getSigners();
+            Iterator it = c.iterator();
+
+            //
+            // check each signer
+            //
+            while (it.hasNext()) {
+                SignerInformation signer = (SignerInformation) it.next();
+                Collection certCollection = certs.getMatches(signer.getSID());
+
+                Iterator certIt = certCollection.iterator();
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider("SC").getCertificate((X509CertificateHolder) certIt.next());
+                //
+                // verify that the sig is correct and that it was generated
+                // when the certificate was current
+                //
+                if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("SC").build(cert))) {
+                    Log.e(SMileCrypto.LOG_TAG, "Signature verified.");
+                } else {
+                    Log.e(SMileCrypto.LOG_TAG, "Signature failed.");
+                }
+            }
+        }
+    }
 }

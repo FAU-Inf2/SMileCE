@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import javax.mail.Address;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 
 public class SignMessage {
     public SignMessage() {}
@@ -215,8 +214,6 @@ public class SignMessage {
             Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
             e.printStackTrace();
         }
-
-        Log.e(SMileCrypto.LOG_TAG, signedMimeMultipart.getContentType());
 
         return signedMimeMultipart;
     }
