@@ -1,5 +1,6 @@
 package de.fau.cs.mad.smile.android.encryption;
 
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
@@ -12,6 +13,7 @@ import org.spongycastle.cms.CMSSignedDataParser;
 import org.spongycastle.cms.CMSTypedStream;
 import org.spongycastle.cms.SignerInformation;
 import org.spongycastle.cms.SignerInformationStore;
+import org.spongycastle.cms.SignerInformationVerifier;
 import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 import org.spongycastle.util.Store;
@@ -20,14 +22,20 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 
+import javax.mail.BodyPart;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.SharedByteArrayInputStream;
 
 public class SignatureCheck {
     static {
@@ -44,9 +52,9 @@ public class SignatureCheck {
             Session session = Session.getDefaultInstance(props, null);
             File file = new File(pathToFile);
             MimeMessage mimeMessage = new MimeMessage(session, new FileInputStream(file));
-            //Log.d(SMileCrypto.LOG_TAG, mimeMessage.getContent().toString());
-            return checkSignature(mimeMessage);
-
+            Log.d(SMileCrypto.LOG_TAG, mimeMessage.getContentType());
+            Log.d(SMileCrypto.LOG_TAG, mimeMessage.getContent().toString());
+            return new AsyncCheckSignature().execute(mimeMessage).get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception while converting file to MimeMessage: " + e.getMessage());
             e.printStackTrace();
@@ -63,6 +71,11 @@ public class SignatureCheck {
                 Log.d(SMileCrypto.LOG_TAG, "MimeMessage is NOT signed!");
                 return false;
             }
+
+            Log.e(SMileCrypto.LOG_TAG, "----------------\ntry NEW METHOD");
+            //check(mimeMessage);
+            Log.e(SMileCrypto.LOG_TAG, "END NEW METHOD\n----------------");
+
 
             Log.e(SMileCrypto.LOG_TAG, "----------------\ntry working example");
             workingExample();
@@ -135,6 +148,82 @@ public class SignatureCheck {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public Boolean check(MimeMessage mimeMessage) throws Exception{
+        Object part = mimeMessage.getContent();
+        Log.e(SMileCrypto.LOG_TAG, "instance of: " + part.toString());
+        if(part instanceof SharedByteArrayInputStream) {
+            String content = getUTF8Content(part);
+            Log.e(SMileCrypto.LOG_TAG, "content: " + content);
+            DecryptMail dM = new DecryptMail();
+            mimeMessage = dM.decodeMimeBodyParts(content, false, mimeMessage.getContentType());
+            Log.d(SMileCrypto.LOG_TAG, mimeMessage.getContentType());
+            MimeMultipart part2 = (MimeMultipart) mimeMessage.getContent();
+            int count = part2.getCount();
+            for(int i = 0; i < count; i++) {
+                BodyPart bodyPart = part2.getBodyPart(i);
+                Log.e(SMileCrypto.LOG_TAG, bodyPart.toString());
+                Log.e(SMileCrypto.LOG_TAG, bodyPart.getContentType());
+                Log.e(SMileCrypto.LOG_TAG, bodyPart.getContent().toString());
+            }
+
+            SMIMEToolkit toolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
+            if (toolkit.isSigned(mimeMessage)) {
+                Log.d(SMileCrypto.LOG_TAG, "MimeMessage is signed!");
+                SignerInformationVerifier signerInformationVerifier = new SignerInformationVerifier(null, null, null, null);
+                Log.e(SMileCrypto.LOG_TAG, "Valid? " + toolkit.isValidSignature(mimeMessage, signerInformationVerifier));
+            } else {
+                Log.d(SMileCrypto.LOG_TAG, "MimeMessage is NOT signed!");
+            }
+        }
+
+/*        SignedMailValidator signedMailValidator = new SignedMailValidator(mimeMessage, null);
+         SignerInformationStore signerInformationStore = signedMailValidator.getSignerInformationStore();
+        Store store = null; //todo
+
+        Collection c = signerInformationStore.getSigners();
+        Iterator it = c.iterator();
+        Boolean hasValidSigner = false;
+        while (it.hasNext()) {
+            SignerInformation signer = (SignerInformation) it.next();
+            Collection certCollection = store.getMatches(signer.getSID());
+            Iterator certIt = certCollection.iterator();
+            X509CertificateHolder certHolder = (X509CertificateHolder) certIt.next();
+            X509Certificate certFromSignedData = new JcaX509CertificateConverter().setProvider("SC").getCertificate(certHolder);
+            Log.d(SMileCrypto.LOG_TAG, "Info from extracted cert: " + certFromSignedData.getSubjectDN().getName());
+            KeyManagement.addFriendsCertificate(certFromSignedData);
+            Log.d(SMileCrypto.LOG_TAG, "Check signature now…");
+            try {
+                if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("SC").build(certFromSignedData))) {
+                    Log.d(SMileCrypto.LOG_TAG, "Signature verified!");
+                    hasValidSigner = true;
+                } else {
+                    Log.d(SMileCrypto.LOG_TAG, "Signature verification failed!");
+                }
+            } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+                Log.e(SMileCrypto.LOG_TAG, "Signature verification failed!");
+            }
+        }
+        return hasValidSigner; */
+        return false;
+    }
+
+    public static String getUTF8Content(Object contentObject) throws Exception{
+        // possible ClassCastException
+        SharedByteArrayInputStream sbais = (SharedByteArrayInputStream) contentObject;
+        // possible UnsupportedEncodingException
+        InputStreamReader isr = new InputStreamReader(sbais, Charset.forName("UTF-8"));
+        int charsRead = 0;
+        StringBuilder content = new StringBuilder();
+        int bufferSize = 1024;
+        char[] buffer = new char[bufferSize];
+        // possible IOException
+        while ((charsRead = isr.read(buffer)) != -1) {
+            content.append(Arrays.copyOf(buffer, charsRead));
+        }
+        return content.toString();
     }
 
     private Boolean workingExample() throws Exception{
@@ -232,6 +321,13 @@ public class SignatureCheck {
             } else {
                 Log.e(SMileCrypto.LOG_TAG, "SUCCESS!");
             }
+        }
+    }
+
+    private class AsyncCheckSignature extends AsyncTask<Object, Void, Boolean> {
+
+        protected Boolean doInBackground(Object... params) {
+            return checkSignature((MimeMessage) params[0]);
         }
     }
 }

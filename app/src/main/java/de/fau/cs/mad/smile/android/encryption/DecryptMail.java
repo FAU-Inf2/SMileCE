@@ -404,7 +404,7 @@ public class DecryptMail {
             if(multipartContentType == null)
                 multipart = new MimeMultipart("alternative");
             else
-                multipart = new MimeMultipart("signed");
+                multipart = new MimeMultipart(multipartContentType);
 
             String[] lines = decryptedPart.split("\n");
             Boolean possibleConvert = false;
