@@ -13,13 +13,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
 import javax.mail.Address;
+import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 public class SignMessage {
     public SignMessage() {}
 
-    public MimeMultipart sign(MimeBodyPart mimeBodyPart, Address signerAddress) {
+    public Multipart sign(MimeBodyPart mimeBodyPart, Address signerAddress) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -60,7 +61,7 @@ public class SignMessage {
         return sign(mimeBodyPart, privateKey, certificate);
     }
 
-    public MimeMultipart sign(MimeBodyPart mimeBodyPart, String alias) {
+    public Multipart sign(MimeBodyPart mimeBodyPart, String alias) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -86,7 +87,7 @@ public class SignMessage {
         return sign(mimeBodyPart, privateKey, certificate);
     }
 
-    private MimeMultipart sign(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
+    private Multipart sign(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -133,7 +134,7 @@ public class SignMessage {
         return signedMimeBodyPart;
     }
 
-    public MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, String alias) {
+    public Multipart signSynchronous(MimeBodyPart mimeBodyPart, String alias) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -159,7 +160,7 @@ public class SignMessage {
         return signSynchronous(mimeBodyPart, privateKey, certificate);
     }
 
-    public MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, Address signerAddress) {
+    public Multipart signSynchronous(MimeBodyPart mimeBodyPart, Address signerAddress) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -200,9 +201,9 @@ public class SignMessage {
         return signSynchronous(mimeBodyPart, privateKey, certificate);
     }
 
-    private MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
+    private Multipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
         SMIMEToolkit smimeToolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
-        MimeMultipart signedMimeMultipart = null;
+        Multipart signedMimeMultipart = null;
         try {
             Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
 
@@ -215,13 +216,15 @@ public class SignMessage {
             e.printStackTrace();
         }
 
+        Log.e(SMileCrypto.LOG_TAG, signedMimeMultipart.getContentType());
+
         return signedMimeMultipart;
     }
 
-    private class AsyncSign extends AsyncTask<Object, Void, MimeMultipart> {
+    private class AsyncSign extends AsyncTask<Object, Void, Multipart> {
 
         @Override
-        protected MimeMultipart doInBackground(Object... params) {
+        protected Multipart doInBackground(Object... params) {
             return signSynchronous((MimeBodyPart) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
         }
     }
