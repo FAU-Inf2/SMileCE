@@ -116,6 +116,11 @@ public class SignatureCheck {
                 valid &= signer.verify(verifierBuilder.build(cert.getPublicKey()));
                 Log.d(SMileCrypto.LOG_TAG, "valid signature: " + valid);
                 valid &= checkSigner(cert, sender);
+                if (valid) {
+                    //TODO: good place?
+                    KeyManagement.addFriendsCertificate(cert);
+                }
+
                 Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);
                 Date signTime = checkSignatureTime(usedParameters, signer, cert);
                 usedParameters.setDate(signTime);

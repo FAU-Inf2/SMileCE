@@ -16,12 +16,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedFileInputStream;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.SignMessage;
 import de.fau.cs.mad.smile.android.encryption.SignatureCheck;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
@@ -85,6 +88,7 @@ public class SMimeService extends Service {
                 result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
             } else {
                 // TODO: not encrypted/decrypt failed
+                result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
             }
         } catch (Exception e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
@@ -128,10 +132,52 @@ public class SMimeService extends Service {
     }
 
     private final Intent sign(final Intent data, final ParcelFileDescriptor input, final ParcelFileDescriptor output) {
-        return null;
+
+        final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
+        final OutputStream outputStream = new ParcelFileDescriptor.AutoCloseOutputStream(output);
+        final String sender = data.getStringExtra(SMimeApi.EXTRA_SENDER);
+        File inputFile = null;
+
+        final Intent result = new Intent();
+
+        try {
+            inputFile = copyToFile(inputStream);
+            SignMessage signer = new SignMessage();
+            MimeBodyPart mimeBodyPart = new MimeBodyPart(new SharedFileInputStream(inputFile));
+            MimeMultipart signedPart = signer.sign(mimeBodyPart, new InternetAddress(sender));
+            if (signedPart != null) {
+                signedPart.writeTo(outputStream);
+                result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
+            }
+        }catch (Exception e) {
+            result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+            e.printStackTrace();
+        } finally {
+            if(outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(inputFile != null) {
+                inputFile.delete();
+            }
+        }
+
+        return result;
     }
 
     private final Intent encryptAndSign(final Intent data, final ParcelFileDescriptor input, final ParcelFileDescriptor output) {
+
         return null;
     }
 }
