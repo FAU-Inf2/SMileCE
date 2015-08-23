@@ -11,8 +11,12 @@ import org.spongycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.spongycastle.operator.OutputEncryptor;
 
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -172,7 +176,7 @@ public class EncryptMail {
         return certificates;
     }
 
-    public MimeBodyPart encryptAndSign(MimeMessage mimeMessage) {
+    public MimeBodyPart encryptAndSign(MimeMessage mimeMessage) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         SignMessage signMessage = new SignMessage();
         MimeMessage encryptedMimeMessage = encryptMessage(mimeMessage);
 
