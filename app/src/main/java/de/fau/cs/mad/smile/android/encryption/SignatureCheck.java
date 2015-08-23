@@ -4,37 +4,88 @@ import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
+import org.spongycastle.asn1.ASN1Encoding;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Primitive;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.cms.Attribute;
+import org.spongycastle.asn1.cms.AttributeTable;
+import org.spongycastle.asn1.cms.CMSAttributes;
+import org.spongycastle.asn1.cms.Time;
+import org.spongycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.spongycastle.asn1.x509.ExtendedKeyUsage;
+import org.spongycastle.asn1.x509.Extension;
+import org.spongycastle.asn1.x509.KeyPurposeId;
 import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.cert.jcajce.JcaCertStoreBuilder;
 import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.spongycastle.cms.CMSException;
 import org.spongycastle.cms.CMSProcessable;
 import org.spongycastle.cms.CMSProcessableByteArray;
 import org.spongycastle.cms.CMSSignedData;
 import org.spongycastle.cms.CMSSignedDataParser;
 import org.spongycastle.cms.CMSTypedStream;
+import org.spongycastle.cms.SignerId;
 import org.spongycastle.cms.SignerInformation;
 import org.spongycastle.cms.SignerInformationStore;
-import org.spongycastle.cms.SignerInformationVerifier;
 import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.spongycastle.cms.jcajce.JcaX509CertSelectorConverter;
+import org.spongycastle.i18n.ErrorBundle;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.mail.smime.SMIMEException;
+import org.spongycastle.mail.smime.SMIMESigned;
 import org.spongycastle.mail.smime.SMIMESignedParser;
+import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 import org.spongycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.spongycastle.util.Store;
+import org.spongycastle.x509.CertPathReviewerException;
+import org.spongycastle.x509.PKIXCertPathReviewer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.Security;
+import java.security.cert.CertPath;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.mail.BodyPart;
+import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedByteArrayInputStream;
@@ -44,7 +95,309 @@ public class SignatureCheck {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
-    public SignatureCheck() {
+    private static final int SHORT_KEY_LENGTH = 512;
+
+    private final KeyManagement keyManagement;
+
+    public SignatureCheck() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+        keyManagement = new KeyManagement();
+    }
+
+    public Boolean verifySignature(final MimeBodyPart bodyPart, final String sender)
+            throws MessagingException, CMSException, SMIMEException, IOException,
+            GeneralSecurityException, OperatorCreationException, CertPathReviewerException {
+        if (bodyPart == null) {
+            return false;
+        }
+
+        boolean valid = true;
+
+        SMIMESigned signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
+
+        JcaCertStoreBuilder jcaCertStoreBuilder = new JcaCertStoreBuilder();
+        jcaCertStoreBuilder.addCertificates(signed.getCertificates());
+        jcaCertStoreBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+
+        CertStore certs = jcaCertStoreBuilder.build();
+        SignerInformationStore signers = signed.getSignerInfos();
+
+        KeyStore keyStore = KeyStore.getInstance("AndroidCAStore");
+        keyStore.load(null);
+        PKIXParameters usedParameters = new PKIXParameters(keyStore);
+        usedParameters.addCertStore(certs);
+
+        Collection signersCollection = signers.getSigners();
+        Iterator iterator = signersCollection.iterator();
+
+        while (iterator.hasNext()) {
+            SignerInformation signer = (SignerInformation) iterator.next();
+            List<X509Certificate> certCollection = findCerts(usedParameters.getCertStores(), signer.getSID());
+            for (X509Certificate cert : certCollection) {
+                // check signature
+                boolean validSignature = signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert.getPublicKey()));
+                valid |= validSignature;
+                valid |= checkSigner(cert, sender);
+                Date signTime = getSignatureTime(signer);
+
+                if (signTime == null) {
+                    // TODO: notify no signing time
+                    signTime = usedParameters.getDate();
+                    if (signTime == null) {
+                        signTime = new Date();
+                    }
+                } else {
+                    cert.checkValidity(signTime);
+                }
+
+                usedParameters.setDate(signTime);
+                Object[] certPathUserProvided = createCertPath(cert, usedParameters.getTrustAnchors(), usedParameters.getCertStores(), Collections.singletonList(certs));
+                CertPath certPath = (CertPath) certPathUserProvided[0];
+
+                PKIXCertPathReviewer review = new PKIXCertPathReviewer(certPath, usedParameters);
+                valid |= review.isValidCertPath();
+            }
+        }
+
+        return valid;
+    }
+
+    /**
+     * Taken from bouncycastle SignedMailValidator
+     * Returns an Object array containing a CertPath and a List of Booleans. The list contains the value <code>true</code>
+     * if the corresponding certificate in the CertPath was taken from the user provided CertStores.
+     *
+     * @param signerCert       the end of the path
+     * @param trustAnchors     trust anchors for the path
+     * @param systemCertStores list of {@link CertStore} provided by the system
+     * @param userCertStores   list of {@link CertStore} provided by the user
+     * @return a CertPath and a List of booleans.
+     * @throws GeneralSecurityException
+     */
+    public Object[] createCertPath(X509Certificate signerCert,
+                                   Set<TrustAnchor> trustAnchors, List<CertStore> systemCertStores, List<CertStore> userCertStores)
+            throws GeneralSecurityException {
+        Set<X509Certificate> certSet = new LinkedHashSet<>();
+        List<Boolean> userProvidedList = new ArrayList<>();
+
+        // add signer certificate
+
+        X509Certificate cert = signerCert;
+        certSet.add(cert);
+        userProvidedList.add(true);
+
+        boolean trustAnchorFound = false;
+
+        X509Certificate trustAnchorCert = null;
+
+        // add other certs to the cert path
+        while (cert != null && !trustAnchorFound) {
+            // check if cert Issuer is Trustanchor
+            for (TrustAnchor anchor : trustAnchors) {
+                X509Certificate anchorCert = anchor.getTrustedCert();
+                if (anchorCert != null) {
+                    if (anchorCert.getSubjectX500Principal().equals(
+                            cert.getIssuerX500Principal())) {
+                        try {
+                            cert.verify(anchorCert.getPublicKey(), "BC");
+                            trustAnchorFound = true;
+                            trustAnchorCert = anchorCert;
+                            break;
+                        } catch (Exception e) {
+                            // trustanchor not found
+                        }
+                    }
+                } else {
+                    if (anchor.getCAName().equals(
+                            cert.getIssuerX500Principal().getName())) {
+                        try {
+                            cert.verify(anchor.getCAPublicKey(), "BC");
+                            trustAnchorFound = true;
+                            break;
+                        } catch (Exception e) {
+                            // trustanchor not found
+                        }
+                    }
+                }
+            }
+
+            if (!trustAnchorFound) {
+                // add next cert to path
+                X509CertSelector select = new X509CertSelector();
+                try {
+                    select.setSubject(cert.getIssuerX500Principal().getEncoded());
+                } catch (IOException e) {
+                    throw new IllegalStateException(e.toString());
+                }
+                byte[] authKeyIdentBytes = cert.getExtensionValue(Extension.authorityKeyIdentifier.getId());
+                if (authKeyIdentBytes != null) {
+                    try {
+                        AuthorityKeyIdentifier kid = AuthorityKeyIdentifier.getInstance(getObject(authKeyIdentBytes));
+                        if (kid.getKeyIdentifier() != null) {
+                            select.setSubjectKeyIdentifier(new DEROctetString(kid.getKeyIdentifier()).getEncoded(ASN1Encoding.DER));
+                        }
+                    } catch (IOException ioe) {
+                        // ignore
+                    }
+                }
+                boolean userProvided = false;
+
+                cert = findNextCert(systemCertStores, select, certSet);
+                if (cert == null && userCertStores != null) {
+                    userProvided = true;
+                    cert = findNextCert(userCertStores, select, certSet);
+                }
+
+                if (cert != null) {
+                    // cert found
+                    certSet.add(cert);
+                    userProvidedList.add(userProvided);
+                }
+            }
+        }
+
+        // if a trustanchor was found - try to find a selfsigned certificate of
+        // the trustanchor
+        if (trustAnchorFound) {
+            if (trustAnchorCert != null && trustAnchorCert.getSubjectX500Principal().equals(trustAnchorCert.getIssuerX500Principal())) {
+                certSet.add(trustAnchorCert);
+                userProvidedList.add(false);
+            } else {
+                X509CertSelector select = new X509CertSelector();
+
+                try {
+                    select.setSubject(cert.getIssuerX500Principal().getEncoded());
+                    select.setIssuer(cert.getIssuerX500Principal().getEncoded());
+                } catch (IOException e) {
+                    throw new IllegalStateException(e.toString());
+                }
+
+                boolean userProvided = false;
+
+                trustAnchorCert = findNextCert(systemCertStores, select, certSet);
+                if (trustAnchorCert == null && userCertStores != null) {
+                    userProvided = true;
+                    trustAnchorCert = findNextCert(userCertStores, select, certSet);
+                }
+
+                if (trustAnchorCert != null) {
+                    try {
+                        cert.verify(trustAnchorCert.getPublicKey(), "BC");
+                        certSet.add(trustAnchorCert);
+                        userProvidedList.add(userProvided);
+                    } catch (GeneralSecurityException gse) {
+                        // wrong cert
+                    }
+                }
+            }
+        }
+
+        CertPath certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath(new ArrayList<>(certSet));
+        return new Object[]{certPath, userProvidedList};
+    }
+
+    private X509Certificate findNextCert(List<CertStore> certStores, X509CertSelector selector, Set<X509Certificate> certSet)
+            throws CertStoreException {
+        List<X509Certificate> certificates = findCerts(certStores, selector);
+
+        for (X509Certificate certificate : certificates) {
+            if (!certSet.contains(certificate)) {
+                return certificate;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean checkSigner(final X509Certificate cert, final String sender) throws CertificateParsingException, CertificateEncodingException, IOException {
+        boolean valid = true;
+        valid |= checkKeyLength(cert);
+        valid |= checkKeyUsage(cert);
+        valid |= checkExtendedKeyUsage(cert);
+        valid |= checkMailAddresses(cert, sender);
+        return valid;
+    }
+
+    private boolean checkMailAddresses(X509Certificate cert, String sender) throws CertificateParsingException, CertificateEncodingException {
+        List<String> names = keyManagement.getAlternateNamesFromCert(cert);
+        return names.contains(sender);
+    }
+
+    private boolean checkExtendedKeyUsage(X509Certificate cert) throws CertificateParsingException {
+
+        List<String> extendedKeyUsage = cert.getExtendedKeyUsage();
+        return extendedKeyUsage.contains(KeyPurposeId.anyExtendedKeyUsage.getId()) ||
+                extendedKeyUsage.contains(KeyPurposeId.id_kp_emailProtection.getId());
+    }
+
+    private boolean checkKeyLength(X509Certificate cert) {
+        PublicKey key = cert.getPublicKey();
+        int keyLength = -1;
+        if (key instanceof RSAPublicKey) {
+            keyLength = ((RSAPublicKey) key).getModulus().bitLength();
+        } else if (key instanceof DSAPublicKey) {
+            keyLength = ((DSAPublicKey) key).getParams().getP().bitLength();
+        }
+
+        return (keyLength != -1 && keyLength <= SHORT_KEY_LENGTH);
+    }
+
+    /**
+     * See https://tools.ietf.org/html/rfc5280#section-4.2.1.3
+     *
+     * @param cert the certificate to check key usage for
+     * @return true if key usage is set and either digitalSignature or nonRepudiation are present, otherwise false
+     */
+    private boolean checkKeyUsage(X509Certificate cert) {
+        boolean[] keyUsage = cert.getKeyUsage();
+        if (keyUsage == null) {
+            return false;
+        }
+
+        return keyUsage[0] || keyUsage[1];
+    }
+
+    private Date getSignatureTime(SignerInformation signer) {
+        AttributeTable attributeTable = signer.getSignedAttributes();
+        Date result = null;
+
+        if (attributeTable != null) {
+            Attribute attr = attributeTable.get(CMSAttributes.signingTime);
+            if (attr != null) {
+                Time t = Time.getInstance(attr.getAttrValues().getObjectAt(0)
+                        .toASN1Primitive());
+                result = t.getDate();
+            }
+        }
+
+        return result;
+    }
+
+    private ASN1Primitive getObject(byte[] ext)
+            throws IOException {
+        ASN1InputStream aIn = new ASN1InputStream(ext);
+        ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
+
+        aIn = new ASN1InputStream(octs.getOctets());
+        return aIn.readObject();
+    }
+
+    private List<X509Certificate> findCerts(List<CertStore> certStores, SignerId sid) throws CertStoreException {
+        JcaX509CertSelectorConverter converter = new JcaX509CertSelectorConverter();
+        return findCerts(certStores, converter.getCertSelector(sid));
+    }
+
+    private List<X509Certificate> findCerts(List<CertStore> certStores, X509CertSelector selector) throws CertStoreException {
+        List<X509Certificate> certificates = new ArrayList<>();
+        for (CertStore certStore : certStores) {
+            Collection<? extends Certificate> storeCerts = certStore.getCertificates(selector);
+            for (Certificate cert : storeCerts) {
+                if (cert.getType().equals("X.509")) {
+                    certificates.add((X509Certificate) cert);
+                }
+            }
+        }
+
+        return certificates;
     }
 
     public Boolean checkSignature(String pathToFile) {
@@ -149,7 +502,7 @@ public class SignatureCheck {
         }
     }
 
-    private Boolean workingExample() throws Exception{
+    private Boolean workingExample() throws Exception {
         Log.e(SMileCrypto.LOG_TAG, "try hardcoded part......");
             /*
             * example from https://stackoverflow.com/questions/16662408/correct-way-to-sign-and-verify-signature-using-bouncycastle
@@ -220,10 +573,10 @@ public class SignatureCheck {
         return hasValidSigner;
     }
 
-    private Boolean anotherSignatureCheck(MimeMessage mimeMessage) throws Exception{
+    private Boolean anotherSignatureCheck(MimeMessage mimeMessage) throws Exception {
         Object part = mimeMessage.getContent();
         Log.e(SMileCrypto.LOG_TAG, "instance of: " + part.toString());
-        if(part instanceof SharedByteArrayInputStream) {
+        if (part instanceof SharedByteArrayInputStream) {
             String content = getUTF8Content(part);
             Log.e(SMileCrypto.LOG_TAG, "content: " + content);
             DecryptMail dM = new DecryptMail();
@@ -231,7 +584,7 @@ public class SignatureCheck {
             Log.d(SMileCrypto.LOG_TAG, mimeMessage.getContentType());
             MimeMultipart part2 = (MimeMultipart) mimeMessage.getContent();
             int count = part2.getCount();
-            for(int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 BodyPart bodyPart = part2.getBodyPart(i);
                 Log.e(SMileCrypto.LOG_TAG, bodyPart.toString());
                 Log.e(SMileCrypto.LOG_TAG, bodyPart.getContentType());
@@ -280,7 +633,7 @@ public class SignatureCheck {
         return false;
     }
 
-    private static String getUTF8Content(Object contentObject) throws Exception{
+    private static String getUTF8Content(Object contentObject) throws Exception {
         // possible ClassCastException
         SharedByteArrayInputStream sbais = (SharedByteArrayInputStream) contentObject;
         // possible UnsupportedEncodingException

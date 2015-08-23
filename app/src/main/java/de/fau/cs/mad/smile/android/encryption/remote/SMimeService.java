@@ -22,6 +22,7 @@ import javax.mail.util.SharedFileInputStream;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.SignatureCheck;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 
@@ -68,11 +69,19 @@ public class SMimeService extends Service {
             encryptedFile = copyToFile(inputStream);
 
             final DecryptMail decryptMail = new DecryptMail();
+            final SignatureCheck verifyMail = new SignatureCheck();
             MimeBodyPart mimeBodyPart = new MimeBodyPart(new SharedFileInputStream(encryptedFile));
             MimeBodyPart decryptedPart = decryptMail.decryptMail(recipient, mimeBodyPart);
+
             if(decryptedPart != null) {
                 decryptedPart.writeTo(outputStream);
-                result.putExtra(SMimeApi.RESULT_TYPE, SMimeApi.RESULT_TYPE_ENCRYPTED);
+                int resultType = SMimeApi.RESULT_TYPE_ENCRYPTED;
+
+                if(verifyMail.verifySignature(decryptedPart, sender)) {
+                    resultType |= SMimeApi.RESULT_TYPE_SIGNED;
+                }
+
+                result.putExtra(SMimeApi.RESULT_TYPE, resultType);
                 result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
             } else {
                 // TODO: not encrypted/decrypt failed
