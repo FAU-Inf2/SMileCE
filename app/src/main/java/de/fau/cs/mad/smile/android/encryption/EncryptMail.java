@@ -200,6 +200,8 @@ public class EncryptMail {
     }
 
     private class AsyncEncryptPart extends AsyncTask<Object, Void, MimeBodyPart> {
+
+
         @Override
         protected MimeBodyPart doInBackground(Object... params) {
             if(params.length == 2)
