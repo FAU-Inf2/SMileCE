@@ -8,8 +8,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import de.fau.cs.mad.smile.android.encryption.R;
-
 
 public class SettingsActivity extends ActionBarActivity {
     private Toolbar toolbar;
