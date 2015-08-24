@@ -6,6 +6,7 @@
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
     <string name="go">Go</string>
+    <string name="export">Export</string>
     <string name="done">Done</string>
     <string name="info">Info</string>
     <string name="okay">Okay</string>
@@ -195,6 +196,10 @@
     <string name="alert_header_end">\'s key?</string>
     <string name="erase">ERASE</string>
     <string name="alert_content">If you delete this key, you won\'t be able to decrypt messages encrypted with this key. </string>
+    <string name="alert_header_export">Exporting certificate</string>
+    <string name="certificate_export_fail">Exporting certificate failed.</string>
+    <string name="certificate_export_success">Certificate was successfully saved as:&#160;</string>
+    <string name="alert_export">Do you really want to export your certificate containing the private key to the SD-card?</string>
     <string name="new_contact_begin">"Do you wish to add "</string>
     <string name="new_contact_end">" to your address book?"</string>
     <string name="add">ADD</string>

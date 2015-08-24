@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -81,13 +82,15 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        Log.e(SMileCrypto.LOG_TAG, "item: " + id);
         if (id == android.R.id.home) {
             finish();
             return true;
         } else if(id == R.id.action_delete) {
             deleteKey(this.keyInfo);
+        } else if (id == R.id.action_export) {
+            exportCertificate();
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -389,6 +392,56 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
                         }
                     });
             alertDialogBuilder.create().show();
+        }
+    }
+
+    private void exportCertificate() {
+        Log.d(SMileCrypto.LOG_TAG, "Try to export certificate.");
+        if(this.alias.contains("_own_")) {
+            exportOwnCertificate();
+        } else if(this.alias.contains("_other_")) {
+            exportOtherCertificate();
+        } else {
+            //this should not happen
+            Log.e(SMileCrypto.LOG_TAG, "Tried to export certificate with invalid alias: " + alias);
+        }
+    }
+
+    private void exportOwnCertificate() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setTitle(getString(R.string.alert_header_export));
+        alertDialogBuilder
+                    .setMessage(getString(R.string.alert_export))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(R.string.export), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            String dst = KeyManagement.copyP12ToSDCard(alias);
+                            if (dst == null) {
+                                Toast.makeText(App.getContext(),
+                                        getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(App.getContext(),
+                                        getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            alertDialogBuilder.create().show();
+        }
+
+    private void exportOtherCertificate() {
+        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.certificate, alias);
+        if (dst == null) {
+            Toast.makeText(App.getContext(),
+                    getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(App.getContext(),
+                    getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
         }
     }
 

@@ -2,6 +2,7 @@ package de.fau.cs.mad.smile.android.encryption;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -17,6 +18,7 @@ import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -381,6 +383,51 @@ public class KeyManagement {
         } catch (IOException e) {
             Log.e(SMileCrypto.LOG_TAG, "Error copying .p12 to internal storage: " + e.getMessage());
             return false;
+        }
+    }
+
+    public static String copyP12ToSDCard(String alias) {
+        File certDirectory = App.getContext().getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE);
+        String filename = alias + ".p12";
+        File src = new File(certDirectory, filename);
+
+        File dstDirectory =  new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
+        dstDirectory.mkdirs(); // create folder if it does not exist yet
+
+        File dst = new File(dstDirectory, filename);
+        try {
+            org.apache.commons.io.FileUtils.copyFile(src, dst);
+            Log.d(SMileCrypto.LOG_TAG, "Copied p12 from interal storage to SD-card.");
+            return dst.getAbsolutePath();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error copying .p12 to external storage: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static String copyCertificateToSDCard(X509Certificate certificate, String alias) {
+        if(certificate == null || alias == null) {
+            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
+            Log.e(SMileCrypto.LOG_TAG, "Called copyCertificateToSDCard with invalid parameters.");
+            return null;
+        }
+
+        String filename = alias + ".crt";
+        File dstDirectory =  new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
+        dstDirectory.mkdirs(); // create folder if it does not exist yet
+
+        File dst = new File(dstDirectory, filename);
+        try {
+            Log.d(SMileCrypto.LOG_TAG, "Export certificate with alias: " + alias);
+            FileOutputStream fos = new FileOutputStream(dst);
+            fos.write(certificate.getEncoded());
+            fos.flush();
+            fos.close();
+            Log.d(SMileCrypto.LOG_TAG, "Exported certificate to SD-card.");
+            return dst.getAbsolutePath();
+        } catch (Exception e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error exporting certificate to external storage: " + e.getMessage());
+            return null;
         }
     }
 
