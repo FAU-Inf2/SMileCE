@@ -198,7 +198,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         passphraseUserInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         passphraseUserInput.setTransformationMethod(new PasswordTransformationMethod());
 
-        alertDialogBuilder.setCancelable(false).setNegativeButton(getResources().getString(R.string.go),
+        alertDialogBuilder.setCancelable(false).setPositiveButton(getResources().getString(R.string.go),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String passphrase = passphraseUserInput.getText().toString();
@@ -209,7 +209,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
                         }
                     }
                 })
-                .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 //dialog.dismiss();
                                 finish();
@@ -227,18 +227,19 @@ public class ImportCertificateActivity extends ActionBarActivity {
         builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
                 "\n" + getResources().getString(R.string.try_again));
 
-        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
-            }
-        });
-        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 showPassphrasePrompt(pathToFile);
             }
         });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+
         builder.create().show();
     }
 
@@ -300,16 +301,16 @@ public class ImportCertificateActivity extends ActionBarActivity {
         builder.setTitle(getResources().getString(R.string.error));
         builder.setMessage(message);
 
-        builder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
-            }
-        });
-        builder.setNegativeButton(R.string.retry, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 showFileChooser();
+            }
+        });
+        builder.setNegativeButton(R.string.done, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
             }
         });
         builder.create().show();
