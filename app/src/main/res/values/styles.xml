@@ -21,6 +21,8 @@
         <item name="colorControlHighlight">@color/accent_material_dark</item>
     </style>
 
+    <style name="DialogTheme" parent="@android:style/Theme.Dialog"></style>
+
     <!--Style for simple title inner header view - TODO: does not work? -->
     <style name="card.header_simple_title">
         <item name="android:textSize">@dimen/card_header_simple_title_text_size</item>

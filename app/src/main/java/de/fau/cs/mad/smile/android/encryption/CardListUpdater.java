@@ -1,10 +1,10 @@
 package de.fau.cs.mad.smile.android.encryption;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
 import android.view.View;
@@ -76,15 +76,8 @@ public class CardListUpdater {
                         }
                         final KeyCard kc = (KeyCard) card;
                         ContextThemeWrapper context;
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                            Log.d(SMileCrypto.LOG_TAG, "SDK < LOLIPOP");
-                            context = new ContextThemeWrapper(card.getContext(), android.R.style.Theme_Holo_Dialog);
-                        } else {
-                            Log.d(SMileCrypto.LOG_TAG, "SDK >= LOLIPOP");
-                            context = new ContextThemeWrapper(card.getContext(), android.R.style.Theme_Material_Dialog);
-                        }
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                                context);
+                                card.getContext());
                         if (kc.keyInfo.alias.startsWith("SMile_crypto_own")) {
 
                             // set title
