@@ -18,7 +18,8 @@
         android:layout_height="20dp"
         android:src="@drawable/ic_public_key_silver_48dp"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="24dp"/>
 
     <ImageView
         android:id="@+id/privateKey"
@@ -27,5 +28,6 @@
         android:src="@drawable/ic_private_key_black_48dp"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/publicKey"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:layout_marginEnd="24dp"/>
 </RelativeLayout>

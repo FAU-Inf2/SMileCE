@@ -7,12 +7,17 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
 
 public class CardListUpdater {
@@ -67,78 +72,29 @@ public class CardListUpdater {
 
             if(!contains) {
                 Log.e(SMileCrypto.LOG_TAG, "Items added");
-                card.setOnLongClickListener(new Card.OnLongCardClickListener() {
-
+                card.getCardHeader().setPopupMenu(R.menu.card_context, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                     @Override
-                    public boolean onLongClick(Card card, View view) {
-                        if (!(card instanceof KeyCard)) {
-                            return false;
+                    public void onMenuItemClick(BaseCard card, MenuItem item) {
+                        if(!(card instanceof KeyCard)) {
+                            return;
                         }
-                        final KeyCard kc = (KeyCard) card;
-                        ContextThemeWrapper context;
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                                card.getContext());
-                        if (kc.keyInfo.alias.startsWith("SMile_crypto_own")) {
-
-                            // set title
-                            alertDialogBuilder.setTitle(App.getContext().getString(R.string.alert_header_start) + kc.keyInfo.contact + App.getContext().getString(R.string.alert_header_end));
-
-                            // set dialog message
-                            alertDialogBuilder
-                                    .setMessage(App.getContext().getString(R.string.alert_content))
-                                    .setCancelable(false)
-                                    .setPositiveButton(App.getContext().getString(R.string.erase), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, close
-                                            // current activity
-                                            keyManager.deleteKey(kc.keyInfo.alias);
-                                            mCardArrayAdapter.remove(kc);
-                                            mCardArrayAdapter.notifyDataSetChanged();
-                                        }
-                                    })
-                                    .setNegativeButton(App.getContext().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, just close
-                                            // the dialog box and do nothing
-                                            dialog.cancel();
-                                        }
-                                    });
-
-                            // create alert dialog
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-
-                            // show it
-                            alertDialog.show();
-                        } else {
-                            // set dialog message
-                            alertDialogBuilder
-                                    .setMessage(App.getContext().getString(R.string.alert_header_start) + kc.keyInfo.contact + App.getContext().getString(R.string.alert_header_end))
-                                    .setCancelable(false)
-                                    .setPositiveButton(App.getContext().getString(R.string.erase), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, close
-                                            // current activity
-                                            keyManager.deleteKey(kc.keyInfo.alias);
-                                            mCardArrayAdapter.remove(kc);
-                                            assert !mCardArrayAdapter.contains(kc);
-                                            mCardArrayAdapter.notifyDataSetChanged();
-                                        }
-                                    })
-                                    .setNegativeButton(App.getContext().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // if this button is clicked, just close
-                                            // the dialog box and do nothing
-                                            dialog.cancel();
-                                        }
-                                    });
-
-                            // create alert dialog
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-
-                            // show it
-                            alertDialog.show();
+                        KeyCard kc = (KeyCard) card;
+                        int id = item.getItemId();
+                        boolean own = kc.keyInfo.alias.startsWith("SMile_crypto_own");
+                        if (id == R.id.delete) {
+                            if(own) {
+                                deleteOwnCertificate(kc);
+                            }
+                            else {
+                                deleteOtherCertificate(kc);
+                            }
+                        } else if (id == R.id.export) {
+                            if(own) {
+                                exportOwnCertificate(kc.keyInfo);
+                            } else {
+                                exportOtherCertificate(kc.keyInfo);
+                            }
                         }
-                        return true;
                     }
                 });
 
@@ -154,7 +110,6 @@ public class CardListUpdater {
                         ac.startActivity(i);
                     }
                 });
-
                 mCardArrayAdapter.add(card);
             }
         }
@@ -170,5 +125,96 @@ public class CardListUpdater {
         }
         cards.removeAll(toDelete);
         mCardArrayAdapter.notifyDataSetChanged();
+    }
+
+    private void deleteOwnCertificate(final KeyCard kc) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                kc.getContext());
+
+            alertDialogBuilder.setTitle(App.getContext().getString(R.string.alert_header_start) + kc.keyInfo.contact + App.getContext().getString(R.string.alert_header_end));
+
+            alertDialogBuilder
+                    .setMessage(App.getContext().getString(R.string.alert_content))
+                    .setCancelable(false)
+                    .setPositiveButton(App.getContext().getString(R.string.erase), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            keyManager.deleteKey(kc.keyInfo.alias);
+                            mCardArrayAdapter.remove(kc);
+                            mCardArrayAdapter.notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton(App.getContext().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+
+            alertDialog.show();
+    }
+
+    private void deleteOtherCertificate(final KeyCard kc) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                kc.getContext());
+
+        alertDialogBuilder
+                .setMessage(App.getContext().getString(R.string.alert_header_start) + kc.keyInfo.contact + App.getContext().getString(R.string.alert_header_end))
+                .setCancelable(false)
+                .setPositiveButton(App.getContext().getString(R.string.erase), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        keyManager.deleteKey(kc.keyInfo.alias);
+                        mCardArrayAdapter.remove(kc);
+                        mCardArrayAdapter.notifyDataSetChanged();
+                    }
+                })
+                .setNegativeButton(App.getContext().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        alertDialog.show();
+
+    }
+
+
+    private void exportOwnCertificate(final KeyInfo keyInfo) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ac);
+        alertDialogBuilder.setTitle(ac.getString(R.string.alert_header_export));
+        alertDialogBuilder
+                .setMessage(ac.getString(R.string.alert_export))
+                .setCancelable(false)
+                .setPositiveButton(ac.getString(R.string.export), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String dst = KeyManagement.copyP12ToSDCard(keyInfo.alias);
+                        if (dst == null) {
+                            Toast.makeText(App.getContext(),
+                                    ac.getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(App.getContext(),
+                                    ac.getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                })
+                .setNegativeButton(ac.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialogBuilder.create().show();
+    }
+
+    private void exportOtherCertificate(KeyInfo keyInfo) {
+        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.certificate, keyInfo.alias);
+        if (dst == null) {
+            Toast.makeText(App.getContext(),
+                    ac.getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(App.getContext(),
+                    ac.getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
+        }
     }
 }

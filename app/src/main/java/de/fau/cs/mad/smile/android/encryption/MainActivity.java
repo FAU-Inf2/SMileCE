@@ -88,6 +88,7 @@ public class MainActivity extends ActionBarActivity {
         updater = new CardListUpdater(keyManager, this, mCardArrayAdapter, cards);
 
         updater.updateCards();
+        registerForContextMenu(gRecyclerView);
 
         final ViewGroup fabContainer = (ViewGroup) this.findViewById(R.id.fab_container);
         fab = (ImageButton) this.findViewById(R.id.fab);
