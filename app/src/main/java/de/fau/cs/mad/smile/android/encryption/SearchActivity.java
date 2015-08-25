@@ -1,5 +1,6 @@
 package de.fau.cs.mad.smile.android.encryption;
 
+import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,7 +35,10 @@ public class SearchActivity extends ActionBarActivity {
     private String searchQuery;
     private EditText searchEt;
     private ArrayList<Card> cardsFiltered;
-    private String queryText;
+    private String edText;
+
+    private static String STATE_SEARCH = "searchquery";
+    private static String STATE_EDTEXT = "edtext";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +49,13 @@ public class SearchActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         cards = new ArrayList<>();
-        queryText = "";
+        if (savedInstanceState != null) {
+            searchQuery = savedInstanceState.getString(STATE_SEARCH);
+            edText = savedInstanceState.getString(STATE_EDTEXT);
+        } else {
+            searchQuery = "";
+            edText = "";
+        }
 
         try {
             keyManager = new KeyManagement();
@@ -70,7 +80,7 @@ public class SearchActivity extends ActionBarActivity {
         updater.updateCards();
         searchEt = (EditText) toolbar.findViewById(R.id.search_bar);
         searchEt.addTextChangedListener(new SearchWatcher());
-        searchEt.setText(queryText);
+        searchEt.setText(edText);
         searchEt.requestFocus();
 
         ImageView image = (ImageView) toolbar.findViewById(R.id.remove_search);
@@ -82,6 +92,13 @@ public class SearchActivity extends ActionBarActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString(STATE_SEARCH, searchQuery);
+        savedInstanceState.putString(STATE_EDTEXT, edText);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
