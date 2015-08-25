@@ -141,9 +141,9 @@ public class SMimeService extends Service {
         final Intent result = new Intent();
 
         try {
-            inputFile = copyToFile(inputStream);
+            //inputFile = copyToFile(inputStream);
             SignMessage signer = new SignMessage();
-            MimeBodyPart mimeBodyPart = new MimeBodyPart(new SharedFileInputStream(inputFile));
+            MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
             MimeMultipart signedPart = signer.sign(mimeBodyPart, new InternetAddress(sender));
             if (signedPart != null) {
                 signedPart.writeTo(outputStream);
