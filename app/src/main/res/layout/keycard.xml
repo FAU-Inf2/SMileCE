@@ -65,7 +65,7 @@
                 android:layout_height="48dp"
                 android:gravity="center"
                 android:background="@drawable/contact_badge_round"
-                android:layout_below="@id/card_header"
+                android:layout_below="@id/privateKey"
                 />
 
             <TextView
@@ -74,7 +74,7 @@
                 android:id="@+id/email_label"
                 android:text="@string/email_label"
                 android:layout_toEndOf="@id/badge"
-                android:layout_below="@id/card_header"
+                android:layout_below="@id/privateKey"
                 android:layout_marginStart="8dp"
                 />
 
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/email"
                 android:layout_toEndOf="@id/valid_label"
-                android:layout_below="@id/card_header"
+                android:layout_below="@id/privateKey"
                 android:layout_marginStart="8dp"/>
 
 

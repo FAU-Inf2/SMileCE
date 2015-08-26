@@ -173,6 +173,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
     public KeyAdapter(Activity activity, List<KeyInfo> keylistist) {
         this.activity = activity;
         this.keylist = keylistist;
+        notifyDataSetChanged();
     }
 
     @Override
