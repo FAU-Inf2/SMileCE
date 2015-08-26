@@ -32,8 +32,13 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.daimajia.swipe.SimpleSwipeListener;
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 
 import org.joda.time.DateTime;
 import org.joda.time.Months;
@@ -53,7 +58,7 @@ import java.util.List;
 import de.fau.cs.mad.smile.android.encryption.R;
 
 
-public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
+public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     private List<KeyInfo> keylist;
     private Activity activity;
     private static List<Integer> materialColors = Arrays.asList(
@@ -91,6 +96,11 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         notifyDataSetChanged();
     }
 
+    @Override
+    public int getSwipeLayoutResourceId(int i) {
+        return R.id.swipe;
+    }
+
     public static class KeyViewHolder extends RecyclerView.ViewHolder {
         protected TextView mail;
         protected TextView termination_date;
@@ -104,7 +114,12 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         protected ImageView validCircle2;
         protected ImageView validCircle3;
         protected ImageView validCircle4;
-        protected View view;
+        protected RelativeLayout view;
+        protected SwipeLayout swipe;
+        protected RelativeLayout delete;
+        protected ImageView delete_icon;
+        protected RelativeLayout share;
+        protected ImageView share_icon;
 
 
         public KeyViewHolder(final View itemView) {
@@ -121,7 +136,12 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
             validCircle2 = (ImageView) itemView.findViewById(R.id.valid_circle_2);
             validCircle3 = (ImageView) itemView.findViewById(R.id.valid_circle_3);
             validCircle4 = (ImageView) itemView.findViewById(R.id.valid_circle_4);
-            view = itemView;
+            view = (RelativeLayout) itemView.findViewById(R.id.card_layout);
+            swipe = (SwipeLayout) itemView.findViewById(R.id.swipe);
+            delete = (RelativeLayout) itemView.findViewById(R.id.delete);
+            share = (RelativeLayout) itemView.findViewById(R.id.share);
+            delete_icon = (ImageView) itemView.findViewById(R.id.delete_icon);
+            share_icon = (ImageView) itemView.findViewById(R.id.share_icon);
         }
     }
 
@@ -186,7 +206,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(KeyViewHolder holder, int position) {
+    public void onBindViewHolder(final KeyViewHolder holder, final int position) {
         final KeyInfo keyInfo = keylist.get(position);
         if(keyInfo.contact.equals("")) {
             holder.header.setText(keyInfo.mail);
@@ -262,6 +282,53 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
             }
         });
         holder.contextButton.setOnClickListener(new oncClickCreatePopup(position));
+        holder.swipe.addSwipeListener(new SimpleSwipeListener() {
+            @Override
+            public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
+                layout.setDragDistance(0);
+                boolean own = keyInfo.alias.startsWith("SMile_crypto_own");
+                if(holder.delete_icon.isShown()) {
+                    holder.delete_icon.setVisibility(View.INVISIBLE);
+                    if(own) {
+                        deleteOwnCertificate(keyInfo, position);
+                    } else {
+                        deleteOtherCertificate(keyInfo, position);
+                    }
+                }
+
+                if(holder.share_icon.isShown()) {
+                    holder.share_icon.setVisibility(View.INVISIBLE);
+                    Toast.makeText(activity, "Sharing certificates!", Toast.LENGTH_SHORT).show();
+                }
+                super.onHandRelease(layout, xvel, yvel);
+            }
+        });
+        holder.swipe.addRevealListener(R.id.delete, new SwipeLayout.OnRevealListener() {
+            @Override
+            public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+                if (dragEdge != SwipeLayout.DragEdge.Right) {
+                    return;
+                }
+                if (v <= 0.3 && holder.delete_icon.isShown()) {
+                    holder.delete_icon.setVisibility(View.INVISIBLE);
+                } else if (v > 0.3 && !holder.delete_icon.isShown()) {
+                    holder.delete_icon.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        holder.swipe.addRevealListener(R.id.share, new SwipeLayout.OnRevealListener() {
+            @Override
+            public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+                if (dragEdge != SwipeLayout.DragEdge.Left) {
+                    return;
+                }
+                if(v <= 0.2 && holder.share_icon.isShown()) {
+                    holder.share_icon.setVisibility(View.INVISIBLE);
+                } else if(v > 0.2 && !holder.share_icon.isShown()) {
+                    holder.share_icon.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
     private ColorFilter getColorFilter(String color) {

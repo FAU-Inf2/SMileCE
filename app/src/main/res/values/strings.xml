@@ -81,6 +81,9 @@
         · joda-time-android:\n
         \t License: Apache License 2.0\n
         \t Link: <a href="https://github.com/dlew/joda-time-android">https://github.com/dlew/joda-time-android</a>\n
+        · Android Swipe Layout:\n
+        \t License: The MIT License (MIT)\n
+        \t Link: <a href="https://github.com/daimajia/AndroidSwipeLayout">https://github.com/daimajia/AndroidSwipeLayout</a>\n
     </string>
 
     <string name="key_management">SMile key management</string>
