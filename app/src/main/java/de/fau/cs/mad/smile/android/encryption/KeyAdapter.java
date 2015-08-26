@@ -304,7 +304,7 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
     }
 
     public void removeKey(int position) {
-        if(position > 0 && position < getItemCount()) {
+        if(position >= 0 && position < getItemCount()) {
             keylist.remove(position);
             notifyItemRemoved(position);
         }
