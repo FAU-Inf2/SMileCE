@@ -8,13 +8,13 @@ import java.util.List;
 
 public class KeyInfo {
     protected String alias = "";
-    protected String contact = "Max Mustermann";
+    protected String contact = "";
     protected final List<String> mailAddresses;
-    protected String mail = "Max@musterman.de";
+    protected String mail = "";
     protected String type = "";
     protected String hash = "";
-    protected String trust = "0";
-    protected String thumbprint = "0";
+    protected String trust = "";
+    protected String thumbprint = "";
     protected DateTime termination_date;
     protected Boolean hasPrivateKey = false;
     protected DateTime valid_after;

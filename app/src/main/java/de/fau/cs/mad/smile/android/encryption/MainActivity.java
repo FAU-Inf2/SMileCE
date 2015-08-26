@@ -19,23 +19,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import org.spongycastle.operator.OperatorCreationException;
+
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
-import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
 
 public class MainActivity extends ActionBarActivity {
 
-    private CardArrayRecyclerViewAdapter mCardArrayAdapter;
+    private KeyAdapter adapter;
     private KeyManagement keyManager;
-    private ArrayList<Card> cards;
-
-    private CardListUpdater updater;
 
     private ImageButton fab;
 
@@ -65,8 +63,6 @@ public class MainActivity extends ActionBarActivity {
         toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
 
-        cards = new ArrayList<>();
-
         try {
             keyManager = new KeyManagement();
         } catch (KeyStoreException e) { // TODO: display error message and die
@@ -80,14 +76,11 @@ public class MainActivity extends ActionBarActivity {
         }
 
         //Staggered grid view
-        CardRecyclerView gRecyclerView = (CardRecyclerView) this.findViewById(R.id.carddemo_recyclerview);
+        RecyclerView gRecyclerView = (RecyclerView) this.findViewById(R.id.card_list);
         gRecyclerView.setHasFixedSize(false);
         gRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mCardArrayAdapter = new CardArrayRecyclerViewAdapter(this, cards);
-        gRecyclerView.setAdapter(mCardArrayAdapter);
-        updater = new CardListUpdater(keyManager, this, mCardArrayAdapter, cards);
-
-        updater.updateCards();
+        adapter = new KeyAdapter(this);
+        gRecyclerView.setAdapter(adapter);
         registerForContextMenu(gRecyclerView);
 
         final ViewGroup fabContainer = (ViewGroup) this.findViewById(R.id.fab_container);
@@ -97,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent i = new Intent(v.getContext(), ImportCertificateActivity.class);
                 startActivity(i);
-                updater.updateCards();
+                adapter.removeAndAdd(keyManager.getAllCertificates());
             }
         });
 
@@ -175,16 +168,18 @@ public class MainActivity extends ActionBarActivity {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
+                        adapter.removeAndAdd(keyManager.getAllCertificates());
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_help))) {
                         Intent i = new Intent(MainActivity.this, HelpActivity.class);
                         startActivity(i);
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_info))) {
                         Intent i = new Intent(MainActivity.this, InfoActivity.class);
                         startActivity(i);
+                        adapter.removeAndAdd(keyManager.getAllCertificates());
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
                         Intent i = new Intent(MainActivity.this, SearchActivity.class);
                         startActivity(i);
-                        updater.updateCards();
+                        adapter.removeAndAdd(keyManager.getAllCertificates());
                     }
                     return true;
                 }
@@ -223,7 +218,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onResume() {
-        updater.updateCards();
+        adapter.removeAndAdd(keyManager.getAllCertificates());
         super.onResume();
     }
 

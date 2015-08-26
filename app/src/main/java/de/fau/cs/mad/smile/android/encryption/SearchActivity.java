@@ -1,9 +1,9 @@
 package de.fau.cs.mad.smile.android.encryption;
 
-import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,21 +23,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
-import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
-
 public class SearchActivity extends ActionBarActivity {
-    private CardArrayRecyclerViewAdapter mCardArrayAdapter;
+    private KeyAdapter adapter;
     private KeyManagement keyManager;
 
-    private CardListUpdater updater;
-    private ArrayList<Card> cards;
+    private ArrayList<KeyInfo> cards;
 
     private Toolbar toolbar;
     private String searchQuery;
     private EditText searchEt;
-    private ArrayList<Card> cardsFiltered;
+    private ArrayList<KeyInfo> cardsFiltered;
     private String edText;
 
     private static String STATE_SEARCH = "searchquery";
@@ -51,7 +46,6 @@ public class SearchActivity extends ActionBarActivity {
         toolbar.setTitle(R.string.title_activity_search);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        cards = new ArrayList<>();
         if (savedInstanceState != null) {
             searchQuery = savedInstanceState.getString(STATE_SEARCH);
             edText = savedInstanceState.getString(STATE_EDTEXT);
@@ -71,16 +65,16 @@ public class SearchActivity extends ActionBarActivity {
         } catch (CertificateException e) {
             e.printStackTrace();
         }
+        cards = keyManager.getAllCertificates();
 
         //Staggered grid view
-        CardRecyclerView gRecyclerView = (CardRecyclerView) this.findViewById(R.id.carddemo_recyclerview);
+        RecyclerView gRecyclerView = (RecyclerView) this.findViewById(R.id.card_list);
         gRecyclerView.setHasFixedSize(false);
         gRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mCardArrayAdapter = new CardArrayRecyclerViewAdapter(this, cards);
-        gRecyclerView.setAdapter(mCardArrayAdapter);
-        updater = new CardListUpdater(keyManager, this, mCardArrayAdapter, cards);
+        adapter = new KeyAdapter(this);
+        adapter.addKey(cards);
+        gRecyclerView.setAdapter(adapter);
 
-        updater.updateCards();
         searchEt = (EditText) toolbar.findViewById(R.id.search_bar);
         searchEt.addTextChangedListener(new SearchWatcher());
         searchEt.setText(edText);
@@ -91,10 +85,9 @@ public class SearchActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 searchEt.setText("");
-                updater.updateCards();
+                adapter.removeAndAdd(keyManager.getAllCertificates());
             }
         });
-
     }
 
     @Override
@@ -120,6 +113,12 @@ public class SearchActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+        adapter.removeAndAdd(keyManager.getAllCertificates());
+        super.onResume();
+    }
+
     private class SearchWatcher implements TextWatcher {
 
         @Override
@@ -136,25 +135,24 @@ public class SearchActivity extends ActionBarActivity {
         public void afterTextChanged(Editable editable) {
             searchQuery = searchEt.getText().toString();
             Log.d(SMileCrypto.LOG_TAG, "Search for: " + searchQuery);
-            cardsFiltered = performSearch(cards, searchQuery);
-            updater.updateCards(cardsFiltered);
+            if (!searchQuery.equals("")) {
+                cardsFiltered = performSearch(cards, searchQuery);
+                adapter.switchCards(cardsFiltered);
+            } else {
+                adapter.switchCards(cards);
+            }
         }
 
     }
 
 
-    private ArrayList<Card> performSearch(ArrayList<Card> cardList, String query) {
+    private ArrayList<KeyInfo> performSearch(ArrayList<KeyInfo> cardList, String query) {
 
         String[] queryByWords = query.toLowerCase().split("\\s+");
 
-        ArrayList<Card> cardsFiltered = new ArrayList<Card>();
+        ArrayList<KeyInfo> cardsFiltered = new ArrayList<KeyInfo>();
 
-        for (Card card : cardList) {
-            if (!(card instanceof KeyCard)) {
-                continue;
-            }
-            KeyCard kc = (KeyCard) card;
-            KeyInfo ki = kc.keyInfo;
+        for (KeyInfo ki : cardList) {
             DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
             String content = (
                     ki.contact + " " +
@@ -178,7 +176,7 @@ public class SearchActivity extends ActionBarActivity {
 
                 if (numberOfMatches == 0) {
                     Log.d(SMileCrypto.LOG_TAG, "Found complete query");
-                    cardsFiltered.add(card);
+                    cardsFiltered.add(ki);
                 }
 
             }
