@@ -24,6 +24,7 @@
     <string name="navigation_drawer_import_certificate">Import S/MIME-Certificate</string>
     <string name="navigation_drawer_key_chain">Get Cert from KeyChain</string>
     <string name="navigation_decrypt_local_mail">Decrypt locally saved mail</string>
+    <string name="navigation_encrypt_local_mail">Encrypt locally saved mail</string>
     <string name="navigation_import_other_certificate">Import public certificate</string>
 
     <string name="navigation_drawer_header_name">FAU is MAD!</string>
@@ -100,6 +101,8 @@
     <string name="title_activity_import_certificate">Import certificate to SMile</string>
     <string name="title_activity_key_chain">KeyChainActivity</string>
     <string name="title_activity_decrypt_local_mail">DecryptLocalMailActivity</string>
+    <string name="title_activity_search">Search</string>
+    <string name="title_activity_encrypt_local_mail">Encrypt local mail</string>
 
     <string name="import_certificate_todo">…import certificate…</string>
     <string name="fab_select_import_certificate">Select a certificate to import</string>
@@ -250,5 +253,4 @@
     <string name="UID">LDAP user id: </string>
     <string name="UI">Unique identifier: </string>
     <string name="CA">Certification agency information </string>
-    <string name="title_activity_search">Search</string>
 </resources>

@@ -89,7 +89,9 @@ public class EncryptDecryptMail {
         System.out.println("Start encrypt.");
 
         EncryptMail encryptMail = new EncryptMail();
-        return encryptMail.encryptMessage(originalMimeMessage);
+        // TODO: needs to loop over recipients and return a message per recipient
+        // return encryptMail.encryptMessage(originalMimeMessage);
+        return null;
     }
 
     private Multipart sign(MimeMessage original) throws Exception {

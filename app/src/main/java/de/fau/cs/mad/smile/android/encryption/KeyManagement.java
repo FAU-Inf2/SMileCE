@@ -63,13 +63,13 @@ public class KeyManagement {
                     continue;
                 }
 
-                X509Certificate c = (X509Certificate) p12.getCertificate(alias);
+                X509Certificate certificate = (X509Certificate) p12.getCertificate(alias);
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
-                Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + c.getSubjectDN().getName());
-                Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + c.getIssuerDN().getName());
+                Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + certificate.getSubjectDN().getName());
+                Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + certificate.getIssuerDN().getName());
 
                 PrivateKey key = (PrivateKey) p12.getKey(alias, passphrase.toCharArray());
-                String new_alias = addCertificateToKeyStore(key, c);
+                String new_alias = addCertificateToKeyStore(key, certificate);
 
                 copyP12ToInternalDir(pathToFile, new_alias);
                 return savePassphrase(new_alias, passphrase);

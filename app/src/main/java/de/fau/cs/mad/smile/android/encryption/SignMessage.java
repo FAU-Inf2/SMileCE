@@ -128,25 +128,6 @@ public class SignMessage {
         }
     }
 
-    /* Note: doing this is strongly not recommended as it means a recipient of the message will have to be able to read the signature to read the message.*/
-    @Deprecated
-    public MimeBodyPart signEncapsulated(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
-        SMIMEToolkit smimeToolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
-        MimeBodyPart signedMimeBodyPart = null;
-        try {
-            Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
-
-            SignerInfoGenerator signerInfoGenerator = new
-                    JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").build("SHA256WITHRSA", privateKey, certificate);
-
-            signedMimeBodyPart = smimeToolkit.signEncapsulated(mimeBodyPart, signerInfoGenerator);
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
-        }
-
-        return signedMimeBodyPart;
-    }
-
     public Multipart signSynchronous(MimeBodyPart mimeBodyPart, String alias) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");

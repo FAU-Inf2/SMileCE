@@ -239,7 +239,12 @@ public class MainActivity extends ActionBarActivity {
             Intent i = new Intent(MainActivity.this, DecryptLocalMailActivity.class);
             startActivity(i);
             return true;
+        } else if (id == R.id.encrypt_local_mail) {
+            Intent i = new Intent(MainActivity.this, EncryptLocalMailActivity.class);
+            startActivity(i);
+            return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 }

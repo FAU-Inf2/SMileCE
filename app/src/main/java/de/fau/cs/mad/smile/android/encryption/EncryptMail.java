@@ -8,12 +8,15 @@ import org.spongycastle.cms.CMSAlgorithm;
 import org.spongycastle.cms.RecipientInfoGenerator;
 import org.spongycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.spongycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.spongycastle.jcajce.provider.asymmetric.X509;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.spongycastle.operator.OutputEncryptor;
 
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -27,24 +30,38 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 public class EncryptMail {
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
+    private final KeyManagement keyManagement;
+
+    public EncryptMail() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+        keyManagement = new KeyManagement();
+    }
+
+    /*
     public MimeMessage encryptMessage(MimeMessage message) {
         try {
             if(message == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }
-            return new AsyncEncryptMessage().execute(message).get();
+            return new encryptMessage(message);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
+    }*/
+
+    public MimeMessage encryptMessage(MimeMessage message, Address recipient) throws KeyStoreException {
+        String alias = keyManagement.getAliasByAddress(recipient);
+        X509Certificate certificate = keyManagement.getCertificateForAlias(alias);
+        return encryptMessage(message, certificate);
     }
 
     public MimeMessage encryptMessage(MimeMessage message, X509Certificate certificate) {
@@ -53,12 +70,18 @@ public class EncryptMail {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }
-            return new AsyncEncryptMessage().execute(message, certificate).get();
+            return new AsyncEncryptMessage(message, certificate).execute().get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
+    }
+
+    public MimeBodyPart encryptBodyPart(MimeBodyPart mimeBodyPart, Address recipient) throws KeyStoreException {
+        String alias = keyManagement.getAliasByAddress(recipient);
+        X509Certificate certificate = keyManagement.getCertificateForAlias(alias);
+        return encryptBodyPart(mimeBodyPart, certificate);
     }
 
     public MimeBodyPart encryptBodyPart(MimeBodyPart mimePart, X509Certificate certificate) {
@@ -68,7 +91,7 @@ public class EncryptMail {
                 return null;
             }
 
-            return new AsyncEncryptPart().execute(mimePart, certificate).get();
+            return new AsyncEncryptPart(mimePart, certificate).execute().get();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -78,12 +101,17 @@ public class EncryptMail {
 
     public MimeBodyPart encryptBodyPartSynchronous(MimeBodyPart mimePart, X509Certificate certificate) {
         SMIMEEnvelopedGenerator envelopedGenerator = new SMIMEEnvelopedGenerator();
+
         try {
-            RecipientInfoGenerator recipientInfoGen = new JceKeyTransRecipientInfoGenerator(certificate);
+            JceKeyTransRecipientInfoGenerator recipientInfoGen =
+                    new JceKeyTransRecipientInfoGenerator(certificate);
+            recipientInfoGen.setProvider(BouncyCastleProvider.PROVIDER_NAME);
             envelopedGenerator.addRecipientInfoGenerator(recipientInfoGen);
 
-            OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(
-                    CMSAlgorithm.AES256_CBC).build();
+            JceCMSContentEncryptorBuilder builder =
+                    new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC);
+            builder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+            OutputEncryptor encryptor = builder.build();
 
             return envelopedGenerator.generate(mimePart, encryptor);
         } catch (Exception e) {
@@ -176,42 +204,33 @@ public class EncryptMail {
         return certificates;
     }
 
-    public MimeBodyPart encryptAndSign(MimeMessage mimeMessage) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
-        SignMessage signMessage = new SignMessage();
-        MimeMessage encryptedMimeMessage = encryptMessage(mimeMessage);
+    private class AsyncEncryptMessage extends AsyncTask<Void, Void, MimeMessage> {
+        private final MimeMessage mimeMessage;
+        private final X509Certificate certificate;
 
-        try {
-            MimeBodyPart mimeBodyPart = (MimeBodyPart) encryptedMimeMessage.getContent();
-            //TODO: correct cast??
+        public AsyncEncryptMessage(final MimeMessage mimeMessage, final X509Certificate certificate) {
+            this.mimeMessage = mimeMessage;
+            this.certificate = certificate;
+        }
 
-            return signMessage.signEncapsulated(mimeBodyPart, null, null);
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in encryptAndSign: " + e.getMessage());
-            return null;
+        @Override
+        protected MimeMessage doInBackground(Void... params) {
+            return encryptMessageSynchronous(mimeMessage, certificate);
         }
     }
 
-    private class AsyncEncryptMessage extends AsyncTask<Object, Void, MimeMessage> {
-        @Override
-        protected MimeMessage doInBackground(Object... params) {
-            if(params.length == 1)
-                return encryptMessageSynchronous((MimeMessage) params[0]);
-            else if(params.length == 2)
-                return encryptMessageSynchronous((MimeMessage) params[0], (X509Certificate) params[1]);
-            else
-                return null;
+    private class AsyncEncryptPart extends AsyncTask<Void, Void, MimeBodyPart> {
+        private final MimeBodyPart bodyPart;
+        private final X509Certificate certificate;
+
+        public AsyncEncryptPart(MimeBodyPart bodyPart, X509Certificate certificate) {
+            this.bodyPart = bodyPart;
+            this.certificate = certificate;
         }
-    }
-
-    private class AsyncEncryptPart extends AsyncTask<Object, Void, MimeBodyPart> {
-
 
         @Override
-        protected MimeBodyPart doInBackground(Object... params) {
-            if(params.length == 2)
-                return encryptBodyPartSynchronous((MimeBodyPart) params[0], (X509Certificate) params[1]);
-            else
-                return null;
+        protected MimeBodyPart doInBackground(Void... params) {
+            return encryptBodyPartSynchronous(bodyPart, certificate);
         }
     }
 }

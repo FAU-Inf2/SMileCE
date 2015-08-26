@@ -158,8 +158,7 @@ public class DecryptMail {
         }
     }
 
-    public final MimeBodyPart decryptMail(final String senderAddress,
-                                          final MimeBodyPart mimeBodyPart)
+    public final MimeBodyPart decryptMail(final MimeBodyPart mimeBodyPart, final String senderAddress)
             throws KeyStoreException, MessagingException, NoSuchAlgorithmException,
             CertificateException, IOException, SMIMEException {
         if (mimeBodyPart == null) {
