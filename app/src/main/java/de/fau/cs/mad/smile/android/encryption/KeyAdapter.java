@@ -170,9 +170,9 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         this.keylist = new ArrayList<KeyInfo>();
     }
 
-    public KeyAdapter(Activity activity, List<KeyInfo> keylistist) {
+    public KeyAdapter(Activity activity, List<KeyInfo> keyInfoList) {
         this.activity = activity;
-        this.keylist = keylistist;
+        this.keylist = keyInfoList;
     }
 
     @Override
