@@ -254,4 +254,11 @@
     <string name="UI">Unique identifier: </string>
     <string name="CA">Certification agency information </string>
     <string name="title_activity_search">Search</string>
+
+    <string name="share">SHARE</string>
+    <string name="alert_share_own">Do you wish to share your private certificate with another app?</string>
+    <string name="dialog_share_own">This is potentially dangerous. Others may use your certificate to read your email or worse sign their own mails with it.</string>
+    <string name="alert_share_other">Do you wish to share this certificate with another app?</string>
+    <string name="certificate_share_fail">Sharing certificate failed.</string>
+    <string name="certificate_share_success">Certificate was successfully shared.</string>
 </resources>

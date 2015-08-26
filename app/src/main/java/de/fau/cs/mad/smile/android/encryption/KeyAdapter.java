@@ -46,6 +46,7 @@ import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStoreException;
@@ -298,7 +299,11 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
 
                 if(holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.INVISIBLE);
-                    Toast.makeText(activity, "Sharing certificates!", Toast.LENGTH_SHORT).show();
+                    if(own) {
+                        shareOwnCertificate(keyInfo);
+                    } else {
+                        shareOtherCertificate(keyInfo);
+                    }
                 }
                 super.onHandRelease(layout, xvel, yvel);
             }
@@ -322,9 +327,9 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 if (dragEdge != SwipeLayout.DragEdge.Left) {
                     return;
                 }
-                if(v <= 0.2 && holder.share_icon.isShown()) {
+                if (v <= 0.2 && holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.INVISIBLE);
-                } else if(v > 0.2 && !holder.share_icon.isShown()) {
+                } else if (v > 0.2 && !holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.VISIBLE);
                 }
             }
@@ -615,6 +620,53 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
         } else {
             Toast.makeText(activity,
                     App.getContext().getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    private void shareOwnCertificate(final KeyInfo keyInfo) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
+        alertDialogBuilder.setTitle(App.getContext().getString(R.string.alert_share_own));
+        alertDialogBuilder
+                .setMessage(App.getContext().getString(R.string.dialog_share_own))
+                .setCancelable(false)
+                .setPositiveButton(App.getContext().getString(R.string.share), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String dst = KeyManagement.copyP12ToSDCard(keyInfo.alias);
+                        if (dst == null) {
+                            Toast.makeText(App.getContext(),
+                                    App.getContext().getString(R.string.certificate_share_fail), Toast.LENGTH_LONG).show();
+                        } else {
+                            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                            shareIntent.setType("application/x-pkcs12");
+
+                            Uri uri = Uri.fromFile(new File((dst)));
+                            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                            activity.startActivity(shareIntent);
+                        }
+                    }
+                })
+                .setNegativeButton(App.getContext().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialogBuilder.create().show();
+    }
+
+    private void shareOtherCertificate(KeyInfo keyInfo) {
+        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.certificate, keyInfo.alias);
+        if (dst == null) {
+            Toast.makeText(activity,
+                    App.getContext().getString(R.string.certificate_share_fail), Toast.LENGTH_LONG).show();
+        } else {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("application/x-pkcs12");
+
+            Uri uri = Uri.fromFile(new File((dst)));
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            activity.startActivity(shareIntent);
         }
     }
 }
