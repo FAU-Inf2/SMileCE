@@ -12,6 +12,7 @@ import android.util.Log;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedFileInputStream;
 
+import de.fau.cs.mad.javax.activation.DataHandler;
+import de.fau.cs.mad.javax.activation.FileDataSource;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.DecryptMail;
@@ -149,17 +152,17 @@ public class SMimeService extends Service {
             SignMessage signer = new SignMessage();
             Properties props = System.getProperties();
             Session session = Session.getDefaultInstance(props, null);
-            MimeMessage mimeMessage = new MimeMessage(session, new SharedFileInputStream(inputFile));
-            MimeBodyPart bodyPart = new MimeBodyPart((InputStream) mimeMessage.getContent());
+            MimeMessage mimeMessage = new MimeMessage(session, new FileInputStream(inputFile));
+            mimeMessage.setDataHandler(new DataHandler(new FileDataSource(inputFile)));
+            Object content = mimeMessage.getContent();
+            MimeBodyPart bodyPart = new MimeBodyPart((InputStream) content);
             MimeMultipart signedPart = signer.sign(bodyPart, new InternetAddress(sender));
             if (signedPart != null) {
-                MimeMessage outMessage = new MimeMessage(mimeMessage);
-                outMessage.setContent(signedPart, signedPart.getContentType());
-                outMessage.saveChanges();
+                mimeMessage.setContent(signedPart, signedPart.getContentType());
+                mimeMessage.saveChanges();
                 File outputFile = new File(App.getContext().getApplicationContext().getDir("service-messages", Context.MODE_PRIVATE), "signed.tmp");
-                outMessage.writeTo(new FileOutputStream(outputFile));
-                //mimeMessage.setContent(signedPart);
-                //mimeMessage.writeTo(outputStream);
+                mimeMessage.writeTo(new FileOutputStream(outputFile));
+                mimeMessage.writeTo(outputStream);
                 result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
             }
         }catch (Exception e) {
