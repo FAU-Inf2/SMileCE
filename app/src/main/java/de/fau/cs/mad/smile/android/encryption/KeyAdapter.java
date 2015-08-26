@@ -331,7 +331,6 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         return output;
     }
 
-
     private Bitmap generateCircleBitmap(int circleColor, float diameterDP, String text){
         /**
          *
@@ -386,7 +385,6 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
 
         try {
             if (contactLookup != null && contactLookup.getCount() > 0) {
-
                 contactLookup.moveToNext();
                 lookUpKey = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.LOOKUP_KEY));
                 name = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
@@ -413,7 +411,16 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
             Log.d(SMileCrypto.LOG_TAG, "Thumbnail found.");
         } else {
             Log.d(SMileCrypto.LOG_TAG, "Thumbnail not found.");
-            String initial = (name.length() > 0) ? name.substring(0, 1) : keyInfo.contact.substring(0, 1);
+
+            String initial = "A";
+            if (name.length() > 0) {
+                initial = name.substring(0, 1);
+            } else {
+                if(keyInfo != null && keyInfo.contact != null && keyInfo.contact.length() > 0){
+                    initial = keyInfo.contact.substring(0, 1);
+                }
+            }
+
             BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), generateCircleBitmap(getMaterialColor(initial), 42, initial));
             holder.contactimage.setBackground(bdrawable);
         }
@@ -504,7 +511,6 @@ public class KeyAdapter extends RecyclerView.Adapter<KeyAdapter.KeyViewHolder> {
         alertDialog.show();
 
     }
-
 
     private void exportOwnCertificate(final KeyInfo keyInfo) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);

@@ -65,6 +65,7 @@ public class SearchActivity extends ActionBarActivity {
         } catch (CertificateException e) {
             e.printStackTrace();
         }
+
         cards = keyManager.getAllCertificates();
 
         //Staggered grid view
