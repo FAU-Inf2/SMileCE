@@ -15,6 +15,9 @@ import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
 import org.spongycastle.asn1.x500.style.BCStyle;
@@ -157,10 +160,11 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
 
         Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
         listDataHeader.add(getString(R.string.validity));
         HashMap<String, String> validity = new HashMap<>();
-        validity.put("Startdate", keyInfo.valid_after.toString());
-        validity.put("Enddate", keyInfo.termination_date.toString());
+        validity.put("Startdate", keyInfo.valid_after.toString(fmt));
+        validity.put("Enddate", keyInfo.termination_date.toString(fmt));
         ArrayList<AbstractCertificateInfoItem> val = new ArrayList<>();
         ValidityItem validityItem  = new ValidityItem();
         validityItem.build(validity);

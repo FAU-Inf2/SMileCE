@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -152,26 +155,29 @@ public class SearchActivity extends ActionBarActivity {
             }
             KeyCard kc = (KeyCard) card;
             KeyInfo ki = kc.keyInfo;
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
             String content = (
                     ki.contact + " " +
                             ki.mail + " " +
-                            String.valueOf(ki.termination_date) + " " +
-                            String.valueOf(ki.valid_after)
+                            ki.termination_date.toString(fmt) + " " +
+                            ki.valid_after.toString(fmt)
             ).toLowerCase();
+
+            int numberOfMatches = queryByWords.length;
 
             for (String word : queryByWords) {
                 Log.d(SMileCrypto.LOG_TAG, "Search for " + word + " in " + content);
 
-                int numberOfMatches = queryByWords.length;
-
                 if (content.contains(word)) {
+                    Log.d(SMileCrypto.LOG_TAG, "Found");
                     numberOfMatches--;
                 } else {
+                    Log.d(SMileCrypto.LOG_TAG, "Not found");
                     break;
                 }
 
                 if (numberOfMatches == 0) {
-                    Log.d(SMileCrypto.LOG_TAG, "found");
+                    Log.d(SMileCrypto.LOG_TAG, "Found complete query");
                     cardsFiltered.add(card);
                 }
 

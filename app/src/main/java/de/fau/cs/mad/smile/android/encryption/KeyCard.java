@@ -238,7 +238,7 @@ public class KeyCard extends Card {
 
         if(keyInfo.termination_date != null && keyInfo.valid_after != null) {
             DateTime valid = keyInfo.termination_date;
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM, yyyy");
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
             String displayDate= valid.toString(fmt);
             valid_until.setText(displayDate);
             DateTime today = new DateTime();

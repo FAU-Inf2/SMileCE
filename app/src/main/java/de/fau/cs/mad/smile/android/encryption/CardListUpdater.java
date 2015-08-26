@@ -75,21 +75,20 @@ public class CardListUpdater {
                 card.getCardHeader().setPopupMenu(R.menu.card_context, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                     @Override
                     public void onMenuItemClick(BaseCard card, MenuItem item) {
-                        if(!(card instanceof KeyCard)) {
+                        if (!(card instanceof KeyCard)) {
                             return;
                         }
                         KeyCard kc = (KeyCard) card;
                         int id = item.getItemId();
                         boolean own = kc.keyInfo.alias.startsWith("SMile_crypto_own");
                         if (id == R.id.delete) {
-                            if(own) {
+                            if (own) {
                                 deleteOwnCertificate(kc);
-                            }
-                            else {
+                            } else {
                                 deleteOtherCertificate(kc);
                             }
                         } else if (id == R.id.export) {
-                            if(own) {
+                            if (own) {
                                 exportOwnCertificate(kc.keyInfo);
                             } else {
                                 exportOtherCertificate(kc.keyInfo);
