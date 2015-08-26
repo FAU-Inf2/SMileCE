@@ -65,14 +65,15 @@ public class SearchActivity extends ActionBarActivity {
         } catch (CertificateException e) {
             e.printStackTrace();
         }
+
         cards = keyManager.getAllCertificates();
 
         //Staggered grid view
         RecyclerView gRecyclerView = (RecyclerView) this.findViewById(R.id.card_list);
         gRecyclerView.setHasFixedSize(false);
         gRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new KeyAdapter(this);
-        adapter.addKey(cards);
+        adapter = new KeyAdapter(this, cards);
+        //adapter.addKey(cards);
         gRecyclerView.setAdapter(adapter);
 
         searchEt = (EditText) toolbar.findViewById(R.id.search_bar);

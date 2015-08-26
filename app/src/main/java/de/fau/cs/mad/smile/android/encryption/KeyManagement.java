@@ -292,7 +292,11 @@ public class KeyManagement {
                 email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
             }
             Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
+
             keyInfo.mail = email;
+            if (keyInfo.mail.equals("") && keyInfo.mailAddresses.size() > 0) {
+                keyInfo.mail = keyInfo.mailAddresses.get(0);
+            }
 
             keyInfo.termination_date = new DateTime(cert.getNotAfter());
             keyInfo.valid_after = new DateTime((cert.getNotBefore()));
