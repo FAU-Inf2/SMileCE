@@ -86,8 +86,13 @@ public class SignatureCheck {
         }
 
         boolean valid = true;
+        SMIMESigned signed;
 
-        SMIMESigned signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
+        if(bodyPart.isMimeType("multipart/signed")) {
+            signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
+        } else {
+            return false;
+        }
 
         JcaCertStoreBuilder jcaCertStoreBuilder = new JcaCertStoreBuilder();
         jcaCertStoreBuilder.addCertificates(signed.getCertificates());

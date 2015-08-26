@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import javax.mail.Address;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 public class SignMessage {
@@ -80,26 +81,6 @@ public class SignMessage {
         return sign(mimeBodyPart, privateKey, certificate);
     }
 
-    public Multipart sign(MimeBodyPart mimeBodyPart, String alias) throws KeyStoreException {
-        if(mimeBodyPart == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            return null;
-        }
-
-        if(alias == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, alias was null.");
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            return null;
-        }
-
-        String passphrase = keyManagement.getPassphraseForAlias(alias);
-        PrivateKey privateKey = keyManagement.getPrivateKeyForAlias(alias, passphrase);
-        X509Certificate certificate = keyManagement.getCertificateForAlias(alias);
-
-        return sign(mimeBodyPart, privateKey, certificate);
-    }
-
     private MimeMultipart sign(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
         if(mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
@@ -126,73 +107,6 @@ public class SignMessage {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
-    }
-
-    public Multipart signSynchronous(MimeBodyPart mimeBodyPart, String alias) {
-        if(mimeBodyPart == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            return null;
-        }
-        if(alias == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, alias was null.");
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            return null;
-        }
-        KeyManagement keyManagement;
-        PrivateKey privateKey;
-        X509Certificate certificate;
-        try {
-            keyManagement = new KeyManagement();
-            privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
-            certificate = keyManagement.getCertificateForAlias(alias);
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error getting info from KeyManagement: " + e.getMessage());
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
-            return null;
-        }
-        return signSynchronous(mimeBodyPart, privateKey, certificate);
-    }
-
-    public Multipart signSynchronous(MimeBodyPart mimeBodyPart, Address signerAddress) {
-        if(mimeBodyPart == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            return null;
-        }
-        if(signerAddress == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, signerAddress was null.");
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            return null;
-        }
-        KeyManagement keyManagement;
-        PrivateKey privateKey;
-        X509Certificate certificate;
-        try {
-            keyManagement = new KeyManagement();
-            ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(signerAddress);
-            if(keyInfos.size() == 0) {
-                SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
-                Log.e(SMileCrypto.LOG_TAG, "No certificate found for signer address: " + signerAddress);
-                return null;
-            }
-            String alias = "";
-            DateTime termination = new DateTime(0);
-            for(KeyInfo keyInfo : keyInfos) { // use cert with longest validity
-                DateTime terminationDate = keyInfo.termination_date;
-                if(terminationDate.isAfter(termination)) {
-                    alias = keyInfo.alias;
-                    termination = terminationDate;
-                }
-            }
-            privateKey = keyManagement.getPrivateKeyForAlias(alias, keyManagement.getPassphraseForAlias(alias));
-            certificate = keyManagement.getCertificateForAlias(alias);
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error getting info from KeyManagement: " + e.getMessage());
-            SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
-            return null;
-        }
-        return signSynchronous(mimeBodyPart, privateKey, certificate);
     }
 
     private MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {

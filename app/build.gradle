@@ -64,6 +64,8 @@ dependencies {
     compile 'com.madgag.spongycastle:pg:1.51.0.0'
     compile 'net.danlew:android.joda:2.8.2'
     compile 'commons-io:commons-io:2.4'
+    compile 'com.android.support:support-v4:22.0'
+    compile "com.daimajia.swipelayout:library:1.2.0@aar"
     testCompile 'junit:junit:4.12'
     testCompile('org.robolectric:robolectric:3.0') {
         exclude group: 'commons-logging', module: 'commons-logging'
