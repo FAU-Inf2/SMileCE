@@ -6,12 +6,14 @@ import android.util.Log;
 import org.joda.time.DateTime;
 import org.spongycastle.cms.SignerInfoGenerator;
 import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -22,6 +24,10 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 public class SignMessage {
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
+
     private final KeyManagement keyManagement;
 
     public SignMessage() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
@@ -215,7 +221,7 @@ public class SignMessage {
             Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
 
             SignerInfoGenerator signerInfoGenerator = new
-                    JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").build("SHA256WITHRSA", privateKey, certificate);
+                    JcaSimpleSignerInfoGeneratorBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build("SHA256WITHRSA", privateKey, certificate);
 
             signedMimeMultipart = smimeToolkit.sign(mimeBodyPart, signerInfoGenerator);
         } catch (Exception e) {
