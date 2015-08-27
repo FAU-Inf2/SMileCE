@@ -105,11 +105,12 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
         if(key.equals("pref_key_direction")) {
-            keylist.beginBatchedUpdates();
+            ArrayList<KeyInfo> kis = new ArrayList<KeyInfo>(keylist.size());
             for(int i = 0; i < getItemCount(); ++i) {
-                keylist.recalculatePositionOfItemAt(i);
+                kis.add(keylist.get(i));
             }
-            keylist.endBatchedUpdates();
+            keylist.clear();
+            addKey(kis);
         }
     }
 
