@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference
+
+    <ListPreference
+        android:key="pref_key_direction"
+        android:entries="@array/order"
+        android:summary="@string/sort_order_summary"
+        android:entryValues="@array/orderValues"
+        android:title="@string/order"
+        android:defaultValue="1"/>
+
+    <SwitchPreference
         android:key="pref_key_debug"
         android:summary="@string/debug_summary"
         android:title="@string/debug_info"
-        android:defaultValue="false"/>
+        android:defaultValue="false"
+        />
 
 </PreferenceScreen>

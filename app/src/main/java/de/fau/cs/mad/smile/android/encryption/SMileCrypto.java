@@ -7,14 +7,7 @@ import android.util.Log;
 
 import de.fau.cs.mad.smile.android.encryption.ui.fragment.SettingsFragment;
 
-public class SMileCrypto extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(key.equals("pref_key_debug")) {
-            DEBUG = sharedPreferences.getBoolean(key, false);
-        }
-    }
+public class SMileCrypto extends Application {
 
     public static interface ApplicationAware {
         void initializeComponent(Application application);
@@ -55,7 +48,12 @@ public class SMileCrypto extends Application implements SharedPreferences.OnShar
      * Log.d, including protocol dumps.
      *
      */
-    private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-    public static boolean DEBUG = sharedPreferences.getBoolean("pref_key_debug", false);
+
+    public static boolean DEBUG = true;
+
+    static {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+        DEBUG = sharedPreferences.getBoolean("pref_key_debug", false);
+    }
 
 }

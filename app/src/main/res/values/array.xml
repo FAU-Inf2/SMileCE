@@ -10,4 +10,12 @@
         <item>@string/texthtml</item>
         <item>@string/fullmime</item>
     </string-array>
+    <string-array name="order">
+        <item name="asc">Ascending</item>
+        <item name="dec">Descending</item>
+    </string-array>
+    <string-array name="orderValues">
+        <item>1</item>
+        <item>-1</item>
+    </string-array>
 </resources>

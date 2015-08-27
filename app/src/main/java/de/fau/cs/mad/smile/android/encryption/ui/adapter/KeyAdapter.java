@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -20,6 +21,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
@@ -65,9 +67,10 @@ import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;
 
 
-public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
+public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> implements SharedPreferences.OnSharedPreferenceChangeListener{
     private SortedList<KeyInfo> keylist;
     private Activity activity;
+    private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
     private static List<Integer> materialColors = Arrays.asList(
             0xffe57373,
             0xfff06292,
@@ -96,6 +99,18 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     @Override
     public int getSwipeLayoutResourceId(int i) {
         return R.id.swipe;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
+        if(key.equals("pref_key_direction")) {
+            keylist.beginBatchedUpdates();
+            for(int i = 0; i < getItemCount(); ++i) {
+                keylist.recalculatePositionOfItemAt(i);
+            }
+            keylist.endBatchedUpdates();
+        }
     }
 
     public static class KeyViewHolder extends RecyclerView.ViewHolder {
@@ -201,6 +216,8 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 } else {
                     erg = o1.getContact().compareTo(o2.getContact());
                 }
+                Log.d(SMileCrypto.LOG_TAG, "Order: " + Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1")));
+                erg *= Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1"));
                 return erg;
             }
 
@@ -237,6 +254,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
         if(keyInfoList != null) {
             addKey(keyInfoList);
         }
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
