@@ -263,4 +263,6 @@
     <string name="alert_share_other">Do you wish to share this certificate with another app?</string>
     <string name="certificate_share_fail">Sharing certificate failed.</string>
     <string name="certificate_share_success">Certificate was successfully shared.</string>
+    <string name="debug_info">Debug Information</string>
+    <string name="debug_summary">Enable debug logging.</string>
 </resources>

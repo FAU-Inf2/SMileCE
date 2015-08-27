@@ -52,10 +52,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activity.KeyChainActivity"
-            android:label="@string/title_activity_key_chain" >
-        </activity>
-        <activity
             android:name=".ui.activity.DecryptLocalMailActivity"
             android:label="@string/title_activity_decrypt_local_mail" >
         </activity>
