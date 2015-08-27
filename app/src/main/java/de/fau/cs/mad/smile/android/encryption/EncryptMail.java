@@ -25,12 +25,12 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import javax.mail.Address;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
+import korex.mail.Address;
+import korex.mail.Session;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeUtility;
 
 public class EncryptMail {
     static {

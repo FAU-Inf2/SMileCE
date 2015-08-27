@@ -61,9 +61,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
+import korex.mail.MessagingException;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMultipart;
+
+import de.fau.cs.mad.smime_api.SMimeApi;
 
 public class SignatureCheck {
     static {
@@ -78,11 +80,11 @@ public class SignatureCheck {
         keyManagement = new KeyManagement();
     }
 
-    public Boolean verifySignature(final MimeBodyPart bodyPart, final String sender)
+    public int verifySignature(final MimeBodyPart bodyPart, final String sender)
             throws MessagingException, CMSException, SMIMEException, IOException,
             GeneralSecurityException, OperatorCreationException, CertPathReviewerException {
         if (bodyPart == null) {
-            return false;
+            throw new IllegalArgumentException("bodyPart should not be null");
         }
 
         boolean valid = true;
@@ -91,7 +93,7 @@ public class SignatureCheck {
         if(bodyPart.isMimeType("multipart/signed")) {
             signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
         } else {
-            return false;
+            throw new IllegalArgumentException("part should be multipart/signed");
         }
 
         JcaCertStoreBuilder jcaCertStoreBuilder = new JcaCertStoreBuilder();
@@ -110,6 +112,8 @@ public class SignatureCheck {
 
         Collection signersCollection = signers.getSigners();
         Iterator iterator = signersCollection.iterator();
+
+        int status = SMimeApi.RESULT_SIGNATURE_UNSIGNED;
 
         while (iterator.hasNext()) {
             SignerInformation signer = (SignerInformation) iterator.next();
@@ -135,12 +139,18 @@ public class SignatureCheck {
                 CertPath certPath = createCertPath(cert, usedParameters.getTrustAnchors(), pkixParameters.getCertStores(), userCertStores, userProvidedList);
 
                 PKIXCertPathReviewer review = new PKIXCertPathReviewer(certPath, usedParameters);
-                valid &= review.isValidCertPath();
+
+                if(review.isValidCertPath()) {
+                    status = SMimeApi.RESULT_SIGNATURE_SIGNED;
+                } else {
+                    status = SMimeApi.RESULT_SIGNATURE_SIGNED_UNCOFIRMED;
+                }
+
                 Log.d(SMileCrypto.LOG_TAG, "valid certificate path: " + valid);
             }
         }
 
-        return valid;
+        return status;
     }
 
     @NonNull

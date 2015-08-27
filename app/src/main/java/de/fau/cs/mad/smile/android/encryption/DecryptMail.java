@@ -29,17 +29,17 @@ import org.spongycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.spongycastle.mail.smime.SMIMEException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Header;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.InternetHeaders;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import korex.mail.Address;
+import korex.mail.BodyPart;
+import korex.mail.Header;
+import korex.mail.MessagingException;
+import korex.mail.Multipart;
+import korex.mail.Session;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.InternetHeaders;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeMultipart;
 
 public class DecryptMail {
     static {

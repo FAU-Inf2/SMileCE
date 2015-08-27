@@ -4,10 +4,13 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.spongycastle.cms.SignerInfoGenerator;
 import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
-import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
+import org.spongycastle.mail.smime.SMIMESignedGenerator;
+import org.spongycastle.util.CollectionStore;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -17,12 +20,11 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.mail.Address;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import korex.mail.Address;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMultipart;
 
 public class SignMessage {
     static {
@@ -110,15 +112,22 @@ public class SignMessage {
     }
 
     private MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
-        SMIMEToolkit smimeToolkit = new SMIMEToolkit(new BcDigestCalculatorProvider());
         MimeMultipart signedMimeMultipart = null;
+
         try {
             Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
 
-            SignerInfoGenerator signerInfoGenerator = new
-                    JcaSimpleSignerInfoGeneratorBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build("SHA256WITHRSA", privateKey, certificate);
+            JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
+            builder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+            SignerInfoGenerator signerInfoGenerator = builder.build("SHA256WITHRSA", privateKey, certificate);
 
-            signedMimeMultipart = smimeToolkit.sign(mimeBodyPart, signerInfoGenerator);
+            SMIMESignedGenerator gen = new SMIMESignedGenerator();
+            List<X509CertificateHolder> certList = new ArrayList<>();
+            certList.add(new JcaX509CertificateHolder(certificate));
+            gen.addCertificates(new CollectionStore(certList));
+            gen.addSignerInfoGenerator(signerInfoGenerator);
+
+            signedMimeMultipart = gen.generate(mimeBodyPart);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
             e.printStackTrace();

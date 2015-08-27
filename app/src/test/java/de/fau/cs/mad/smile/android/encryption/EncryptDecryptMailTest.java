@@ -22,7 +22,7 @@ import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 
-import javax.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeBodyPart;
 
 import java.security.KeyPair;
 import java.security.cert.CertificateEncodingException;
@@ -32,15 +32,15 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.InternetHeaders;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import korex.mail.Address;
+import korex.mail.BodyPart;
+import korex.mail.Message;
+import korex.mail.Session;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.InternetHeaders;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeMultipart;
 
 import de.fau.cs.mad.javax.activation.CommandMap;
 import de.fau.cs.mad.javax.activation.MailcapCommandMap;
