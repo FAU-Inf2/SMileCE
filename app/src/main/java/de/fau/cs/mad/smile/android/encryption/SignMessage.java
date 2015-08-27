@@ -127,7 +127,7 @@ public class SignMessage {
         return signedMimeMultipart;
     }
 
-    private class AsyncSign extends AsyncTask<Object, Void, MimeMultipart> {
+    private class AsyncSign extends AsyncTask<Void, Void, MimeMultipart> {
         private final MimeBodyPart mimeBodyPart;
         private final PrivateKey privateKey;
         private final X509Certificate certificate;
@@ -139,7 +139,7 @@ public class SignMessage {
         }
 
         @Override
-        protected MimeMultipart doInBackground(Object... params) {
+        protected MimeMultipart doInBackground(Void... params) {
             return signSynchronous(mimeBodyPart, privateKey, certificate);
         }
     }
