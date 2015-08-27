@@ -6,6 +6,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.spongycastle.cms.CMSException;
 import org.spongycastle.mail.smime.SMIMEException;
@@ -15,6 +16,7 @@ import org.spongycastle.x509.CertPathReviewerException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 import korex.mail.MessagingException;
@@ -75,7 +77,7 @@ public class SMimeService extends Service {
             }
         } catch (IOException | GeneralSecurityException | CertPathReviewerException | CMSException | OperatorCreationException | SMIMEException | MessagingException e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
-            e.printStackTrace();
+            Log.e(SMileCrypto.LOG_TAG, "Exception while doing crypto stuff", e);
         } finally {
             if (operation != null) {
                 try {
