@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -40,6 +40,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
+import de.fau.cs.mad.smile.android.encryption.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.PasswordEncryption;
+import de.fau.cs.mad.smile.android.encryption.PathConverter;
+import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.internet.MimeMessage;
 
 
@@ -203,7 +209,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         if(keyInfos == null || keyInfos.size() == 0) {
             showErrorPrompt();
         } else if(keyInfos.size() == 1) {
-            String alias = keyInfos.get(0).alias;
+            String alias = keyInfos.get(0).getAlias();
             passphraseDecryptOrPromptAlias(alias, pathToFile);
         } else {
             //case more than one certificate --> show prompt to select correct certificate
@@ -261,12 +267,12 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         String[] stringArray = new String[size];
         for(int i = 0; i < size; i++) {
             KeyInfo keyInfo = keyInfos.get(i);
-            DateTime valid = keyInfo.termination_date;
+            DateTime valid = keyInfo.getTerminationDate();
             DateTimeFormatter fmt = DateTimeFormat.forPattern("MMMM dd, yyyy");
             String displayDate = valid.toString(fmt);
-            String info = "Name:\t\t\t\t\t" + keyInfo.contact +
+            String info = "Name:\t\t\t\t\t" + keyInfo.getContact() +
                     "\nValid until:\t\t" + displayDate +
-                    "\nThumbprint: " + keyInfo.thumbprint;
+                    "\nThumbprint: " + keyInfo.getThumbprint();
             stringArray[i] = info;
         }
         Log.d(SMileCrypto.LOG_TAG, size + " certificates to decide.");
@@ -279,7 +285,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(SMileCrypto.LOG_TAG, "Selected certificate at position: " + position);
-                String alias = keyInfos.get(position).alias;
+                String alias = keyInfos.get(position).getAlias();
                 Log.d(SMileCrypto.LOG_TAG, "Selected alias is: " + alias);
                 passphraseDecryptOrPromptAlias(alias, pathToFile);
                 dialog.dismiss();

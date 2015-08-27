@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -22,6 +22,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class SearchActivity extends ActionBarActivity {
     private KeyAdapter adapter;
@@ -156,10 +162,10 @@ public class SearchActivity extends ActionBarActivity {
         for (KeyInfo ki : cardList) {
             DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
             String content = (
-                    ki.contact + " " +
-                            ki.mail + " " +
-                            ki.termination_date.toString(fmt) + " " +
-                            ki.valid_after.toString(fmt)
+                    ki.getContact() + " " +
+                            ki.getMail() + " " +
+                            ki.getTerminationDate().toString(fmt) + " " +
+                            ki.getValidAfter().toString(fmt)
             ).toLowerCase();
 
             int numberOfMatches = queryByWords.length;

@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,16 +19,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-import org.spongycastle.operator.OperatorCreationException;
-
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+
+import de.fau.cs.mad.smile.android.encryption.ui.DividerItemDecoration;
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.RecyclerViewAdapter;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -116,9 +119,9 @@ public class MainActivity extends ActionBarActivity {
         int i = 0;
         while(mName == null && i < ownCertificates.size()) { // use first certificate with name set
             KeyInfo keyInfo = ownCertificates.get(i);
-            mName = keyInfo.contact;
+            mName = keyInfo.getContact();
             Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
-            mEmail = keyInfo.mail;
+            mEmail = keyInfo.getMail();
             Log.d(SMileCrypto.LOG_TAG, "mEmail: " + mEmail);
             i++;
         }

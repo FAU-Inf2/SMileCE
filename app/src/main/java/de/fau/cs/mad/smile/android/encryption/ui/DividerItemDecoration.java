@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -8,7 +8,7 @@ import android.view.View;
 
 import de.fau.cs.mad.smile.android.encryption.R;
 
-public class DividerItemDecoration extends RecyclerView.ItemDecoration{
+public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     private Drawable mDivider;
 
     public DividerItemDecoration(Resources resources) {

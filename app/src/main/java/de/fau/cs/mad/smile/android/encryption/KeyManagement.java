@@ -115,7 +115,7 @@ public class KeyManagement {
     public ArrayList<KeyInfo> getOwnCertificates() {
         ArrayList<KeyInfo> keyList = new ArrayList<>();
         for (KeyInfo keyInfo : getAllCertificates()) {
-            if(keyInfo.hasPrivateKey) {
+            if(keyInfo.getHasPrivateKey()) {
                 keyList.add(keyInfo);
             }
         }
@@ -150,6 +150,11 @@ public class KeyManagement {
 
     public final X509Certificate getCertificateForAlias(final String alias) throws KeyStoreException {
         return (X509Certificate) androidKeyStore.getCertificate(alias);
+    }
+
+    public final Certificate[] getCertificateChain(final Certificate certificate) throws KeyStoreException {
+        final String alias = androidKeyStore.getCertificateAlias(certificate);
+        return androidKeyStore.getCertificateChain(alias);
     }
 
     public PrivateKey getPrivateKeyForAlias(final String alias, final String passphrase) throws KeyStoreException {
@@ -214,9 +219,9 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + mailAddress);
 
             for (KeyInfo keyInfo : getOwnCertificates()) {
-                for (String mail : keyInfo.mailAddresses) {
+                for (String mail : keyInfo.getMailAddresses()) {
                     if (mailAddress.equalsIgnoreCase(mail)) {
-                        return keyInfo.alias;
+                        return keyInfo.getAlias();
                     }
                 }
             }
@@ -240,7 +245,7 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Looking up alias for: " + mailAddress);
 
             for (KeyInfo keyInfo : getOwnCertificates()) {
-                if (mailAddress.equals(keyInfo.mail)) {
+                if (mailAddress.equals(keyInfo.getMail())) {
                     keyInfos.add(keyInfo);
                 }
             }
@@ -255,7 +260,7 @@ public class KeyManagement {
         ArrayList<KeyInfo> keyInfos = getKeyInfoByOwnAddress(emailAddress);
         ArrayList<String> aliases = new ArrayList<>();
         for(KeyInfo keyInfo : keyInfos) {
-            String alias = keyInfo.alias;
+            String alias = keyInfo.getAlias();
             if(alias != null) {
                 aliases.add(alias);
             }
@@ -268,22 +273,22 @@ public class KeyManagement {
             CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         Certificate c = androidKeyStore.getCertificate(alias); // maybe hand in certificate?
         KeyInfo keyInfo = new KeyInfo();
-        keyInfo.alias = alias;
+        keyInfo.setAlias(alias);
         Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
         Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
-        keyInfo.type = c.getType();
-        keyInfo.hash = Integer.toHexString(c.hashCode());
+        keyInfo.setType(c.getType());
+        keyInfo.setHash(Integer.toHexString(c.hashCode()));
 
         if (c.getType().equals("X.509")) {
             X509Certificate cert = (X509Certificate) c;
-            keyInfo.certificate = cert;
-            keyInfo.mailAddresses.addAll(getAlternateNamesFromCert(cert));
-            keyInfo.hasPrivateKey = androidKeyStore.isKeyEntry(alias);
+            keyInfo.setCertificate(cert);
+            keyInfo.getMailAddresses().addAll(getAlternateNamesFromCert(cert));
+            keyInfo.setHasPrivateKey(androidKeyStore.isKeyEntry(alias));
 
             X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
             RDN[] cn = x500name.getRDNs(BCStyle.CN);
             if (cn.length > 0) {
-                keyInfo.contact = IETFUtils.valueToString(cn[0].getFirst().getValue());
+                keyInfo.setContact(IETFUtils.valueToString(cn[0].getFirst().getValue()));
             }
 
             RDN[] rdn_email = x500name.getRDNs(BCStyle.E);
@@ -293,15 +298,15 @@ public class KeyManagement {
             }
             Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
 
-            keyInfo.mail = email;
-            if (keyInfo.mail.equals("") && keyInfo.mailAddresses.size() > 0) {
-                keyInfo.mail = keyInfo.mailAddresses.get(0);
+            keyInfo.setMail(email);
+            if (keyInfo.getMail().equals("") && keyInfo.getMailAddresses().size() > 0) {
+                keyInfo.setMail(keyInfo.getMailAddresses().get(0));
             }
 
-            keyInfo.termination_date = new DateTime(cert.getNotAfter());
-            keyInfo.valid_after = new DateTime((cert.getNotBefore()));
+            keyInfo.setTerminationDate(new DateTime(cert.getNotAfter()));
+            keyInfo.setValidAfter(new DateTime((cert.getNotBefore())));
             //keyInfo.trust; TODO
-            keyInfo.thumbprint = getThumbprint(cert);
+            keyInfo.setThumbprint(getThumbprint(cert));
         }
 
         return keyInfo;

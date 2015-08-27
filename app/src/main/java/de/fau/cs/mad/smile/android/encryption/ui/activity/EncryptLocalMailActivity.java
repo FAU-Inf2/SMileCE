@@ -1,16 +1,12 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.spongycastle.mail.smime.SMIMEException;
 
@@ -18,18 +14,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
 
+import de.fau.cs.mad.smile.android.encryption.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.EncryptMail;
+import de.fau.cs.mad.smile.android.encryption.R;
 import korex.mail.Address;
 import korex.mail.MessagingException;
 import korex.mail.Session;
-import korex.mail.internet.InternetAddress;
 import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMessage;
 
@@ -86,19 +81,11 @@ public class EncryptLocalMailActivity extends ActionBarActivity {
                     //mimeMessage.setContent(decryptedPart.getContent(), decryptedPart.getContentType());
                     //mimeMessage.saveChanges();
                     File decryptedFile = new File(downloadDir, "decrypted.eml");
-                    decryptedPart.writeTo(new FileOutputStream(decryptedFile));
+                    if (decryptedPart != null) {
+                        decryptedPart.writeTo(new FileOutputStream(decryptedFile));
+                    }
                 }
-            } catch (CertificateException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (KeyStoreException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            } catch (SMIMEException e) {
+            } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException | MessagingException | SMIMEException e) {
                 e.printStackTrace();
             }
 

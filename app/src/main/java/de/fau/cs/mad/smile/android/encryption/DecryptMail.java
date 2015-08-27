@@ -58,7 +58,7 @@ public class DecryptMail {
         try {
             MimeMessage mimeMessage = getMimeMessageFromFile(pathToFile);
             if(alias != null) {
-                return decryptMailSynchronous(alias, mimeMessage, passphrase);
+                return decryptMailSynchronous(mimeMessage, alias, passphrase);
             }
 
             Address[] recipients = getMailAddressFromMimeMessage(mimeMessage);
@@ -74,7 +74,7 @@ public class DecryptMail {
                     continue;
                 }
                 for(String foundAlias : aliases) { //try all aliases until one fits
-                    MimeBodyPart result = decryptMailSynchronous(foundAlias, mimeMessage, passphrase);
+                    MimeBodyPart result = decryptMailSynchronous(mimeMessage, foundAlias, passphrase);
                     if (result != null) // message was decrypted
                         return result;
                 }
@@ -90,7 +90,7 @@ public class DecryptMail {
         }
     }
 
-    private MimeBodyPart decryptMailSynchronous(String alias, MimeMessage mimeMessage, String passphrase) {
+    private MimeBodyPart decryptMailSynchronous(MimeMessage mimeMessage, String alias, String passphrase) {
         try {
             encryptedMimeMessage = mimeMessage;
 
@@ -294,7 +294,7 @@ public class DecryptMail {
         }
 
         for(KeyInfo keyInfo : keyInfos) {
-            String alias = keyInfo.alias;
+            String alias = keyInfo.getAlias();
             if(alias == null)
                 continue;
 
@@ -340,7 +340,7 @@ public class DecryptMail {
 
         ArrayList<KeyInfo> keyInfos = getKeyInfosByMimeMessage(mimeMessage);
         for(KeyInfo keyInfo : keyInfos) {
-            String alias = keyInfo.alias;
+            String alias = keyInfo.getAlias();
             if (alias != null) {
                 aliases.add(alias);
             }
@@ -706,7 +706,7 @@ public class DecryptMail {
                     mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1], (String) params[2]);
                     //pathToFile, alias [null possible], passphrase
                 else if(params[0] instanceof MimeMessage && params[2] instanceof String)
-                    mimeBodyPart = decryptMailSynchronous((String) params[1], (MimeMessage) params[0], (String) params[2]);
+                    mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (String) params[1], (String) params[2]);
                     //alias, encryptedMimeMessage, passphrase
                 else if(params[0] instanceof MimeMessage && params[2] instanceof X509Certificate)
                     mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);
@@ -727,7 +727,7 @@ public class DecryptMail {
                 mimeBodyPart = decryptMailSynchronous((String) params[0], (String) params[1], (String) params[2]);
                 //pathToFile, alias [null possible], passphrase
                 else if(params[0] instanceof MimeMessage && params[2] instanceof String)
-                    mimeBodyPart = decryptMailSynchronous((String) params[1], (MimeMessage) params[0], (String) params[2]);
+                    mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (String) params[1], (String) params[2]);
                     //alias, encryptedMimeMessage, passphrase
                 else if(params[0] instanceof MimeMessage && params[2] instanceof X509Certificate)
                     mimeBodyPart = decryptMailSynchronous((MimeMessage) params[0], (PrivateKey) params[1], (X509Certificate) params[2]);

@@ -1,22 +1,19 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.adapter;
 
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
-import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.List;
+
+import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 public class ExpandableCertificateListAdapter extends BaseExpandableListAdapter{
 

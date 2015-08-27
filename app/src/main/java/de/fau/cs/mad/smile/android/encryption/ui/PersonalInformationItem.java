@@ -1,14 +1,16 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.HashMap;
+
+import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.R;
 
 public class PersonalInformationItem extends AbstractCertificateInfoItem {
     private HashMap<String, String> data;

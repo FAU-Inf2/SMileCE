@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.adapter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -57,7 +57,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;
 
 
 public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
@@ -159,7 +164,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
         public boolean onMenuItemClick(MenuItem item) {
             KeyInfo keyInfo = keylist.get(position);
             int id = item.getItemId();
-            boolean own = keyInfo.alias.startsWith("SMile_crypto_own");
+            boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
             if (id == R.id.delete) {
                 if (own) {
                     deleteOwnCertificate(keyInfo, position);
@@ -187,14 +192,14 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
             @Override
             public int compare(KeyInfo o1, KeyInfo o2) {
                 int erg = 0;
-                if(o1.contact.equals("") && o2.contact.equals("")) {
-                    erg = o1.mail.compareTo(o2.mail);
-                } else if(o1.contact.equals("")) {
-                    erg = o1.mail.compareTo(o2.contact);
-                } else if(o2.contact.equals("")) {
-                    erg = o1.contact.compareTo(o2.mail);
+                if(o1.getContact().equals("") && o2.getContact().equals("")) {
+                    erg = o1.getMail().compareTo(o2.getMail());
+                } else if(o1.getContact().equals("")) {
+                    erg = o1.getMail().compareTo(o2.getContact());
+                } else if(o2.getContact().equals("")) {
+                    erg = o1.getContact().compareTo(o2.getMail());
                 } else {
-                    erg = o1.contact.compareTo(o2.contact);
+                    erg = o1.getContact().compareTo(o2.getContact());
                 }
                 return erg;
             }
@@ -221,7 +226,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
 
             @Override
             public boolean areContentsTheSame(KeyInfo oldItem, KeyInfo newItem) {
-                return oldItem.contact.equals(newItem.contact) && oldItem.mail.equals(newItem.mail) && oldItem.termination_date.equals(newItem.termination_date);
+                return oldItem.getContact().equals(newItem.getContact()) && oldItem.getMail().equals(newItem.getMail()) && oldItem.getTerminationDate().equals(newItem.getTerminationDate());
             }
 
             @Override
@@ -246,19 +251,19 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     @Override
     public void onBindViewHolder(final KeyViewHolder holder, final int position) {
         final KeyInfo keyInfo = keylist.get(position);
-        if(keyInfo.contact.equals("")) {
-            holder.header.setText(keyInfo.mail);
+        if(keyInfo.getContact().equals("")) {
+            holder.header.setText(keyInfo.getMail());
         } else {
-            holder.header.setText(keyInfo.contact);
+            holder.header.setText(keyInfo.getContact());
         }
-        holder.mail.setText(keyInfo.mail);
+        holder.mail.setText(keyInfo.getMail());
 
-        if(keyInfo.hasPrivateKey) {
+        if(keyInfo.getHasPrivateKey()) {
             holder.privateKey.setVisibility(View.VISIBLE);
         }
 
-        if(keyInfo.termination_date != null && keyInfo.valid_after != null) {
-            DateTime valid = keyInfo.termination_date;
+        if(keyInfo.getTerminationDate() != null && keyInfo.getValidAfter() != null) {
+            DateTime valid = keyInfo.getTerminationDate();
             DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
             String displayDate= valid.toString(fmt);
             holder.termination_date.setText(displayDate);
@@ -272,7 +277,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-            } else if (keyInfo.valid_after.getMillis() > today.getMillis()) {
+            } else if (keyInfo.getValidAfter().getMillis() > today.getMillis()) {
                 holder.validCircle0.getBackground().setColorFilter(getColorFilter("#0000ff"));
                 holder.validCircle1.getBackground().setColorFilter(getColorFilter("#0000ff"));
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#0000ff"));
@@ -310,12 +315,12 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
             }
         }
-        setContactBadge(keyInfo.mail, holder, keyInfo);
+        setContactBadge(keyInfo.getMail(), holder, keyInfo);
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(activity, DisplayCertificateInformationActivity.class);
-                i.putExtra("Alias", keyInfo.alias);
+                i.putExtra("Alias", keyInfo.getAlias());
                 activity.startActivity(i);
             }
         });
@@ -324,7 +329,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
             @Override
             public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
                 layout.setDragDistance(0);
-                boolean own = keyInfo.alias.startsWith("SMile_crypto_own");
+                boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
                 if(holder.delete_icon.isShown()) {
                     holder.delete_icon.setVisibility(View.INVISIBLE);
                     if(own) {
@@ -523,10 +528,10 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
             if (name.length() > 0) {
                 initial = name.substring(0, 1);
             } else {
-                if(keyInfo != null && keyInfo.contact != null && keyInfo.contact.length() > 0){
-                    initial = keyInfo.contact.substring(0, 1);
-                } else if(keyInfo != null && keyInfo.mail != null && keyInfo.mail.length() > 0) {
-                    initial = keyInfo.mail.substring(0, 1);
+                if(keyInfo != null && keyInfo.getContact() != null && keyInfo.getContact().length() > 0){
+                    initial = keyInfo.getContact().substring(0, 1);
+                } else if(keyInfo != null && keyInfo.getMail() != null && keyInfo.getMail().length() > 0) {
+                    initial = keyInfo.getMail().substring(0, 1);
                 } else {
                     initial = " ";
                 }
@@ -556,14 +561,14 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 activity);
 
-        alertDialogBuilder.setTitle(App.getContext().getString(R.string.alert_header_start) + keyInfo.contact + App.getContext().getString(R.string.alert_header_end));
+        alertDialogBuilder.setTitle(App.getContext().getString(R.string.alert_header_start) + keyInfo.getContact() + App.getContext().getString(R.string.alert_header_end));
 
         alertDialogBuilder
                 .setMessage(App.getContext().getString(R.string.alert_content))
                 .setCancelable(false)
                 .setPositiveButton(App.getContext().getString(R.string.erase), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        keyManagement.deleteKey(keyInfo.alias);
+                        keyManagement.deleteKey(keyInfo.getAlias());
                         removeKey(position);
                     }
                 })
@@ -604,11 +609,11 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 activity);
 
         alertDialogBuilder
-                .setMessage(App.getContext().getString(R.string.alert_header_start) + keyInfo.contact + App.getContext().getString(R.string.alert_header_end))
+                .setMessage(App.getContext().getString(R.string.alert_header_start) + keyInfo.getContact() + App.getContext().getString(R.string.alert_header_end))
                 .setCancelable(false)
                 .setPositiveButton(App.getContext().getString(R.string.erase), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        keyManagement.deleteKey(keyInfo.alias);
+                        keyManagement.deleteKey(keyInfo.getAlias());
                         removeKey(position);
                     }
                 })
@@ -631,7 +636,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 .setCancelable(false)
                 .setPositiveButton(App.getContext().getString(R.string.export), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String dst = KeyManagement.copyP12ToSDCard(keyInfo.alias);
+                        String dst = KeyManagement.copyP12ToSDCard(keyInfo.getAlias());
                         if (dst == null) {
                             Toast.makeText(App.getContext(),
                                     App.getContext().getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
@@ -651,7 +656,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     }
 
     private void exportOtherCertificate(KeyInfo keyInfo) {
-        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.certificate, keyInfo.alias);
+        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.getCertificate(), keyInfo.getAlias());
         if (dst == null) {
             Toast.makeText(activity,
                     App.getContext().getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
@@ -670,7 +675,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
                 .setCancelable(false)
                 .setPositiveButton(App.getContext().getString(R.string.share), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String dst = KeyManagement.copyP12ToSDCard(keyInfo.alias);
+                        String dst = KeyManagement.copyP12ToSDCard(keyInfo.getAlias());
                         if (dst == null) {
                             Toast.makeText(App.getContext(),
                                     App.getContext().getString(R.string.certificate_share_fail), Toast.LENGTH_LONG).show();
@@ -694,7 +699,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     }
 
     private void shareOtherCertificate(KeyInfo keyInfo) {
-        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.certificate, keyInfo.alias);
+        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.getCertificate(), keyInfo.getAlias());
         if (dst == null) {
             Toast.makeText(activity,
                     App.getContext().getString(R.string.certificate_share_fail), Toast.LENGTH_LONG).show();

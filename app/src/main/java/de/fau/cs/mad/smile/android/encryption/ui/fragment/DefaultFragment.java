@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;

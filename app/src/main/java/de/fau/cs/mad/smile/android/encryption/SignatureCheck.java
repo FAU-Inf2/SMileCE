@@ -93,7 +93,7 @@ public class SignatureCheck {
         if(bodyPart.isMimeType("multipart/signed")) {
             signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
         } else {
-            throw new IllegalArgumentException("part should be multipart/signed");
+            return SMimeApi.RESULT_SIGNATURE_UNSIGNED;
         }
 
         JcaCertStoreBuilder jcaCertStoreBuilder = new JcaCertStoreBuilder();

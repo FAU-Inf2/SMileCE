@@ -17,6 +17,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -65,9 +66,9 @@ public class SignMessage {
             DateTime termination = new DateTime(0);
 
             for(KeyInfo keyInfo : keyInfos) { // use cert with longest validity
-                DateTime terminationDate = keyInfo.termination_date;
+                DateTime terminationDate = keyInfo.getTerminationDate();
                 if(terminationDate.isAfter(termination)) {
-                    alias = keyInfo.alias;
+                    alias = keyInfo.getAlias();
                     termination = terminationDate;
                 }
             }
@@ -111,31 +112,6 @@ public class SignMessage {
         }
     }
 
-    private MimeMultipart signSynchronous(MimeBodyPart mimeBodyPart, PrivateKey privateKey, X509Certificate certificate) {
-        MimeMultipart signedMimeMultipart = null;
-
-        try {
-            Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
-
-            JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
-            builder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-            SignerInfoGenerator signerInfoGenerator = builder.build("SHA256WITHRSA", privateKey, certificate);
-
-            SMIMESignedGenerator gen = new SMIMESignedGenerator();
-            List<X509CertificateHolder> certList = new ArrayList<>();
-            certList.add(new JcaX509CertificateHolder(certificate));
-            gen.addCertificates(new CollectionStore(certList));
-            gen.addSignerInfoGenerator(signerInfoGenerator);
-
-            signedMimeMultipart = gen.generate(mimeBodyPart);
-        } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return signedMimeMultipart;
-    }
-
     private class AsyncSign extends AsyncTask<Void, Void, MimeMultipart> {
         private final MimeBodyPart mimeBodyPart;
         private final PrivateKey privateKey;
@@ -149,7 +125,38 @@ public class SignMessage {
 
         @Override
         protected MimeMultipart doInBackground(Void... params) {
-            return signSynchronous(mimeBodyPart, privateKey, certificate);
+            return sign();
+        }
+
+        private MimeMultipart sign() {
+            MimeMultipart signedMimeMultipart = null;
+
+            try {
+                Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
+
+                JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
+                builder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+                SignerInfoGenerator signerInfoGenerator = builder.build("SHA256WITHRSA", privateKey, certificate);
+
+                SMIMESignedGenerator gen = new SMIMESignedGenerator();
+                List<X509CertificateHolder> certList = new ArrayList<>();
+                certList.add(new JcaX509CertificateHolder(certificate));
+
+                Certificate[] chain = keyManagement.getCertificateChain(certificate);
+                for (Certificate cert : chain) {
+                    certList.add(new JcaX509CertificateHolder((X509Certificate) cert));
+                }
+
+                gen.addCertificates(new CollectionStore(certList));
+                gen.addSignerInfoGenerator(signerInfoGenerator);
+
+                signedMimeMultipart = gen.generate(mimeBodyPart);
+            } catch (Exception e) {
+                Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            return signedMimeMultipart;
         }
     }
 }

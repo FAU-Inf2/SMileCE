@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.security.KeyChainAliasCallback;
 import android.support.v7.app.ActionBarActivity;
@@ -13,6 +13,8 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.ui.fragment.DefaultFragment;
 
 
 /*depreciated -- can be deleted later (stays here to see how KeyChain works*/

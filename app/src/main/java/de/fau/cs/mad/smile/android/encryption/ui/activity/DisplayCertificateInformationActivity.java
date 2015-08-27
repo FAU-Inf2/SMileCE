@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -30,6 +29,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
+import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.ui.CertificateInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.CryptographicInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableCertificateListAdapter;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.ui.PersonalInformationItem;
+import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.ui.ValidityItem;
 
 public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -111,7 +122,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
     private void extractCertificateInformation(KeyInfo keyInfo) {
         if(this.name == null) {
-            this.name = keyInfo.contact;
+            this.name = keyInfo.getContact();
             Log.d(SMileCrypto.LOG_TAG, "Name was null, set name to: " + this.name);
             toolbar.setTitle(this.name);
             setSupportActionBar(toolbar);
@@ -125,7 +136,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         listDataHeader.add(getString(R.string.personal));
         listDataChild = new HashMap<>();
         HashMap<String, String> data = new HashMap<>();
-        X509Certificate certificate = keyInfo.certificate;
+        X509Certificate certificate = keyInfo.getCertificate();
         if(certificate == null) {
             Log.e(SMileCrypto.LOG_TAG, "Certificate was null -- abort.");
             return;
@@ -163,8 +174,8 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
         listDataHeader.add(getString(R.string.validity));
         HashMap<String, String> validity = new HashMap<>();
-        validity.put("Startdate", keyInfo.valid_after.toString(fmt));
-        validity.put("Enddate", keyInfo.termination_date.toString(fmt));
+        validity.put("Startdate", keyInfo.getValidAfter().toString(fmt));
+        validity.put("Enddate", keyInfo.getTerminationDate().toString(fmt));
         ArrayList<AbstractCertificateInfoItem> val = new ArrayList<>();
         ValidityItem validityItem  = new ValidityItem();
         validityItem.build(validity);
@@ -175,10 +186,10 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, "Setting certificate information");
         listDataHeader.add(getString(R.string.certificate));
         HashMap<String, String> certificateInfo = new HashMap<>();
-        certificateInfo.put("Thumbprint", keyInfo.thumbprint);
-        BigInteger serialNumber = keyInfo.certificate.getSerialNumber();
+        certificateInfo.put("Thumbprint", keyInfo.getThumbprint());
+        BigInteger serialNumber = keyInfo.getCertificate().getSerialNumber();
         certificateInfo.put("Serial number", serialNumber.toString(16));
-        certificateInfo.put("Version", Integer.toString(keyInfo.certificate.getVersion()));
+        certificateInfo.put("Version", Integer.toString(keyInfo.getCertificate().getVersion()));
         ArrayList<AbstractCertificateInfoItem> cert = new ArrayList<>();
         CertificateInformationItem certificateInformationItem = new CertificateInformationItem();
         certificateInformationItem.build(certificateInfo);
@@ -188,7 +199,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, "Setting cryptographic information");
         listDataHeader.add(getString(R.string.cryptographic));
         HashMap<String, String> cryptographicInfo = new HashMap<>();
-        PublicKey publicKey = keyInfo.certificate.getPublicKey();
+        PublicKey publicKey = keyInfo.getCertificate().getPublicKey();
         if(publicKey instanceof  RSAPublicKey) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
             String modulus = rsaPublicKey.getModulus().toString(16);
@@ -196,13 +207,13 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             cryptographicInfo.put("Public Key", "RSAPublicKey");
             cryptographicInfo.put("Modulus", modulus);
             cryptographicInfo.put("Exponent", exponent);
-            cryptographicInfo.put("Signature Algorithm", keyInfo.certificate.getSigAlgName());
-            cryptographicInfo.put("Signature", new BigInteger(keyInfo.certificate.getSignature()).toString(16));
+            cryptographicInfo.put("Signature Algorithm", keyInfo.getCertificate().getSigAlgName());
+            cryptographicInfo.put("Signature", new BigInteger(keyInfo.getCertificate().getSignature()).toString(16));
         } else {
             Log.d(SMileCrypto.LOG_TAG, "Not an instance of RSAPublicKey.");
-            cryptographicInfo.put("Public Key", keyInfo.certificate.getPublicKey().toString());
-            cryptographicInfo.put("Signature Algorithm", keyInfo.certificate.getSigAlgName());
-            cryptographicInfo.put("Signature", new BigInteger(keyInfo.certificate.getSignature()).toString(16));
+            cryptographicInfo.put("Public Key", keyInfo.getCertificate().getPublicKey().toString());
+            cryptographicInfo.put("Signature Algorithm", keyInfo.getCertificate().getSigAlgName());
+            cryptographicInfo.put("Signature", new BigInteger(keyInfo.getCertificate().getSignature()).toString(16));
         }
         ArrayList<AbstractCertificateInfoItem> crypto = new ArrayList<>();
         CryptographicInformationItem cryptographicInformationItem = new CryptographicInformationItem();
@@ -356,14 +367,14 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        if (keyInfo.alias.startsWith("SMile_crypto_own")) {
-            alertDialogBuilder.setTitle(getString(R.string.alert_header_start) + keyInfo.contact + getString(R.string.alert_header_end));
+        if (keyInfo.getAlias().startsWith("SMile_crypto_own")) {
+            alertDialogBuilder.setTitle(getString(R.string.alert_header_start) + keyInfo.getContact() + getString(R.string.alert_header_end));
             alertDialogBuilder
                     .setMessage(getString(R.string.alert_content))
                     .setCancelable(false)
                     .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            Boolean success = keyManagement.deleteKey(keyInfo.alias);
+                            Boolean success = keyManagement.deleteKey(keyInfo.getAlias());
                             if(success)
                                 Toast.makeText(App.getContext(),
                                         R.string.certificate_deleted, Toast.LENGTH_LONG).show();
@@ -379,11 +390,11 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
            alertDialogBuilder.create().show();
         } else {
             alertDialogBuilder
-                    .setMessage(getString(R.string.alert_header_start) + keyInfo.contact + getString(R.string.alert_header_end))
+                    .setMessage(getString(R.string.alert_header_start) + keyInfo.getContact() + getString(R.string.alert_header_end))
                     .setCancelable(false)
                     .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            Boolean success = keyManagement.deleteKey(keyInfo.alias);
+                            Boolean success = keyManagement.deleteKey(keyInfo.getAlias());
                             if(success)
                                 Toast.makeText(App.getContext(),
                                         R.string.certificate_deleted, Toast.LENGTH_LONG).show();
@@ -439,7 +450,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
 
     private void exportOtherCertificate() {
-        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.certificate, alias);
+        String dst = KeyManagement.copyCertificateToSDCard(keyInfo.getCertificate(), alias);
         if (dst == null) {
             Toast.makeText(App.getContext(),
                     getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
