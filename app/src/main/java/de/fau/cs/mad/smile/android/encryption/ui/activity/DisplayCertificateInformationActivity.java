@@ -36,7 +36,7 @@ import de.fau.cs.mad.smile.android.encryption.ui.CertificateInformationItem;
 import de.fau.cs.mad.smile.android.encryption.ui.CryptographicInformationItem;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableCertificateListAdapter;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.PersonalInformationItem;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;

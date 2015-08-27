@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -54,13 +54,13 @@ import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.MessagingException;
 import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMultipart;

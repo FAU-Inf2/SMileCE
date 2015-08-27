@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 import android.util.Base64;
 import android.util.Log;
@@ -14,7 +14,9 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 
+import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class PasswordEncryption {
     public PasswordEncryption()  {

@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -23,6 +23,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.Address;
 import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMultipart;

@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 
 import android.support.v4.util.Pair;
@@ -30,6 +30,8 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
+
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class SelfSignedCertificateCreator {
 

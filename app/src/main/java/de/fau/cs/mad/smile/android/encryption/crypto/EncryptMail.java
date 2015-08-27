@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 
 import android.os.AsyncTask;
@@ -8,7 +8,6 @@ import org.spongycastle.cms.CMSAlgorithm;
 import org.spongycastle.cms.RecipientInfoGenerator;
 import org.spongycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.spongycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.spongycastle.jcajce.provider.asymmetric.X509;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.spongycastle.operator.OutputEncryptor;
@@ -16,7 +15,6 @@ import org.spongycastle.operator.OutputEncryptor;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -25,12 +23,12 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.Address;
 import korex.mail.Session;
 import korex.mail.internet.InternetAddress;
 import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMessage;
-import korex.mail.internet.MimeUtility;
 
 public class EncryptMail {
     static {

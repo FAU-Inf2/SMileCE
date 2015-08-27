@@ -19,8 +19,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Properties;
 
-import de.fau.cs.mad.smile.android.encryption.DecryptMail;
-import de.fau.cs.mad.smile.android.encryption.EncryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
 import de.fau.cs.mad.smile.android.encryption.R;
 import korex.mail.Address;
 import korex.mail.MessagingException;

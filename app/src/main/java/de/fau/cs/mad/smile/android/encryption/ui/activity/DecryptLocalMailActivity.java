@@ -40,9 +40,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
-import de.fau.cs.mad.smile.android.encryption.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.DecryptMail;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.PasswordEncryption;
+import de.fau.cs.mad.smile.android.encryption.crypto.PasswordEncryption;
 import de.fau.cs.mad.smile.android.encryption.PathConverter;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;

@@ -27,7 +27,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import de.fau.cs.mad.smile.android.encryption.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.PathConverter;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;

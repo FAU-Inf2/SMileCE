@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -35,6 +35,10 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
+import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.Address;
 import korex.mail.internet.InternetAddress;
 

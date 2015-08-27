@@ -1,7 +1,6 @@
 package de.fau.cs.mad.smile.android.encryption;
 
 import android.os.AsyncTask;
-import android.support.v4.util.Pair;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +32,6 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import korex.mail.Address;
-import korex.mail.BodyPart;
 import korex.mail.Message;
 import korex.mail.Session;
 import korex.mail.internet.InternetAddress;
@@ -44,8 +42,8 @@ import korex.mail.internet.MimeMultipart;
 
 import de.fau.cs.mad.javax.activation.CommandMap;
 import de.fau.cs.mad.javax.activation.MailcapCommandMap;
-import de.fau.cs.mad.smile.android.encryption.DecryptMail;
-import de.fau.cs.mad.smile.android.encryption.EncryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
 
 import static org.junit.Assert.*;
 

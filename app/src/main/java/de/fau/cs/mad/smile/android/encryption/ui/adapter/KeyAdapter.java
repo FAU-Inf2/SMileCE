@@ -59,7 +59,7 @@ import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;

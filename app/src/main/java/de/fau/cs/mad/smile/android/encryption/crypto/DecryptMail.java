@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -29,6 +29,9 @@ import org.spongycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.spongycastle.mail.smime.SMIMEException;
 import org.spongycastle.operator.bc.BcDigestCalculatorProvider;
 
+import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.Address;
 import korex.mail.BodyPart;
 import korex.mail.Header;

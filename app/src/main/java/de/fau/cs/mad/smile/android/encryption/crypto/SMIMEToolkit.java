@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption;
+package de.fau.cs.mad.smile.android.encryption.crypto;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;

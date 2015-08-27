@@ -31,9 +31,9 @@ import korex.mail.internet.MimeMessage;
 import korex.mail.internet.MimeMultipart;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
-import de.fau.cs.mad.smile.android.encryption.SignMessage;
-import de.fau.cs.mad.smile.android.encryption.DecryptMail;
-import de.fau.cs.mad.smile.android.encryption.EncryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.SignMessage;
+import de.fau.cs.mad.smile.android.encryption.crypto.DecryptMail;
+import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
 
 public class EncryptDecryptMail {
     final String content = "Content for MIME-Messages, üäÖß, México 42!";
