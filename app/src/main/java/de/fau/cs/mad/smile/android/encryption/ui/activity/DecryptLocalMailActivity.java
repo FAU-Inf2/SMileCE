@@ -31,10 +31,15 @@ import android.widget.Toast;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.spongycastle.cms.CMSException;
+import org.spongycastle.mail.smime.SMIMEException;
+import org.spongycastle.operator.OperatorCreationException;
+import org.spongycastle.x509.CertPathReviewerException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -46,7 +51,12 @@ import de.fau.cs.mad.smile.android.encryption.crypto.PasswordEncryption;
 import de.fau.cs.mad.smile.android.encryption.PathConverter;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.VerifyMail;
+import korex.mail.MessagingException;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeUtility;
 
 
 public class DecryptLocalMailActivity extends ActionBarActivity {
@@ -251,8 +261,10 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         }
 
         Boolean success = decryptFile(pathToFile, alias, passphrase);
-        if(!success)
+        if(!success) {
             showErrorPrompt();
+        }
+
         options();
     }
 
@@ -300,13 +312,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
         try {
             decryptMail = new DecryptMail();
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         } finally {
             if(decryptMail == null) {
@@ -314,6 +320,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                 return null;
             }
         }
+
         return decryptMail;
     }
 

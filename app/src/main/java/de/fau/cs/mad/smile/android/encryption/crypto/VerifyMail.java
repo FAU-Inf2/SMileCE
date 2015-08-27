@@ -67,7 +67,7 @@ import korex.mail.internet.MimeMultipart;
 
 import de.fau.cs.mad.smime_api.SMimeApi;
 
-public class SignatureCheck {
+public class VerifyMail {
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
@@ -76,7 +76,7 @@ public class SignatureCheck {
 
     private final KeyManagement keyManagement;
 
-    public SignatureCheck() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    public VerifyMail() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         keyManagement = new KeyManagement();
     }
 
