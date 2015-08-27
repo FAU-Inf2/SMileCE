@@ -10,6 +10,10 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.apache.commons.io.FileUtils;
+import org.spongycastle.cms.CMSException;
+import org.spongycastle.mail.smime.SMIMEException;
+import org.spongycastle.operator.OperatorCreationException;
+import org.spongycastle.x509.CertPathReviewerException;
 
 import java.io.Closeable;
 import java.io.File;
@@ -18,18 +22,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.crypto.DecryptMail;
 import de.fau.cs.mad.smile.android.encryption.crypto.SignMessage;
-import de.fau.cs.mad.smile.android.encryption.crypto.SignatureCheck;
+import de.fau.cs.mad.smile.android.encryption.crypto.VerifyMail;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 import korex.activation.CommandMap;
@@ -57,6 +63,8 @@ public class SMimeService extends Service {
                     return encryptAndSign(data, input, output);
                 case SMimeApi.ACTION_DECRYPT_VERIFY:
                     return decryptAndVerify(data, input, output);
+                case SMimeApi.ACTION_VERIFY:
+                    return verify(data, input, output);
                 default:
                     return null;
             }
@@ -74,7 +82,7 @@ public class SMimeService extends Service {
         return mBinder;
     }
 
-    private final Intent decryptAndVerify(final Intent data, final ParcelFileDescriptor input, final ParcelFileDescriptor output) {
+    private Intent decryptAndVerify(final Intent data, final ParcelFileDescriptor input, final ParcelFileDescriptor output) {
         final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
         final OutputStream outputStream = new ParcelFileDescriptor.AutoCloseOutputStream(output);
         final String recipient = data.getStringExtra(SMimeApi.EXTRA_RECIPIENT);
@@ -87,7 +95,7 @@ public class SMimeService extends Service {
             //encryptedFile = copyToFile(inputStream);
 
             final DecryptMail decryptMail = new DecryptMail();
-            final SignatureCheck verifyMail = new SignatureCheck();
+            final VerifyMail verifyMail = new VerifyMail();
             MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
             MimeBodyPart decryptedPart = decryptMail.decryptMail(mimeBodyPart, recipient);
 
@@ -133,6 +141,54 @@ public class SMimeService extends Service {
         Log.d(SMileCrypto.LOG_TAG, "decryptAndVerify: returning intent: " + result);
         return result;
     }
+
+    private Intent verify(Intent data, ParcelFileDescriptor input, ParcelFileDescriptor output) {
+        final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
+        final String sender = data.getStringExtra(SMimeApi.EXTRA_SENDER);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Intent result = new Intent();
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int resultType = SMimeApi.RESULT_TYPE_UNENCRYPTED_UNSIGNED;
+                    final VerifyMail verifyMail = new VerifyMail();
+                    MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
+                    int signatureStatus = verifyMail.verifySignature(mimeBodyPart, sender);
+                    if (signatureStatus != SMimeApi.RESULT_SIGNATURE_UNSIGNED) {
+                        resultType |= SMimeApi.RESULT_TYPE_SIGNED;
+                    }
+
+                    result.putExtra(SMimeApi.RESULT_TYPE, resultType);
+                    result.putExtra(SMimeApi.RESULT_SIGNATURE, signatureStatus);
+                    result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
+                } catch (IOException | MessagingException | OperatorCreationException | GeneralSecurityException | SMIMEException | CMSException | CertPathReviewerException e) {
+                    result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }).start();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 
     private Intent encrypt(Intent data, ParcelFileDescriptor input, ParcelFileDescriptor output) {
         Intent result = new Intent();
@@ -265,7 +321,7 @@ public class SMimeService extends Service {
             while (enumeration.hasMoreElements()) {
                 String headerLine = (String) enumeration.nextElement();
                 //if (!headerLine.toLowerCase().startsWith("content-")) {
-                    target.addHeaderLine(headerLine);
+                target.addHeaderLine(headerLine);
                 //}
             }
         }

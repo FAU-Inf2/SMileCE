@@ -129,7 +129,7 @@ public class EncryptDecryptMail {
         System.out.println("Start decrypt.");
 
         DecryptMail decryptMail = new DecryptMail();
-        return decryptMail.decryptMail((String) null, mimeMessage, null);
+        return decryptMail.decryptMail(mimeMessage, (String) null, null);
     }
 
     private class AsyncCreateMimeMessage extends AsyncTask<Void, Void, MimeMessage> {

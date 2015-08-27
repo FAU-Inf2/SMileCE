@@ -196,12 +196,13 @@ public class DecryptMail {
         return decryptedBodyPart;
     }
 
-    public MimeBodyPart decryptMail(String alias, MimeMessage mimeMessage, String passphrase) {
+    public MimeBodyPart decryptMail(MimeMessage mimeMessage, String alias, String passphrase) {
         if (mimeMessage == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
+
         this.encryptedMimeMessage = mimeMessage;
 
         ArrayList<String> aliases;
@@ -301,7 +302,7 @@ public class DecryptMail {
             if(alias == null)
                 continue;
 
-            MimeBodyPart result = decryptMail(alias, mimeMessage, passphrase);
+            MimeBodyPart result = decryptMail(mimeMessage, alias, passphrase);
             if(result != null)
                 return result;
 
