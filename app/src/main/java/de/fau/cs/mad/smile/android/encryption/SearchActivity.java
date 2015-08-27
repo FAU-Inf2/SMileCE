@@ -86,7 +86,7 @@ public class SearchActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 searchEt.setText("");
-                adapter.removeAndAdd(keyManager.getAllCertificates());
+                adapter.addKey(keyManager.getAllCertificates());
             }
         });
     }
@@ -116,7 +116,7 @@ public class SearchActivity extends ActionBarActivity {
 
     @Override
     public void onResume() {
-        adapter.removeAndAdd(keyManager.getAllCertificates());
+        adapter.addKey(keyManager.getAllCertificates());
         super.onResume();
     }
 

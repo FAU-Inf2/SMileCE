@@ -21,6 +21,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -60,7 +61,7 @@ import de.fau.cs.mad.smile.android.encryption.R;
 
 
 public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
-    private List<KeyInfo> keylist;
+    private SortedList<KeyInfo> keylist;
     private Activity activity;
     private static List<Integer> materialColors = Arrays.asList(
             0xffe57373,
@@ -82,19 +83,9 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
             0xff90a4ae
     );
 
-    public void removeAndAdd(List<KeyInfo> keyInfos) {
-        for(int i = 0; i < keylist.size(); ++i) {
-            if(!(keyInfos.contains(keylist.get(i)))) {
-                keylist.remove(i);
-                notifyItemRemoved(i);
-            }
-        }
-        addKey(keyInfos);
-    }
-
     public void switchCards(ArrayList<KeyInfo> cardsFiltered) {
-        keylist = cardsFiltered;
-        notifyDataSetChanged();
+        keylist.clear();
+        addKey(cardsFiltered);
     }
 
     @Override
@@ -187,14 +178,60 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     }
 
     public KeyAdapter(Activity activity) {
-        this.activity = activity;
-        this.keylist = new ArrayList<KeyInfo>();
+        this(activity, null);
     }
 
     public KeyAdapter(Activity activity, List<KeyInfo> keyInfoList) {
         this.activity = activity;
-        this.keylist = keyInfoList;
-        notifyDataSetChanged();
+        this.keylist = new SortedList<KeyInfo>(KeyInfo.class, new SortedList.Callback<KeyInfo>() {
+            @Override
+            public int compare(KeyInfo o1, KeyInfo o2) {
+                int erg = 0;
+                if(o1.contact.equals("") && o2.contact.equals("")) {
+                    erg = o1.mail.compareTo(o2.mail);
+                } else if(o1.contact.equals("")) {
+                    erg = o1.mail.compareTo(o2.contact);
+                } else if(o2.contact.equals("")) {
+                    erg = o1.contact.compareTo(o2.mail);
+                } else {
+                    erg = o1.contact.compareTo(o2.contact);
+                }
+                return erg;
+            }
+
+            @Override
+            public void onInserted(int position, int count) {
+                notifyItemRangeInserted(position, count);
+            }
+
+            @Override
+            public void onRemoved(int position, int count) {
+                notifyItemRangeRemoved(position, count);
+            }
+
+            @Override
+            public void onMoved(int fromPosition, int toPosition) {
+                notifyItemMoved(fromPosition, toPosition);
+            }
+
+            @Override
+            public void onChanged(int position, int count) {
+                notifyItemRangeChanged(position, count);
+            }
+
+            @Override
+            public boolean areContentsTheSame(KeyInfo oldItem, KeyInfo newItem) {
+                return oldItem.contact.equals(newItem.contact) && oldItem.mail.equals(newItem.mail) && oldItem.termination_date.equals(newItem.termination_date);
+            }
+
+            @Override
+            public boolean areItemsTheSame(KeyInfo item1, KeyInfo item2) {
+                return item1.equals(item2);
+            }
+        });
+        if(keyInfoList != null) {
+            addKey(keyInfoList);
+        }
     }
 
     @Override
@@ -357,11 +394,8 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
     }
 
     public void addKey(KeyInfo key) {
-        if (key != null && !keylist.contains(key)) {
-            int pos = keylist.size();
+        if (key != null) {
             keylist.add(key);
-            Log.e(SMileCrypto.LOG_TAG, "Added KeyInfo: " + key + " at position: " + pos);
-            notifyItemInserted(pos);
         }
     }
 
@@ -369,16 +403,16 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
         if (keys == null) {
             return;
         }
-
+        keylist.beginBatchedUpdates();
         for (KeyInfo ki : keys) {
-            addKey(ki);
+            keylist.add(ki);
         }
+        keylist.endBatchedUpdates();
     }
 
     public void removeKey(int position) {
         if(position >= 0 && position < getItemCount()) {
-            keylist.remove(position);
-            notifyItemRemoved(position);
+            keylist.removeItemAt(position);
         }
     }
 
@@ -491,6 +525,10 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> {
             } else {
                 if(keyInfo != null && keyInfo.contact != null && keyInfo.contact.length() > 0){
                     initial = keyInfo.contact.substring(0, 1);
+                } else if(keyInfo != null && keyInfo.mail != null && keyInfo.mail.length() > 0) {
+                    initial = keyInfo.mail.substring(0, 1);
+                } else {
+                    initial = " ";
                 }
             }
 

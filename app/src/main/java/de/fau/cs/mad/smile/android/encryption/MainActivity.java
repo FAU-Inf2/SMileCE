@@ -90,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent i = new Intent(v.getContext(), ImportCertificateActivity.class);
                 startActivity(i);
-                adapter.removeAndAdd(keyManager.getAllCertificates());
+                adapter.addKey(keyManager.getAllCertificates());
             }
         });
 
@@ -168,18 +168,18 @@ public class MainActivity extends ActionBarActivity {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
-                        adapter.removeAndAdd(keyManager.getAllCertificates());
+                        adapter.addKey(keyManager.getAllCertificates());
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_help))) {
                         Intent i = new Intent(MainActivity.this, HelpActivity.class);
                         startActivity(i);
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_info))) {
                         Intent i = new Intent(MainActivity.this, InfoActivity.class);
                         startActivity(i);
-                        adapter.removeAndAdd(keyManager.getAllCertificates());
+                        adapter.addKey(keyManager.getAllCertificates());
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
                         Intent i = new Intent(MainActivity.this, SearchActivity.class);
                         startActivity(i);
-                        adapter.removeAndAdd(keyManager.getAllCertificates());
+                        adapter.addKey(keyManager.getAllCertificates());
                     }
                     return true;
                 }
@@ -222,7 +222,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onResume() {
-        adapter.removeAndAdd(keyManager.getAllCertificates());
+        adapter.addKey(keyManager.getAllCertificates());
         super.onResume();
     }
 
