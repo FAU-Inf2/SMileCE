@@ -42,6 +42,6 @@ public class CryptoOperationBuilder {
     }
 
     public CryptoOperation createVerifyOperation() throws IOException {
-        return new EncryptOperation(data, input, output);
+        return new VerifyOperation(data, input, output);
     }
 }
