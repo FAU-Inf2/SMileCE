@@ -44,7 +44,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    RecyclerViewAdapter(String[] titles, int[] icons, String name, String email) {
+    public RecyclerViewAdapter(String[] titles, int[] icons, String name, String email) {
         mNavigationTitles = titles;
         mIcons = icons;
         this.mHeaderName = name;
