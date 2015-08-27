@@ -35,8 +35,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.mail.Address;
-import javax.mail.internet.InternetAddress;
+import korex.mail.Address;
+import korex.mail.internet.InternetAddress;
 
 public class KeyManagement {
 

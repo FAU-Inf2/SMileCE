@@ -26,17 +26,12 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.mail.Address;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-
-import de.fau.cs.mad.javax.activation.CommandMap;
-import de.fau.cs.mad.javax.activation.DataHandler;
-import de.fau.cs.mad.javax.activation.FileDataSource;
-import de.fau.cs.mad.javax.activation.MailcapCommandMap;
+import korex.mail.Address;
+import korex.mail.MessagingException;
+import korex.mail.Session;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
 
 public class EncryptLocalMailActivity extends ActionBarActivity {
 
@@ -68,13 +63,6 @@ public class EncryptLocalMailActivity extends ActionBarActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-               /* MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-                mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-                mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-                mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-                mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
-                mc.addMailcap("message/rfc822;; x-java-content- handler=com.sun.mail.handlers.message_rfc822");
-                */
                 final EncryptMail encryptMail = new EncryptMail();
                 final DecryptMail decryptMail = new DecryptMail();
                 File downloadDir = new File("/sdcard/Download/");

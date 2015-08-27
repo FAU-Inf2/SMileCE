@@ -40,7 +40,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
-import javax.mail.internet.MimeMessage;
+import korex.mail.internet.MimeMessage;
 
 
 public class DecryptLocalMailActivity extends ActionBarActivity {

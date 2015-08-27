@@ -2,6 +2,10 @@ apply plugin: 'com.android.application'
 
 def appSourcesDir = file('src/main/java')
 
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
@@ -53,6 +57,7 @@ android {
 preBuild.dependsOn(":smime-api:build")
 
 def supportVersion = "22.2.1"
+def spongyVersion = '1.52.0.0'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -60,10 +65,13 @@ dependencies {
     compile 'com.android.support:appcompat-v7:' + supportVersion
     compile 'com.android.support:cardview-v7:' + supportVersion
     compile 'com.android.support:recyclerview-v7:' + supportVersion
-    compile 'com.madgag.spongycastle:core:1.51.0.0'
-    compile 'com.madgag.spongycastle:prov:1.51.0.0'
-    compile 'com.madgag.spongycastle:pkix:1.51.0.0'
-    compile 'com.madgag.spongycastle:pg:1.51.0.0'
+
+    compile group: 'com.madgag.spongycastle', name: 'core', version: spongyVersion
+    compile group: 'com.madgag.spongycastle', name: 'prov', version: spongyVersion
+    compile group: 'com.madgag.spongycastle', name: 'pkix', version: spongyVersion
+    compile group: 'com.madgag.spongycastle', name: 'pg', version: spongyVersion
+
+    compile 'com.github.konradrenner:kore-javamail:1.0.2'
     compile 'net.danlew:android.joda:2.8.2'
     compile 'commons-io:commons-io:2.4'
     compile 'com.android.support:support-v4:' + supportVersion

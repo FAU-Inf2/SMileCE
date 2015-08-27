@@ -16,7 +16,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,19 +25,6 @@ import java.security.cert.CertificateException;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
-import de.fau.cs.mad.javax.activation.CommandMap;
-import de.fau.cs.mad.javax.activation.DataHandler;
-import de.fau.cs.mad.javax.activation.FileDataSource;
-import de.fau.cs.mad.javax.activation.MailcapCommandMap;
 import de.fau.cs.mad.smile.android.encryption.EncryptMail;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.App;
@@ -47,6 +33,15 @@ import de.fau.cs.mad.smile.android.encryption.SignMessage;
 import de.fau.cs.mad.smile.android.encryption.SignatureCheck;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
+import korex.activation.CommandMap;
+import korex.activation.MailcapCommandMap;
+import korex.mail.MessagingException;
+import korex.mail.Session;
+import korex.mail.internet.AddressException;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeMultipart;
 
 public class SMimeService extends Service {
 
@@ -97,15 +92,16 @@ public class SMimeService extends Service {
             MimeBodyPart mimeBodyPart = new MimeBodyPart(inputStream);
             MimeBodyPart decryptedPart = decryptMail.decryptMail(mimeBodyPart, recipient);
 
-            if(decryptedPart != null) {
+            if (decryptedPart != null) {
                 decryptedPart.writeTo(outputStream);
                 int resultType = SMimeApi.RESULT_TYPE_ENCRYPTED;
-
-                if(verifyMail.verifySignature(decryptedPart, sender)) {
+                int signatureStatus = verifyMail.verifySignature(decryptedPart, sender);
+                if (signatureStatus != SMimeApi.RESULT_SIGNATURE_UNSIGNED) {
                     resultType |= SMimeApi.RESULT_TYPE_SIGNED;
                 }
 
                 result.putExtra(SMimeApi.RESULT_TYPE, resultType);
+                result.putExtra(SMimeApi.RESULT_SIGNATURE, signatureStatus);
                 result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
             } else {
                 // TODO: not encrypted/decrypt failed
@@ -115,14 +111,14 @@ public class SMimeService extends Service {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
             e.printStackTrace();
         } finally {
-            if(outputStream != null) {
+            if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if(inputStream != null) {
+            if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
@@ -130,7 +126,7 @@ public class SMimeService extends Service {
                 }
             }
 
-            if(encryptedFile != null) {
+            if (encryptedFile != null) {
                 encryptedFile.delete();
             }
         }
@@ -150,7 +146,7 @@ public class SMimeService extends Service {
         } catch (Exception e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
         } finally {
-            if(operation != null) {
+            if (operation != null) {
                 try {
                     operation.close();
                 } catch (IOException e) {
@@ -171,7 +167,7 @@ public class SMimeService extends Service {
         } catch (Exception e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
         } finally {
-            if(operation != null) {
+            if (operation != null) {
                 try {
                     operation.close();
                 } catch (IOException e) {
@@ -192,7 +188,7 @@ public class SMimeService extends Service {
         } catch (Exception e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
         } finally {
-            if(operation != null) {
+            if (operation != null) {
                 try {
                     operation.close();
                 } catch (IOException e) {
@@ -257,7 +253,7 @@ public class SMimeService extends Service {
             final MimeMessage source = preProcess();
             final MimeMessage result = process(source);
             copyHeaders(source, result);
-            addDataHandlers(result);
+            //addDataHandlers(result);
             result.saveChanges();
             result.writeTo(outputStream);
             Intent intent = new Intent();
@@ -269,9 +265,9 @@ public class SMimeService extends Service {
             Enumeration enumeration = source.getAllHeaderLines();
             while (enumeration.hasMoreElements()) {
                 String headerLine = (String) enumeration.nextElement();
-                if (!headerLine.toLowerCase().startsWith("content-")) {
+                //if (!headerLine.toLowerCase().startsWith("content-")) {
                     target.addHeaderLine(headerLine);
-                }
+                //}
             }
         }
 

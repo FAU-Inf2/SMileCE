@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.mail.MessagingException;
-import javax.mail.Part;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import korex.mail.MessagingException;
+import korex.mail.Part;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeMultipart;
 
 import org.spongycastle.cert.X509CertificateHolder;
 import org.spongycastle.cms.CMSException;
