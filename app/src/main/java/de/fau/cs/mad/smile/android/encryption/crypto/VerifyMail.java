@@ -34,6 +34,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertPath;
@@ -61,22 +62,21 @@ import java.util.List;
 import java.util.Set;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smime_api.SMimeApi;
 import korex.mail.MessagingException;
 import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMultipart;
 
-import de.fau.cs.mad.smime_api.SMimeApi;
-
 public class VerifyMail {
     static {
-        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 
     private static final int SHORT_KEY_LENGTH = 512;
 
     private final KeyManagement keyManagement;
 
-    public VerifyMail() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    public VerifyMail() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, NoSuchProviderException {
         keyManagement = new KeyManagement();
     }
 
@@ -127,7 +127,7 @@ public class VerifyMail {
                 valid &= checkSigner(cert, sender);
                 if (valid) {
                     //TODO: good place?
-                    KeyManagement.addFriendsCertificate(cert);
+                    keyManagement.addFriendsCertificate(cert);
                 }
 
                 Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);

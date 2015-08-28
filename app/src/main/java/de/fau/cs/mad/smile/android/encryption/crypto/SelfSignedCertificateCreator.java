@@ -36,7 +36,7 @@ import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 public class SelfSignedCertificateCreator {
 
     static {
-        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 
     private X509v1CertificateBuilder v1CertGen;

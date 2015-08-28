@@ -24,7 +24,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Security;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -43,37 +46,50 @@ import korex.mail.Address;
 import korex.mail.internet.InternetAddress;
 
 public class KeyManagement {
+    static {
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
+    }
 
     private final String certificateDirectory;
     private final KeyStore androidKeyStore;
+    private final List<KeyInfo> certificates;
 
-    public KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+    public KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException {
         final Context context = App.getContext();
         this.certificateDirectory = context.getDir(
                 context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
                 getAbsolutePath();
         this.androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
         androidKeyStore.load(null);
+
+        this.certificates = new ArrayList<>();
     }
 
-    public static Boolean addPrivateKeyFromP12ToKeyStore(String pathToFile, String passphrase) {
+    public Boolean addPrivateKeyFromP12ToKeyStore(final String pathToFile, final String passphrase) {
         try {
-            KeyStore p12 = KeyStore.getInstance("pkcs12");
-            p12.load(new FileInputStream(pathToFile), passphrase.toCharArray());
-            Enumeration e = p12.aliases();
+            char[] passphraseChared = passphrase.toCharArray();
+            KeyStore keyFileStore = KeyStore.getInstance("pkcs12");
+            keyFileStore.load(new FileInputStream(pathToFile), passphraseChared);
+            Enumeration e = keyFileStore.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
-                if (!p12.isKeyEntry(alias)) {
+                if (!keyFileStore.isKeyEntry(alias)) {
                     continue;
                 }
 
-                X509Certificate certificate = (X509Certificate) p12.getCertificate(alias);
+                X509Certificate certificate = (X509Certificate) keyFileStore.getCertificate(alias);
                 Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                 Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + certificate.getSubjectDN().getName());
                 Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + certificate.getIssuerDN().getName());
 
-                PrivateKey key = (PrivateKey) p12.getKey(alias, passphrase.toCharArray());
-                String new_alias = addCertificateToKeyStore(key, certificate);
+                // TODO: collect certificate chain and store
+                final PrivateKey privateKey = (PrivateKey) keyFileStore.getKey(alias, passphraseChared);
+                final String new_alias = addCertificateToKeyStore(privateKey, certificate);
+                if (new_alias == null) {
+                    return false;
+                }
+
+                addKeyInfo(new_alias);
 
                 copyP12ToInternalDir(pathToFile, new_alias);
                 return savePassphrase(new_alias, passphrase);
@@ -85,38 +101,43 @@ public class KeyManagement {
         }
     }
 
-    /*TODO: add certificate from someone else (without private key) */
-    public static Boolean addFriendsCertificate(X509Certificate certificate) {
-        try {
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
+    private void addKeyInfo(final String alias) throws KeyStoreException, CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
+        KeyInfo keyInfo = getKeyInfo(alias);
+        if(!certificates.contains(keyInfo)) {
+            certificates.add(keyInfo);
+        }
+    }
 
+    public Boolean addFriendsCertificate(X509Certificate certificate) {
+        try {
             String thumbprint = getThumbprint(certificate);
             String alias = "SMile_crypto_other_" + thumbprint;
             Log.d(SMileCrypto.LOG_TAG, "Check whether certificate is stored for alias: " + alias);
 
             //Check whether cert is already there
-            if (ks.containsAlias(alias)) {
+            if (androidKeyStore.containsAlias(alias)) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return true;
             }
 
             //Check whether cert is already there because it's our own (= have private key)
-            if (ks.containsAlias("SMile_crypto_own_" + thumbprint)) {
+            if (androidKeyStore.containsAlias("SMile_crypto_own_" + thumbprint)) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return true;
             }
 
             Log.d(SMileCrypto.LOG_TAG, "Alias is not there, import new certificate without private key.");
-            ks.setCertificateEntry(alias, certificate);
-            return ks.containsAlias(alias);
+            androidKeyStore.setCertificateEntry(alias, certificate);
+            addKeyInfo(alias);
+
+            return androidKeyStore.containsAlias(alias);
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in x: " + e.getMessage());
             return false;
         }
     }
 
-    public ArrayList<KeyInfo> getOwnCertificates() {
+    public List<KeyInfo> getOwnCertificates() {
         ArrayList<KeyInfo> keyList = new ArrayList<>();
         for (KeyInfo keyInfo : getAllCertificates()) {
             if(keyInfo.getHasPrivateKey()) {
@@ -127,8 +148,15 @@ public class KeyManagement {
         return keyList;
     }
 
-    public ArrayList<KeyInfo> getAllCertificates() {
-        ArrayList<KeyInfo> erg = new ArrayList<>();
+    public List<KeyInfo> getAllCertificates() {
+        if(certificates.size() == 0) {
+            loadCertificates();
+        }
+
+        return certificates;
+    }
+
+    private void loadCertificates() {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Find all own certificates…");
 
@@ -140,28 +168,27 @@ public class KeyManagement {
                     continue;
                 }
 
-                KeyInfo keyInfo = getKeyInfo(alias);
-
-                erg.add(keyInfo);
+                addKeyInfo(alias);
             }
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
             e.printStackTrace();
         }
-
-        return erg;
     }
 
     public final X509Certificate getCertificateForAlias(final String alias) throws KeyStoreException {
+        if(alias == null) {
+            return null;
+        }
+
         return (X509Certificate) androidKeyStore.getCertificate(alias);
     }
 
-    public final Certificate[] getCertificateChain(final Certificate certificate) throws KeyStoreException {
-        final String alias = androidKeyStore.getCertificateAlias(certificate);
-        return androidKeyStore.getCertificateChain(alias);
-    }
+    public KeyStore.PrivateKeyEntry getPrivateKeyEntry(final String alias, final String passphrase) throws KeyStoreException, UnrecoverableEntryException, NoSuchAlgorithmException {
+        if(alias == null) {
+            return null;
+        }
 
-    public PrivateKey getPrivateKeyForAlias(final String alias, final String passphrase) throws KeyStoreException {
         KeyStore p12 = KeyStore.getInstance("pkcs12");
         String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
         Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
@@ -172,7 +199,6 @@ public class KeyManagement {
             return null;
         }
 
-        PrivateKey privateKey = null;
         try {
             p12.load(new FileInputStream(p12File), passphrase.toCharArray());
             Enumeration e = p12.aliases();
@@ -180,7 +206,7 @@ public class KeyManagement {
             while (e.hasMoreElements()) {
                 String aliasp12 = (String) e.nextElement();
                 if (p12.isKeyEntry(aliasp12)) {
-                    privateKey = (PrivateKey) p12.getKey(aliasp12, passphrase.toCharArray());
+                    return (KeyStore.PrivateKeyEntry) p12.getEntry(aliasp12, null);
                 }
             }
         } catch (Exception e) {
@@ -189,7 +215,7 @@ public class KeyManagement {
             return null;
         }
 
-        return privateKey;
+        return null;
     }
 
     public final String getPassphraseForAlias(final String alias) {
@@ -344,6 +370,8 @@ public class KeyManagement {
     public boolean deleteKey(final String alias) {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Delete key with alias: " + alias);
+            KeyInfo keyInfo = getKeyInfo(alias);
+            certificates.remove(keyInfo);
 
             if (androidKeyStore.containsAlias(alias)) {
                 androidKeyStore.deleteEntry(alias);
@@ -355,7 +383,7 @@ public class KeyManagement {
 
             // just own keys have to be deleted from internal storage
             return deletePassphrase(alias) && deleteP12FromInternalDir(alias);
-        } catch (KeyStoreException e) {
+        } catch (CertificateEncodingException | CertificateParsingException | NoSuchAlgorithmException | KeyStoreException e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while deleting key: " + e.getMessage());
             return false;
         }
@@ -444,21 +472,19 @@ public class KeyManagement {
         }
     }
 
-    private static String addCertificateToKeyStore(final PrivateKey key, final X509Certificate certificate) {
+    private String addCertificateToKeyStore(final PrivateKey key, final X509Certificate certificate) {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Import certificate to keyStore.");
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
 
             String alias = "SMile_crypto_own_" + getThumbprint(certificate);
             //Check whether cert is already there
-            if (ks.containsAlias(alias)) {
+            if (androidKeyStore.containsAlias(alias)) {
                 Log.d(SMileCrypto.LOG_TAG, "Alias " + alias + " already exists.");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
                 return alias;
             }
 
-            ks.setKeyEntry(alias, key, null, new Certificate[]{certificate});
+            androidKeyStore.setKeyEntry(alias, key, null, new Certificate[]{certificate});
 
             Toast.makeText(App.getContext(), R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
@@ -487,14 +513,14 @@ public class KeyManagement {
         return true;
     }
 
-    private static Boolean deleteP12FromInternalDir(final String alias) {
+    private Boolean deleteP12FromInternalDir(final String alias) {
         File certDirectory = App.getContext().getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE);
         String filename = alias + ".p12";
         File toBeDeleted = new File(certDirectory, filename);
         return toBeDeleted.delete();
     }
 
-    private static Boolean deletePassphrase(final String alias) {
+    private Boolean deletePassphrase(final String alias) {
         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(App.getContext().getApplicationContext()).edit();
         e.remove(alias + "-passphrase");
         e.commit();
