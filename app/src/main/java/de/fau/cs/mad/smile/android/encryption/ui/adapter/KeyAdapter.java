@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,9 +62,9 @@ import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;
 
 
@@ -91,7 +92,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             0xff90a4ae
     );
 
-    public void switchCards(ArrayList<KeyInfo> cardsFiltered) {
+    public void switchCards(List<KeyInfo> cardsFiltered) {
         keylist.clear();
         addKey(cardsFiltered);
     }
@@ -561,10 +562,11 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         final KeyManagement keyManagement;
         try {
             keyManagement = new KeyManagement();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException  e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
             printError();
             return;
         }
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 activity);
 
@@ -608,10 +610,11 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         final KeyManagement keyManagement;
         try {
             keyManagement = new KeyManagement();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException  e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
             printError();
             return;
         }
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 activity);
 

@@ -1,7 +1,7 @@
 package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -20,20 +20,22 @@ import org.joda.time.format.DateTimeFormatter;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.List;
 
-import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
 
 public class SearchActivity extends ActionBarActivity {
     private KeyAdapter adapter;
     private KeyManagement keyManager;
 
-    private ArrayList<KeyInfo> cards;
+    private List<KeyInfo> cards;
 
     private Toolbar toolbar;
     private String searchQuery;
@@ -62,13 +64,7 @@ public class SearchActivity extends ActionBarActivity {
 
         try {
             keyManager = new KeyManagement();
-        } catch (KeyStoreException e) { // TODO: display error message and die
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) { // TODO: display error message and die
             e.printStackTrace();
         }
 
@@ -152,9 +148,7 @@ public class SearchActivity extends ActionBarActivity {
 
     }
 
-
-    private ArrayList<KeyInfo> performSearch(ArrayList<KeyInfo> cardList, String query) {
-
+    private ArrayList<KeyInfo> performSearch(List<KeyInfo> cardList, String query) {
         String[] queryByWords = query.toLowerCase().split("\\s+");
 
         ArrayList<KeyInfo> cardsFiltered = new ArrayList<KeyInfo>();

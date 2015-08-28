@@ -89,14 +89,6 @@ public class EncryptDecryptMailTest {
         return encryptMail.encryptMessage(originalMimeMessage, cert);
     }
 
-    private MimeBodyPart decrypt(MimeMessage mimeMessage, PrivateKey key, X509Certificate cert) throws Exception {
-        System.out.println("Start decrypt.");
-
-        DecryptMail decryptMail = new DecryptMail();
-
-        return decryptMail.decryptMail(mimeMessage, key, cert);
-    }
-
     private class AsyncCreateMimeMessage extends AsyncTask<Void, Void, MimeMessage> {
         protected MimeMessage doInBackground(Void... params) {
             try {

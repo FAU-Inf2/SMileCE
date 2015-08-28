@@ -15,8 +15,6 @@ import java.util.GregorianCalendar;
 
 import javax.security.auth.x500.X500Principal;
 
-import de.fau.cs.mad.smile.android.encryption.R;
-
 public class App extends Application {
 
     private static Context mContext;
@@ -39,7 +37,7 @@ public class App extends Application {
 
         try {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);;
+            keyStore.load(null);
 
             if(keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
                 return;

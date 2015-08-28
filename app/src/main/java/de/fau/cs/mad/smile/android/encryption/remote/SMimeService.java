@@ -15,8 +15,10 @@ import org.spongycastle.x509.CertPathReviewerException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.ExecutionException;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.remote.operation.CryptoOperation;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 import korex.mail.MessagingException;
@@ -75,7 +77,8 @@ public class SMimeService extends Service {
                 operation.execute();
                 result = operation.getResult();
             }
-        } catch (IOException | GeneralSecurityException | CertPathReviewerException | CMSException | OperatorCreationException | SMIMEException | MessagingException e) {
+        } catch (IOException | GeneralSecurityException | CertPathReviewerException | CMSException |
+                OperatorCreationException | SMIMEException | ExecutionException | InterruptedException | MessagingException e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
             Log.e(SMileCrypto.LOG_TAG, "Exception while doing crypto stuff", e);
         } finally {

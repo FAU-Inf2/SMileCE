@@ -4,8 +4,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
@@ -16,25 +16,31 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.FileNameMap;
 import java.net.URLConnection;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.PathConverter;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 
 public class ImportCertificateActivity extends ActionBarActivity {
     private Toolbar toolbar;
     protected final int FILE_CHOOSER_REQUEST_CODE = 1;
+    private KeyManagement keyManagement;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +57,11 @@ public class ImportCertificateActivity extends ActionBarActivity {
         final Intent intent = getIntent();
         final String action = intent.getAction();
 
-        if(Intent.ACTION_VIEW.equals(action)){
+        if (Intent.ACTION_VIEW.equals(action)) {
             Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
             Uri uri = intent.getData();
             String path = PathConverter.getPath(this, uri);
-            TextView textView = (TextView)findViewById(R.id.import_text_view);
+            TextView textView = (TextView) findViewById(R.id.import_text_view);
             textView.setText(getString(R.string.import_certificate_show_path) + path);
             Log.d(SMileCrypto.LOG_TAG, "Path to file is " + path);
             handleFile(path);
@@ -63,6 +69,14 @@ public class ImportCertificateActivity extends ActionBarActivity {
             Log.d(SMileCrypto.LOG_TAG, "Intent was something else: " + action);
             Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
             showFileChooser();
+        }
+
+        try {
+            keyManagement = new KeyManagement();
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
+            Toast.makeText(this, R.string.open_keystore_failed, Toast.LENGTH_SHORT);
+            finish();
+            return;
         }
     }
 
@@ -75,9 +89,10 @@ public class ImportCertificateActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-        finish();
-        return true;
+            finish();
+            return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -155,7 +170,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
     private void handleFile(String pathToFile) {
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(pathToFile);
-        if(mimeType == null) {
+        if (mimeType == null) {
             Log.e(SMileCrypto.LOG_TAG, "MimeType was null.");
             Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
             importError(getResources().getString(R.string.unknown_filetype));
@@ -177,10 +192,11 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     importError(getResources().getString(R.string.error_reading_certificate));
                 }
 
-                if (KeyManagement.addFriendsCertificate(certificate))
+                if (keyManagement.addFriendsCertificate(certificate)) {
                     importSuccessful();
-                else
+                } else {
                     importError(getResources().getString(R.string.internal_error));
+                }
                 break;
             default:
                 Log.e(SMileCrypto.LOG_TAG, "Unknown mime type: " + mimeType);
@@ -205,7 +221,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String passphrase = passphraseUserInput.getText().toString();
-                        if (!KeyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
+                        if (!keyManagement.addPrivateKeyFromP12ToKeyStore(pathToFile, passphrase)) {
                             wrongPassphrase(pathToFile);
                         } else {
                             importSuccessful();
