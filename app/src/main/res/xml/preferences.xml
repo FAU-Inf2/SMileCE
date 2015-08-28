@@ -2,6 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
+        android:key="pref_key_type"
+        android:entries="@array/type"
+        android:summary="@string/sort_type_summary"
+        android:entryValues="@array/type"
+        android:title="@string/sort_type"
+        android:defaultValue="@string/type_name"/>
+
+    <ListPreference
         android:key="pref_key_direction"
         android:entries="@array/order"
         android:summary="@string/sort_order_summary"

@@ -264,9 +264,17 @@
     <string name="certificate_share_fail">Sharing certificate failed.</string>
     <string name="certificate_share_success">Certificate was successfully shared.</string>
     <string name="debug_info">Debug Information</string>
-    <string name="debug_summary">Enable debug logging. Change requires restart to function properly.</string>
-    <string name="sort_order_summary">Certificates are displayed in \"%1$s\" order.</string>
-    <string name="sort_asc">"ascending"</string>
-    <string name="sort_dec">"descending"</string>
+    <string name="debug_summary">Enable debug logging.</string>
+    <string name="sort_order_summary">Current certificate display order: %1$s.</string>
+    <string name="sort_asc">ascending</string>
+    <string name="sort_dec">descending</string>
     <string name="order">Order</string>
+    <string name="asc">Ascending</string>
+    <string name="dec">Descending</string>
+    <string name="sort_type_summary">Currently certificates are sorted by: %1$s.</string>
+    <string name="sort_type">Sort by</string>
+    <string name="valid">Expiration date</string>
+    <string name="key_type">Has private key</string>
+    <string name="type_name">Name</string>
+    <string name="type_email">Email</string>
 </resources>
