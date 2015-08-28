@@ -104,7 +104,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
-        if(key.equals("pref_key_direction")) {
+        if(key.equals("pref_key_direction") || key.equals("pref_key_type")) {
             ArrayList<KeyInfo> kis = new ArrayList<KeyInfo>(keylist.size());
             for(int i = 0; i < getItemCount(); ++i) {
                 kis.add(keylist.get(i));
@@ -207,19 +207,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         this.keylist = new SortedList<KeyInfo>(KeyInfo.class, new SortedList.Callback<KeyInfo>() {
             @Override
             public int compare(KeyInfo o1, KeyInfo o2) {
-                int erg = 0;
-                if(o1.getContact().equals("") && o2.getContact().equals("")) {
-                    erg = o1.getMail().compareTo(o2.getMail());
-                } else if(o1.getContact().equals("")) {
-                    erg = o1.getMail().compareTo(o2.getContact());
-                } else if(o2.getContact().equals("")) {
-                    erg = o1.getContact().compareTo(o2.getMail());
-                } else {
-                    erg = o1.getContact().compareTo(o2.getContact());
-                }
-                Log.d(SMileCrypto.LOG_TAG, "Order: " + Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1")));
-                erg *= Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1"));
-                return erg;
+                return o1.compareTo(o2);
             }
 
             @Override
