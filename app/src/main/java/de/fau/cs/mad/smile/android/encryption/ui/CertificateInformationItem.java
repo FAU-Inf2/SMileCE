@@ -17,12 +17,12 @@ public class CertificateInformationItem extends AbstractCertificateInfoItem {
 
     @Override
     public void build(HashMap<String, String> data) {
-        if(data.keySet().contains("Thumbprint") && data.keySet().contains("Serial number")
+        if (data.keySet().contains("Thumbprint") && data.keySet().contains("Serial number")
                 && data.keySet().contains("Version")) {
             this.data = data;
         } else {
             throw new IllegalArgumentException("Data must contain \"Thumbprint\", \"Serial number\", " +
-            "and \"Version\".");
+                    "and \"Version\".");
         }
     }
 

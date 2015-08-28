@@ -5,6 +5,25 @@ import android.os.AsyncTask;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Properties;
+
+import de.fau.cs.mad.javax.activation.CommandMap;
+import de.fau.cs.mad.javax.activation.MailcapCommandMap;
+import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
+import korex.mail.Address;
+import korex.mail.Message;
+import korex.mail.Session;
+import korex.mail.internet.InternetAddress;
+import korex.mail.internet.InternetHeaders;
+import korex.mail.internet.MimeBodyPart;
+import korex.mail.internet.MimeMessage;
+import korex.mail.internet.MimeMultipart;
+
+import static org.junit.Assert.*;
+
 /*import org.spongycastle.asn1.ASN1ObjectIdentifier;
 import org.spongycastle.cms.RecipientId;
 import org.spongycastle.cms.RecipientInformation;
@@ -27,25 +46,6 @@ import java.security.KeyPair;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 */
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.Properties;
-
-import korex.mail.Address;
-import korex.mail.Message;
-import korex.mail.Session;
-import korex.mail.internet.InternetAddress;
-import korex.mail.internet.InternetHeaders;
-import korex.mail.internet.MimeBodyPart;
-import korex.mail.internet.MimeMessage;
-import korex.mail.internet.MimeMultipart;
-
-import de.fau.cs.mad.javax.activation.CommandMap;
-import de.fau.cs.mad.javax.activation.MailcapCommandMap;
-import de.fau.cs.mad.smile.android.encryption.crypto.DecryptMail;
-import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
-
-import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class EncryptDecryptMailTest {
@@ -82,7 +82,7 @@ public class EncryptDecryptMailTest {
 
     }
 
-    private MimeMessage encrypt(MimeMessage originalMimeMessage, PrivateKey key, X509Certificate cert)  throws Exception{
+    private MimeMessage encrypt(MimeMessage originalMimeMessage, PrivateKey key, X509Certificate cert) throws Exception {
         System.out.println("Start encrypt.");
 
         EncryptMail encryptMail = new EncryptMail();
@@ -92,7 +92,7 @@ public class EncryptDecryptMailTest {
     private class AsyncCreateMimeMessage extends AsyncTask<Void, Void, MimeMessage> {
         protected MimeMessage doInBackground(Void... params) {
             try {
-                Thread.currentThread().setContextClassLoader( getClass().getClassLoader() );
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
                 mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
                 mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");

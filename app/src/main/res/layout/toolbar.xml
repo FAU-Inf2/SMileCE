@@ -5,5 +5,4 @@
     android:background="@color/ColorPrimary"
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
     android:title="@string/toolbar_default_title"
-    android:elevation="4dp">
-</android.support.v7.widget.Toolbar>
+    android:elevation="4dp"></android.support.v7.widget.Toolbar>

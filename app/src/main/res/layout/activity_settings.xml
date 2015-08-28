@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:elevation="7dp"
-    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.SettingsActivity"
-    >
+    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.SettingsActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,13 +14,11 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar">
-        </include>
+            layout="@layout/toolbar"></include>
 
         <FrameLayout
             android:id="@+id/currentFragment"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            />
+            android:layout_height="fill_parent" />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

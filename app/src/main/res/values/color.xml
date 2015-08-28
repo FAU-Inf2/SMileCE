@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <resources>
-        <color name="ColorPrimary">#3F51B5</color>
-        <color name="ColorPrimaryDark">#303F9F</color>
-        <color name="card_text_color_header">#000</color>
-    </resources>
+<resources>
+    <color name="ColorPrimary">#3F51B5</color>
+    <color name="ColorPrimaryDark">#303F9F</color>
+    <color name="card_text_color_header">#000</color>
+</resources>

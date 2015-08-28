@@ -17,7 +17,7 @@ public class ValidityItem extends AbstractCertificateInfoItem {
 
     @Override
     public void build(HashMap<String, String> data) {
-        if(data.keySet().contains("Startdate") && data.keySet().contains("Enddate")) {
+        if (data.keySet().contains("Startdate") && data.keySet().contains("Enddate")) {
             this.data = data;
         } else {
             throw new IllegalArgumentException("Data must contain \"Startdate\" and \"Enddate\".");

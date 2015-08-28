@@ -17,7 +17,7 @@ public class CryptographicInformationItem extends AbstractCertificateInfoItem {
 
     @Override
     public void build(HashMap<String, String> data) {
-        if(data.keySet().contains("Public Key") && data.keySet().contains("Signature Algorithm")
+        if (data.keySet().contains("Public Key") && data.keySet().contains("Signature Algorithm")
                 && data.keySet().contains("Signature")) {
             this.data = data;
         } else {
@@ -32,7 +32,7 @@ public class CryptographicInformationItem extends AbstractCertificateInfoItem {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View convertView = infalInflater.inflate(R.layout.certificate_information, parent, false);
 
-        if(data.keySet().contains("Modulus") && data.keySet().contains("Exponent")) {
+        if (data.keySet().contains("Modulus") && data.keySet().contains("Exponent")) {
             TableRow publicKey = (TableRow) convertView.findViewById(R.id.row01);
             TableRow exponent = (TableRow) convertView.findViewById(R.id.row02);
             TableRow modulus = (TableRow) convertView.findViewById(R.id.row03);

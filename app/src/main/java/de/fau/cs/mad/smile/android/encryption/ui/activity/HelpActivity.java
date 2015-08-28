@@ -1,7 +1,7 @@
 package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Pair;
 import android.view.Menu;
@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableListAdapter;
 import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableListAdapter;
 
 
 public class HelpActivity extends ActionBarActivity {

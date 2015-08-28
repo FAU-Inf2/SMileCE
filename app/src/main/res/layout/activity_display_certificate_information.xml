@@ -5,23 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:elevation="7dp"
-    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity"
-    >
+    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar">
-        </include>
+            layout="@layout/toolbar"></include>
 
         <ExpandableListView
             android:id="@+id/lvExp"
             android:layout_height="match_parent"
-            android:layout_width="match_parent"/>
+            android:layout_width="match_parent" />
 
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

@@ -68,7 +68,7 @@ import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;
 
 
-public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> implements SharedPreferences.OnSharedPreferenceChangeListener {
     private SortedList<KeyInfo> keylist;
     private Activity activity;
     private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
@@ -105,9 +105,9 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
-        if(key.equals("pref_key_direction") || key.equals("pref_key_type")) {
+        if (key.equals("pref_key_direction") || key.equals("pref_key_type")) {
             ArrayList<KeyInfo> kis = new ArrayList<KeyInfo>(keylist.size());
-            for(int i = 0; i < getItemCount(); ++i) {
+            for (int i = 0; i < getItemCount(); ++i) {
                 kis.add(keylist.get(i));
             }
             keylist.clear();
@@ -241,7 +241,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 return item1.equals(item2);
             }
         });
-        if(keyInfoList != null) {
+        if (keyInfoList != null) {
             addKey(keyInfoList);
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -259,27 +259,27 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     @Override
     public void onBindViewHolder(final KeyViewHolder holder, final int position) {
         final KeyInfo keyInfo = keylist.get(position);
-        if(keyInfo.getContact().equals("")) {
+        if (keyInfo.getContact().equals("")) {
             holder.header.setText(keyInfo.getMail());
         } else {
             holder.header.setText(keyInfo.getContact());
         }
         holder.mail.setText(keyInfo.getMail());
 
-        if(keyInfo.getHasPrivateKey()) {
+        if (keyInfo.getHasPrivateKey()) {
             holder.privateKey.setVisibility(View.VISIBLE);
         }
 
-        if(keyInfo.getTerminationDate() != null && keyInfo.getValidAfter() != null) {
+        if (keyInfo.getTerminationDate() != null && keyInfo.getValidAfter() != null) {
             DateTime valid = keyInfo.getTerminationDate();
             DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
-            String displayDate= valid.toString(fmt);
+            String displayDate = valid.toString(fmt);
             holder.termination_date.setText(displayDate);
             DateTime today = new DateTime();
             Years years = Years.yearsBetween(today, valid);
             Months months = Months.monthsBetween(today, valid);
 
-            if(valid.getMillis() <= today.getMillis()) {
+            if (valid.getMillis() <= today.getMillis()) {
                 holder.validCircle0.getBackground().setColorFilter(getColorFilter("#ff0000"));
                 holder.validCircle1.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
@@ -291,13 +291,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#0000ff"));
                 holder.validCircle3.getBackground().setColorFilter(getColorFilter("#0000ff"));
                 holder.validCircle4.getBackground().setColorFilter(getColorFilter("#0000ff"));
-            } else if(years.getYears() > 1 || (years.getYears() == 1 && months.getMonths() > 0)) {
+            } else if (years.getYears() > 1 || (years.getYears() == 1 && months.getMonths() > 0)) {
                 holder.validCircle0.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 holder.validCircle1.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 holder.validCircle3.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 holder.validCircle4.getBackground().setColorFilter(getColorFilter("#00ff00"));
-            } else if(months.getMonths() > 5) {
+            } else if (months.getMonths() > 5) {
                 holder.validCircle0.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 holder.validCircle1.getBackground().setColorFilter(getColorFilter("#00ff00"));
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#00ff00"));
@@ -309,13 +309,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#FFA500"));
                 holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-            } else if(months.getMonths() > 0) {
+            } else if (months.getMonths() > 0) {
                 holder.validCircle0.getBackground().setColorFilter(getColorFilter("#FFA500"));
                 holder.validCircle1.getBackground().setColorFilter(getColorFilter("#FFA500"));
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-            } else if(valid.getMillis() > today.getMillis()) {
+            } else if (valid.getMillis() > today.getMillis()) {
                 holder.validCircle0.getBackground().setColorFilter(getColorFilter("#FFA500"));
                 holder.validCircle1.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
                 holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
@@ -338,18 +338,18 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
                 layout.setDragDistance(0);
                 boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
-                if(holder.delete_icon.isShown()) {
+                if (holder.delete_icon.isShown()) {
                     holder.delete_icon.setVisibility(View.INVISIBLE);
-                    if(own) {
+                    if (own) {
                         deleteOwnCertificate(keyInfo, position);
                     } else {
                         deleteOtherCertificate(keyInfo, position);
                     }
                 }
 
-                if(holder.share_icon.isShown()) {
+                if (holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.INVISIBLE);
-                    if(own) {
+                    if (own) {
                         shareOwnCertificate(keyInfo);
                     } else {
                         shareOtherCertificate(keyInfo);
@@ -393,10 +393,10 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         int green = (iColor & 0xFF00) / 0xFF;
         int blue = iColor & 0xFF;
 
-        float[] matrix = { 0, 0, 0, 0, red
+        float[] matrix = {0, 0, 0, 0, red
                 , 0, 0, 0, 0, green
                 , 0, 0, 0, 0, blue
-                , 0, 0, 0, 1, 0 };
+                , 0, 0, 0, 1, 0};
 
         return new ColorMatrixColorFilter(matrix);
     }
@@ -424,7 +424,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     }
 
     public void removeKey(int position) {
-        if(position >= 0 && position < getItemCount()) {
+        if (position >= 0 && position < getItemCount()) {
             keylist.removeItemAt(position);
         }
     }
@@ -451,7 +451,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         return output;
     }
 
-    private Bitmap generateCircleBitmap(int circleColor, float diameterDP, String text){
+    private Bitmap generateCircleBitmap(int circleColor, float diameterDP, String text) {
         /**
          *
          * http://stackoverflow.com/questions/31168636/rounded-quickcontactbadge-with-text
@@ -460,7 +460,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         float diameterPixels = diameterDP * (metrics.densityDpi / 160f);
-        float radiusPixels = diameterPixels/2;
+        float radiusPixels = diameterPixels / 2;
 
         // Create the bitmap
         Bitmap output = Bitmap.createBitmap((int) diameterPixels, (int) diameterPixels, Bitmap.Config.ARGB_8888);
@@ -523,7 +523,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         final Uri lookupUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookUpKey);
 
-        if(thumb != null && thumb.length() > 0) {
+        if (thumb != null && thumb.length() > 0) {
             InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(App.getContext().getContentResolver(), lookupUri, false);
             Bitmap bmp = getCroppedBitmap(BitmapFactory.decodeStream(input));
             BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), bmp);
@@ -536,9 +536,9 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             if (name.length() > 0) {
                 initial = name.substring(0, 1);
             } else {
-                if(keyInfo != null && keyInfo.getContact() != null && keyInfo.getContact().length() > 0){
+                if (keyInfo != null && keyInfo.getContact() != null && keyInfo.getContact().length() > 0) {
                     initial = keyInfo.getContact().substring(0, 1);
-                } else if(keyInfo != null && keyInfo.getMail() != null && keyInfo.getMail().length() > 0) {
+                } else if (keyInfo != null && keyInfo.getMail() != null && keyInfo.getMail().length() > 0) {
                     initial = keyInfo.getMail().substring(0, 1);
                 } else {
                     initial = " ";

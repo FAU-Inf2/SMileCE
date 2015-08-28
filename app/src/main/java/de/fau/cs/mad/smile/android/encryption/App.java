@@ -27,7 +27,7 @@ public class App extends Application {
         generateKeyPair();
     }
 
-    public static Context getContext(){
+    public static Context getContext() {
         return mContext;
     }
 
@@ -39,7 +39,7 @@ public class App extends Application {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
 
-            if(keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
+            if (keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
                 return;
             }
 

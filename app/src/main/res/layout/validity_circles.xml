@@ -1,40 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <ImageView
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:id="@+id/valid_circle_0"
-        android:background="@drawable/valid_circles"/>
+        android:background="@drawable/valid_circles" />
+
     <ImageView
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:id="@+id/valid_circle_1"
         android:layout_toEndOf="@id/valid_circle_0"
         android:background="@drawable/valid_circles"
-        android:layout_marginStart="4dp"/>
+        android:layout_marginStart="4dp" />
+
     <ImageView
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:id="@+id/valid_circle_2"
         android:layout_toEndOf="@id/valid_circle_1"
         android:background="@drawable/valid_circles"
-        android:layout_marginStart="4dp"/>
+        android:layout_marginStart="4dp" />
+
     <ImageView
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:id="@+id/valid_circle_3"
         android:layout_toEndOf="@id/valid_circle_2"
         android:background="@drawable/valid_circles"
-        android:layout_marginStart="4dp"/>
+        android:layout_marginStart="4dp" />
+
     <ImageView
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:id="@+id/valid_circle_4"
         android:layout_toEndOf="@id/valid_circle_3"
         android:background="@drawable/valid_circles"
-        android:layout_marginStart="4dp"/>
+        android:layout_marginStart="4dp" />
+
     <TextView
         android:id="@+id/valid_text"
         android:layout_width="wrap_content"
@@ -42,6 +49,5 @@
         android:layout_toEndOf="@id/valid_circle_4"
         android:paddingStart="4dp"
         android:text="@string/hello_world"
-        android:textSize="13sp"
-        />
+        android:textSize="13sp" />
 </RelativeLayout>

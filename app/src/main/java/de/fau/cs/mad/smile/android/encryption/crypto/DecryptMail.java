@@ -81,7 +81,7 @@ public class DecryptMail {
         try {
             MimeMessage mimeMessage = getMimeMessageFromFile(pathToFile);
 
-            if(alias != null) {
+            if (alias != null) {
                 return decryptMailSynchronous(mimeMessage, alias, passphrase);
             }
 
@@ -94,10 +94,10 @@ public class DecryptMail {
             ArrayList<String> aliases;
             for (Address r : recipients) { // try all recipients until one has fitting certificate
                 aliases = keyManagement.getAliasesByOwnAddress(r);
-                if(aliases.size() == 0) {
+                if (aliases.size() == 0) {
                     continue;
                 }
-                for(String foundAlias : aliases) { //try all aliases until one fits
+                for (String foundAlias : aliases) { //try all aliases until one fits
                     MimeBodyPart result = decryptMailSynchronous(mimeMessage, foundAlias, passphrase);
                     if (result != null) // message was decrypted
                         return result;
@@ -142,7 +142,7 @@ public class DecryptMail {
             MimeBodyPart dec = toolkit.decrypt(mimeMessage, new JceKeyTransRecipientId(certificate),
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
-            if(dec == null) {
+            if (dec == null) {
                 Log.d(SMileCrypto.LOG_TAG, "Decrypted MimeBodyPart is null.");
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_DECRYPTION_FAILED;
             } else {
@@ -152,7 +152,7 @@ public class DecryptMail {
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             e.printStackTrace();
-            if(e.getMessage().contains("CMS processing failure"))
+            if (e.getMessage().contains("CMS processing failure"))
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE;
             else
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -194,12 +194,12 @@ public class DecryptMail {
 
         for (Address a : addresses) {
             ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(a);
-            for(KeyInfo keyInfo : keyInfos) {
+            for (KeyInfo keyInfo : keyInfos) {
                 result.add(keyInfo);
             }
         }
 
-        if(result.size() == 0)
+        if (result.size() == 0)
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
 
         return result;
@@ -221,7 +221,7 @@ public class DecryptMail {
     public MimeMessage decodeMimeBodyParts(String decryptedPart, Boolean decodeBase64Parts, String multipartContentType) {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Try to decode MimeBodyPart…");
-            if(decodeBase64Parts)
+            if (decodeBase64Parts)
                 Log.d(SMileCrypto.LOG_TAG, "Will decode base64-text-parts if such parts exist.");
             else
                 Log.d(SMileCrypto.LOG_TAG, "Will not decode base64-text-parts.");
@@ -231,7 +231,7 @@ public class DecryptMail {
             MimeMessage newMimeMessage = new MimeMessage(session);
 
             Multipart multipart;
-            if(multipartContentType == null)
+            if (multipartContentType == null)
                 multipart = new MimeMultipart("alternative");
             else
                 multipart = new MimeMultipart(multipartContentType);
@@ -306,7 +306,7 @@ public class DecryptMail {
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
-                    if(line.contains("attachment"))
+                    if (line.contains("attachment"))
                         isAttachment = true;
                 } else if (headerPossible && line.startsWith("Content-Description")) {
                     //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
@@ -318,7 +318,7 @@ public class DecryptMail {
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
-                } else if (headerPossible && isAttachment && (line.contains("filename=") || line.contains("name="))){
+                } else if (headerPossible && isAttachment && (line.contains("filename=") || line.contains("name="))) {
                     //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
                     if (headers == null)
                         headers = new InternetHeaders();

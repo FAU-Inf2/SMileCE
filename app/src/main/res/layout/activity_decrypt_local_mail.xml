@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:elevation="7dp"
-    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.DecryptLocalMailActivity"
-    >
+    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.DecryptLocalMailActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,14 +14,13 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar_menu">
-        </include>
+            layout="@layout/toolbar_menu"></include>
 
         <TextView
             android:id="@+id/decrypt_local_mail_text_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:scrollbars = "vertical"
-            android:layout_weight="1.0"/>
+            android:scrollbars="vertical"
+            android:layout_weight="1.0" />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

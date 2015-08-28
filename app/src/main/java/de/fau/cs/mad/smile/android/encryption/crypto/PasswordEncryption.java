@@ -19,7 +19,7 @@ import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class PasswordEncryption {
-    public PasswordEncryption()  {
+    public PasswordEncryption() {
     }
 
     public static String encryptString(String passphrase) {
@@ -28,7 +28,7 @@ public class PasswordEncryption {
             keyStore.load(null);
             String passwordEncryptionCertificateAlias = App.getContext().getResources().getString(R.string.smile_save_passphrases_certificate_alias);
 
-            if(!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
+            if (!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
                 return null;
             }
 
@@ -55,10 +55,11 @@ public class PasswordEncryption {
     public static String decryptString(String encryptedPassphrase) {
         try {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyStore.load(null);;
+            keyStore.load(null);
+            ;
             String passwordEncryptionCertificateAlias = App.getContext().getResources().getString(R.string.smile_save_passphrases_certificate_alias);
 
-            if(!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
+            if (!keyStore.containsAlias(passwordEncryptionCertificateAlias)) {
                 return null;
             }
 
@@ -80,7 +81,7 @@ public class PasswordEncryption {
             }
 
             byte[] bytes = new byte[values.size()];
-            for(int i = 0; i < bytes.length; i++) {
+            for (int i = 0; i < bytes.length; i++) {
                 bytes[i] = values.get(i).byteValue();
             }
 

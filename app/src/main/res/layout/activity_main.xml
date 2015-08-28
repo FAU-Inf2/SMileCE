@@ -12,13 +12,12 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar">
-        </include>
+            layout="@layout/toolbar"></include>
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/card_list"/>
+            android:id="@+id/card_list" />
     </LinearLayout>
 
     <include layout="@layout/fab" />
@@ -29,6 +28,5 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="#ffffff"
-        android:scrollbars="vertical">
-    </android.support.v7.widget.RecyclerView>
+        android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
 </android.support.v4.widget.DrawerLayout>

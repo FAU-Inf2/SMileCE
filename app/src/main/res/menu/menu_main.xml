@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
@@ -12,13 +13,11 @@
         android:orderInCategory="200"
         android:title="@string/navigation_drawer_search"
         android:icon="@drawable/ic_search_white_48dp"
-        app:showAsAction="ifRoom"
-        />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/decrypt_local_mail"
         android:orderInCategory="200"
         android:title="@string/navigation_decrypt_local_mail"
-        app:showAsAction="never"
-        />
+        app:showAsAction="never" />
 </menu>

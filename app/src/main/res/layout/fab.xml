@@ -8,7 +8,7 @@
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:elevation="@dimen/fab_elevation"
-        android:clipChildren="false" >
+        android:clipChildren="false">
 
         <ImageButton
             android:id="@+id/fab"

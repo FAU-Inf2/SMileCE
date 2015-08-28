@@ -103,7 +103,7 @@ public class KeyManagement {
 
     private void addKeyInfo(final String alias) throws KeyStoreException, CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         KeyInfo keyInfo = getKeyInfo(alias);
-        if(!certificates.contains(keyInfo)) {
+        if (!certificates.contains(keyInfo)) {
             certificates.add(keyInfo);
         }
     }
@@ -140,7 +140,7 @@ public class KeyManagement {
     public List<KeyInfo> getOwnCertificates() {
         ArrayList<KeyInfo> keyList = new ArrayList<>();
         for (KeyInfo keyInfo : getAllCertificates()) {
-            if(keyInfo.getHasPrivateKey()) {
+            if (keyInfo.getHasPrivateKey()) {
                 keyList.add(keyInfo);
             }
         }
@@ -149,7 +149,7 @@ public class KeyManagement {
     }
 
     public List<KeyInfo> getAllCertificates() {
-        if(certificates.size() == 0) {
+        if (certificates.size() == 0) {
             loadCertificates();
         }
 
@@ -177,7 +177,7 @@ public class KeyManagement {
     }
 
     public final X509Certificate getCertificateForAlias(final String alias) throws KeyStoreException {
-        if(alias == null) {
+        if (alias == null) {
             return null;
         }
 
@@ -185,7 +185,7 @@ public class KeyManagement {
     }
 
     public KeyStore.PrivateKeyEntry getPrivateKeyEntry(final String alias, final String passphrase) throws KeyStoreException, UnrecoverableEntryException, NoSuchAlgorithmException {
-        if(alias == null) {
+        if (alias == null) {
             return null;
         }
 
@@ -289,9 +289,9 @@ public class KeyManagement {
     public ArrayList<String> getAliasesByOwnAddress(final Address emailAddress) {
         ArrayList<KeyInfo> keyInfos = getKeyInfoByOwnAddress(emailAddress);
         ArrayList<String> aliases = new ArrayList<>();
-        for(KeyInfo keyInfo : keyInfos) {
+        for (KeyInfo keyInfo : keyInfos) {
             String alias = keyInfo.getAlias();
-            if(alias != null) {
+            if (alias != null) {
                 aliases.add(alias);
             }
         }
@@ -377,7 +377,7 @@ public class KeyManagement {
                 androidKeyStore.deleteEntry(alias);
             }
 
-            if(alias.contains("_other_")) {
+            if (alias.contains("_other_")) {
                 return !androidKeyStore.containsAlias(alias);
             }
 
@@ -432,7 +432,7 @@ public class KeyManagement {
         String filename = alias + ".p12";
         File src = new File(certDirectory, filename);
 
-        File dstDirectory =  new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
+        File dstDirectory = new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
         dstDirectory.mkdirs(); // create folder if it does not exist yet
 
         File dst = new File(dstDirectory, filename);
@@ -447,14 +447,14 @@ public class KeyManagement {
     }
 
     public static String copyCertificateToSDCard(X509Certificate certificate, String alias) {
-        if(certificate == null || alias == null) {
+        if (certificate == null || alias == null) {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             Log.e(SMileCrypto.LOG_TAG, "Called copyCertificateToSDCard with invalid parameters.");
             return null;
         }
 
         String filename = alias + ".crt";
-        File dstDirectory =  new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
+        File dstDirectory = new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
         dstDirectory.mkdirs(); // create folder if it does not exist yet
 
         File dst = new File(dstDirectory, filename);

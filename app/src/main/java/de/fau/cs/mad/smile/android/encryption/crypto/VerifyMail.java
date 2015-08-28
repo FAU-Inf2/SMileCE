@@ -90,7 +90,7 @@ public class VerifyMail {
         boolean valid = true;
         SMIMESigned signed;
 
-        if(bodyPart.isMimeType("multipart/signed")) {
+        if (bodyPart.isMimeType("multipart/signed")) {
             signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
         } else {
             return SMimeApi.RESULT_SIGNATURE_UNSIGNED;
@@ -140,7 +140,7 @@ public class VerifyMail {
 
                 PKIXCertPathReviewer review = new PKIXCertPathReviewer(certPath, usedParameters);
 
-                if(review.isValidCertPath()) {
+                if (review.isValidCertPath()) {
                     status = SMimeApi.RESULT_SIGNATURE_SIGNED;
                 } else {
                     status = SMimeApi.RESULT_SIGNATURE_SIGNED_UNCOFIRMED;
@@ -242,11 +242,11 @@ public class VerifyMail {
     }
 
     private FindTrustAnchorResult findTrustAnchor(final X509Certificate signerCertificate,
-                                            final Set<TrustAnchor> trustAnchors,
-                                            final List<CertStore> systemCertStores,
-                                            final List<CertStore> userCertStores,
-                                            final Set<X509Certificate> certSet,
-                                            final List<Boolean> userProvidedList)
+                                                  final Set<TrustAnchor> trustAnchors,
+                                                  final List<CertStore> systemCertStores,
+                                                  final List<CertStore> userCertStores,
+                                                  final Set<X509Certificate> certSet,
+                                                  final List<Boolean> userProvidedList)
             throws CertStoreException {
 
         FindTrustAnchorResult result = new FindTrustAnchorResult();

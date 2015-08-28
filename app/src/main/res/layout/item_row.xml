@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/rowIcon"
         android:paddingStart="16dp"
-        android:src="@drawable/ic_drawer"/>
+        android:src="@drawable/ic_drawer" />
 
     <TextView
         android:layout_width="wrap_content"

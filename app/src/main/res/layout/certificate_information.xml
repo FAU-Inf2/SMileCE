@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TableLayout
@@ -9,28 +10,28 @@
         android:layout_height="wrap_content"
         android:layout_weight="0"
         android:padding="5dp">
+
         <include
             android:id="@+id/row01"
-            layout="@layout/table_row">
-        </include>
+            layout="@layout/table_row"></include>
+
         <include
             android:id="@+id/row02"
-            layout="@layout/table_row">
-        </include>
+            layout="@layout/table_row"></include>
+
         <include
             android:id="@+id/row03"
-            layout="@layout/table_row">
-        </include>
+            layout="@layout/table_row"></include>
+
         <include
             android:id="@+id/row04"
             android:visibility="gone"
-            layout="@layout/table_row">
-        </include>
+            layout="@layout/table_row"></include>
+
         <include
             android:id="@+id/row05"
             android:visibility="gone"
-            layout="@layout/table_row">
-        </include>
+            layout="@layout/table_row"></include>
     </TableLayout>
 
 </LinearLayout>

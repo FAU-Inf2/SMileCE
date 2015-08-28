@@ -2,18 +2,14 @@ package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
-
-import java.math.BigInteger;
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -23,24 +19,27 @@ import org.spongycastle.asn1.x500.style.BCStyle;
 import org.spongycastle.asn1.x500.style.IETFUtils;
 import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
+import java.math.BigInteger;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
 import de.fau.cs.mad.smile.android.encryption.App;
-import de.fau.cs.mad.smile.android.encryption.ui.CertificateInformationItem;
-import de.fau.cs.mad.smile.android.encryption.ui.CryptographicInformationItem;
-import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableCertificateListAdapter;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
-import de.fau.cs.mad.smile.android.encryption.ui.PersonalInformationItem;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
+import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
+import de.fau.cs.mad.smile.android.encryption.ui.CertificateInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.CryptographicInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.PersonalInformationItem;
 import de.fau.cs.mad.smile.android.encryption.ui.ValidityItem;
+import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableCertificateListAdapter;
 
 public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -57,7 +56,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         Log.d(SMileCrypto.LOG_TAG, "Started DisplayCertificateInformationActivity.");
         Bundle extras = getIntent().getExtras();
         this.alias = extras.getString("Alias");
-        if(this.alias == null) {
+        if (this.alias == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called without alias.");
             finish();
         }
@@ -76,7 +75,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         getKeyInfo();
 
         //TODO: workaround to prevent crash
-        if(listDataHeader == null || listDataChild == null) {
+        if (listDataHeader == null || listDataChild == null) {
             Log.e(SMileCrypto.LOG_TAG, "ListDataHeader/ListDataChild was null.");
             finish();
         } else {
@@ -99,7 +98,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         if (id == android.R.id.home) {
             finish();
             return true;
-        } else if(id == R.id.action_delete) {
+        } else if (id == R.id.action_delete) {
             deleteKey(this.keyInfo);
         } else if (id == R.id.action_export) {
             exportCertificate();
@@ -121,7 +120,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     }
 
     private void extractCertificateInformation(KeyInfo keyInfo) {
-        if(this.name == null) {
+        if (this.name == null) {
             this.name = keyInfo.getContact();
             Log.d(SMileCrypto.LOG_TAG, "Name was null, set name to: " + this.name);
             toolbar.setTitle(this.name);
@@ -137,7 +136,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         listDataChild = new HashMap<>();
         HashMap<String, String> data = new HashMap<>();
         X509Certificate certificate = keyInfo.getCertificate();
-        if(certificate == null) {
+        if (certificate == null) {
             Log.e(SMileCrypto.LOG_TAG, "Certificate was null -- abort.");
             return;
         }
@@ -177,7 +176,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         validity.put("Startdate", keyInfo.getValidAfter().toString(fmt));
         validity.put("Enddate", keyInfo.getTerminationDate().toString(fmt));
         ArrayList<AbstractCertificateInfoItem> val = new ArrayList<>();
-        ValidityItem validityItem  = new ValidityItem();
+        ValidityItem validityItem = new ValidityItem();
         validityItem.build(validity);
         val.add(validityItem);
         listDataChild.put(listDataHeader.get(2), val);
@@ -200,7 +199,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         listDataHeader.add(getString(R.string.cryptographic));
         HashMap<String, String> cryptographicInfo = new HashMap<>();
         PublicKey publicKey = keyInfo.getCertificate().getPublicKey();
-        if(publicKey instanceof  RSAPublicKey) {
+        if (publicKey instanceof RSAPublicKey) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
             String modulus = rsaPublicKey.getModulus().toString(16);
             String exponent = rsaPublicKey.getPublicExponent().toString(16);
@@ -240,7 +239,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
         RDN[] L = x500name.getRDNs(BCStyle.L);
         if (L.length > 0) {
-             data.put("L", IETFUtils.valueToString(L[0].getFirst().getValue()));
+            data.put("L", IETFUtils.valueToString(L[0].getFirst().getValue()));
         }
         RDN[] DC = x500name.getRDNs(BCStyle.DC);
         if (DC.length > 0) {
@@ -375,7 +374,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
                     .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             Boolean success = keyManagement.deleteKey(keyInfo.getAlias());
-                            if(success)
+                            if (success)
                                 Toast.makeText(App.getContext(),
                                         R.string.certificate_deleted, Toast.LENGTH_LONG).show();
                             finish();
@@ -387,7 +386,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
                         }
                     });
 
-           alertDialogBuilder.create().show();
+            alertDialogBuilder.create().show();
         } else {
             alertDialogBuilder
                     .setMessage(getString(R.string.alert_header_start) + keyInfo.getContact() + getString(R.string.alert_header_end))
@@ -395,7 +394,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
                     .setPositiveButton(getString(R.string.erase), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             Boolean success = keyManagement.deleteKey(keyInfo.getAlias());
-                            if(success)
+                            if (success)
                                 Toast.makeText(App.getContext(),
                                         R.string.certificate_deleted, Toast.LENGTH_LONG).show();
                             finish();
@@ -412,9 +411,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
     private void exportCertificate() {
         Log.d(SMileCrypto.LOG_TAG, "Try to export certificate.");
-        if(this.alias.contains("_own_")) {
+        if (this.alias.contains("_own_")) {
             exportOwnCertificate();
-        } else if(this.alias.contains("_other_")) {
+        } else if (this.alias.contains("_other_")) {
             exportOtherCertificate();
         } else {
             //this should not happen
@@ -426,28 +425,28 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(getString(R.string.alert_header_export));
         alertDialogBuilder
-                    .setMessage(getString(R.string.alert_export))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.export), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            String dst = KeyManagement.copyP12ToSDCard(alias);
-                            if (dst == null) {
-                                Toast.makeText(App.getContext(),
-                                        getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(App.getContext(),
-                                        getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
-                            }
+                .setMessage(getString(R.string.alert_export))
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.export), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String dst = KeyManagement.copyP12ToSDCard(alias);
+                        if (dst == null) {
+                            Toast.makeText(App.getContext(),
+                                    getString(R.string.certificate_export_fail), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(App.getContext(),
+                                    getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
                         }
-                    })
-                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+                    }
+                })
+                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
 
-            alertDialogBuilder.create().show();
-        }
+        alertDialogBuilder.create().show();
+    }
 
     private void exportOtherCertificate() {
         String dst = KeyManagement.copyCertificateToSDCard(keyInfo.getCertificate(), alias);

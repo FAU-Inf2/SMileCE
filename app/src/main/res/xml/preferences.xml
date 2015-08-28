@@ -7,7 +7,7 @@
         android:summary="@string/sort_type_summary"
         android:entryValues="@array/type_values"
         android:title="@string/sort_type"
-        android:defaultValue="0"/>
+        android:defaultValue="0" />
 
     <ListPreference
         android:key="pref_key_direction"
@@ -15,13 +15,12 @@
         android:summary="@string/sort_order_summary"
         android:entryValues="@array/orderValues"
         android:title="@string/order"
-        android:defaultValue="1"/>
+        android:defaultValue="1" />
 
     <SwitchPreference
         android:key="pref_key_debug"
         android:summary="@string/debug_summary"
         android:title="@string/debug_info"
-        android:defaultValue="false"
-        />
+        android:defaultValue="false" />
 
 </PreferenceScreen>

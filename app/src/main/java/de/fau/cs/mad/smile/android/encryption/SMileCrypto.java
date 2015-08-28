@@ -3,9 +3,6 @@ package de.fau.cs.mad.smile.android.encryption;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
-
-import de.fau.cs.mad.smile.android.encryption.ui.fragment.SettingsFragment;
 
 public class SMileCrypto extends Application {
 

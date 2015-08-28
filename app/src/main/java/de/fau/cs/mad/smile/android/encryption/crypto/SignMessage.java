@@ -29,13 +29,13 @@ public class SignMessage {
     }
 
     public MimeMultipart sign(MimeBodyPart mimeBodyPart, KeyStore.PrivateKeyEntry privateKey) {
-        if(mimeBodyPart == null) {
+        if (mimeBodyPart == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
 
-        if(privateKey == null) {
+        if (privateKey == null) {
             Log.e(SMileCrypto.LOG_TAG, "Could not sign, privateKeyEntry was null.");
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;

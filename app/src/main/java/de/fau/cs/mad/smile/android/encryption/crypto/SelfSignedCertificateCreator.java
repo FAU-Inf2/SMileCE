@@ -53,12 +53,12 @@ public class SelfSignedCertificateCreator {
         //
         // signers name
         //
-        String  issuer = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate";
+        String issuer = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate";
 
         //
         // subjects name - the same as we are self signed.
         //
-        String  subject = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate, E=SMile@MAD.de, CN=SMile Group";
+        String subject = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate, E=SMile@MAD.de, CN=SMile Group";
 
         //
         // create the certificate - version 1
@@ -67,6 +67,7 @@ public class SelfSignedCertificateCreator {
                 new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30 * 12 * 2)),
                 new X500Name(subject), pair.getPublic());
     }
+
     public SelfSignedCertificateCreator(String name) throws OperatorCreationException, IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
         SecureRandom random = new SecureRandom();
         RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(4096, RSAKeyGenParameterSpec.F4);
@@ -78,12 +79,12 @@ public class SelfSignedCertificateCreator {
         //
         // signers name
         //
-        String  issuer = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate";
+        String issuer = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate";
 
         //
         // subjects name - the same as we are self signed.
         //
-        String  subject = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate, E=SMile@MAD.de, CN=" + name;
+        String subject = "C=AU, O=SMile-crypto, OU=SMile Primary Certificate, E=SMile@MAD.de, CN=" + name;
 
         //
         // create the certificate - version 1
@@ -96,7 +97,7 @@ public class SelfSignedCertificateCreator {
     public void create() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, OperatorCreationException, NoSuchProviderException {
         X509CertificateHolder ch = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(key));
         Log.e(SMileCrypto.LOG_TAG, "Holder created");
-        X509Certificate c = new JcaX509CertificateConverter().setProvider( "SC" ).getCertificate(ch);
+        X509Certificate c = new JcaX509CertificateConverter().setProvider("SC").getCertificate(ch);
         Log.e(SMileCrypto.LOG_TAG, "Certificate created");
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
         Log.e(SMileCrypto.LOG_TAG, "Got KeyStore instance");
@@ -112,7 +113,7 @@ public class SelfSignedCertificateCreator {
     public Pair<PrivateKey, X509Certificate> createForTest() throws OperatorCreationException, CertificateException {
         X509CertificateHolder ch = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(key));
         Log.e(SMileCrypto.LOG_TAG, "Holder created");
-        X509Certificate c = new JcaX509CertificateConverter().setProvider( "SC" ).getCertificate(ch);
+        X509Certificate c = new JcaX509CertificateConverter().setProvider("SC").getCertificate(ch);
         return Pair.create(key, c);
     }
 }

@@ -7,16 +7,19 @@
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
+
     <style name="FloatingActionButton" parent="android:Widget.Material.Button">
         <item name="android:background">@drawable/fab_background</item>
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
     </style>
+
     <style name="FloatingActionButton.Mini">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:layout_margin">8dp</item>
     </style>
+
     <style name="EditText" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorControlNormal">@android:color/white</item>
         <item name="colorControlActivated">@android:color/white</item>
@@ -33,6 +36,7 @@
         <item name="android:layout_marginLeft">@dimen/card_header_simple_title_margin_left</item>
         <item name="android:layout_marginTop">@dimen/card_header_simple_title_margin_top</item>
         <item name="android:layout_marginRight">@dimen/card_header_simple_title_margin_right</item>
-        <item name="android:layout_marginBottom">@dimen/card_header_simple_title_margin_bottom</item>
+        <item name="android:layout_marginBottom">@dimen/card_header_simple_title_margin_bottom
+        </item>
     </style>
 </resources>

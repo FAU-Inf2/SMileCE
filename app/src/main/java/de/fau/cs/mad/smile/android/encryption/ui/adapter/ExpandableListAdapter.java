@@ -21,7 +21,7 @@ import java.util.List;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter{
+public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> listDataHeader; // header titles
@@ -90,19 +90,19 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         final Pair<Integer, String[]> item = (Pair<Integer, String[]>) getChild(groupPosition, childPosition);
-        if(item.first.equals((Integer.valueOf(0)))) {
+        if (item.first.equals((Integer.valueOf(0)))) {
             LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.activity_help_list_item, parent, false);
 
             TextView listChild = (TextView) convertView.findViewById(R.id.listItem);
             listChild.setText(item.second[0]);
-        } else if(item.first.equals((Integer.valueOf(1))))  {
+        } else if (item.first.equals((Integer.valueOf(1)))) {
             LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.validity_circles, parent, false);
             String[] data = item.second;
-            if(data.length == 6) {
+            if (data.length == 6) {
                 ImageView validCircle0 = (ImageView) convertView.findViewById(R.id.valid_circle_0);
                 ImageView validCircle1 = (ImageView) convertView.findViewById(R.id.valid_circle_1);
                 ImageView validCircle2 = (ImageView) convertView.findViewById(R.id.valid_circle_2);
@@ -116,7 +116,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 validCircle4.getBackground().setColorFilter(getColorFilter(data[4]));
                 text.setText(data[5]);
             }
-        } else if(item.first.equals((Integer.valueOf(2)))) {
+        } else if (item.first.equals((Integer.valueOf(2)))) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.image_text, parent, false);
@@ -143,10 +143,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         int green = (iColor & 0xFF00) / 0xFF;
         int blue = iColor & 0xFF;
 
-        float[] matrix = { 0, 0, 0, 0, red
+        float[] matrix = {0, 0, 0, 0, red
                 , 0, 0, 0, 0, green
                 , 0, 0, 0, 0, blue
-                , 0, 0, 0, 1, 0 };
+                , 0, 0, 0, 1, 0};
 
         return new ColorMatrixColorFilter(matrix);
     }

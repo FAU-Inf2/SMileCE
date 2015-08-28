@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         int i = 0;
-        while(mName == null && i < ownCertificates.size()) { // use first certificate with name set
+        while (mName == null && i < ownCertificates.size()) { // use first certificate with name set
             KeyInfo keyInfo = ownCertificates.get(i);
             mName = keyInfo.getContact();
             Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
@@ -122,12 +122,12 @@ public class MainActivity extends ActionBarActivity {
             i++;
         }
 
-        if(mName == null && mEmail == null) {
+        if (mName == null && mEmail == null) {
             mName = getResources().getString(R.string.navigation_drawer_header_name);
             mEmail = getResources().getString(R.string.navigation_drawer_header_email_address);
-        } else if(mName == null) {
+        } else if (mName == null) {
             mName = "";
-        } else if(mEmail == null) {
+        } else if (mEmail == null) {
             mEmail = null;
         }
 
@@ -136,10 +136,11 @@ public class MainActivity extends ActionBarActivity {
 
         final GestureDetector mGestureDetector = new GestureDetector(MainActivity.this,
                 new GestureDetector.SimpleOnGestureListener() {
-            @Override public boolean onSingleTapUp(MotionEvent e) {
-                return true;
-            }
-        });
+                    @Override
+                    public boolean onSingleTapUp(MotionEvent e) {
+                        return true;
+                    }
+                });
 
         mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
@@ -161,7 +162,7 @@ public class MainActivity extends ActionBarActivity {
 
                     //switch not possible here :-(
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
-                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
+                    } else if (title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
@@ -198,7 +199,7 @@ public class MainActivity extends ActionBarActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.hello_world,
-                R.string.hello_world){ //TODO: set correct strings
+                R.string.hello_world) { //TODO: set correct strings
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);

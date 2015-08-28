@@ -31,7 +31,7 @@ public class EncryptMail {
 
     public MimeMessage encryptMessage(MimeMessage message, X509Certificate certificate) {
         try {
-            if(message == null) {
+            if (message == null) {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
                 return null;
             }

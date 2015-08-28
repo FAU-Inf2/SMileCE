@@ -12,10 +12,10 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
 import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
 
-public class ExpandableCertificateListAdapter extends BaseExpandableListAdapter{
+public class ExpandableCertificateListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> listDataHeader; // header titles

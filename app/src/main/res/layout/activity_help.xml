@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:elevation="7dp"
-    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.HelpActivity"
-    >
+    tools:context="de.fau.cs.mad.smile.android.encryption.ui.activity.HelpActivity">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -15,12 +14,11 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar">
-        </include>
+            layout="@layout/toolbar"></include>
 
         <ExpandableListView
             android:id="@+id/lvExp"
             android:layout_height="match_parent"
-            android:layout_width="match_parent"/>
+            android:layout_width="match_parent" />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

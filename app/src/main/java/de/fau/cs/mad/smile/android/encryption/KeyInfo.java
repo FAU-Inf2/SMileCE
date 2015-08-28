@@ -37,7 +37,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
     @Override
     public boolean equals(Object o) {
         //Log.e(SMileCrypto.LOG_TAG, "Equals");
-        if(!(o instanceof KeyInfo)) {
+        if (!(o instanceof KeyInfo)) {
             return false;
         }
 
@@ -163,33 +163,38 @@ public class KeyInfo implements Comparable<KeyInfo> {
     }
 
 
-
     @Override
     public int compareTo(KeyInfo another) {
         Context context = App.getContext();
         switch (sharedPreferences.getString("pref_key_type", "0")) {
-            case "0" : return compareName(another);
-            case "1" : return compareMail(another);
-            case "2" : return compareTermination(another);
-            case "3" : return comparePrivateKey(another);
-            default: Log.d(SMileCrypto.LOG_TAG, "Sort by default not possible.");
+            case "0":
+                return compareName(another);
+            case "1":
+                return compareMail(another);
+            case "2":
+                return compareTermination(another);
+            case "3":
+                return comparePrivateKey(another);
+            default:
+                Log.d(SMileCrypto.LOG_TAG, "Sort by default not possible.");
                 throw new IllegalArgumentException("Sort by " + sharedPreferences.getString("pref_key_type", "0") + " not implemented.");
         }
     }
 
     /**
      * Compares contacts to this KeyInfo and another.
+     *
      * @param another Compare to this KeyInfo.
      * @return Comparison between contacts. If one or both do not have a contact set, it uses mail.
      */
 
     public int compareName(KeyInfo another) {
         int erg = 0;
-        if(this.getContact().equals("") && another.getContact().equals("")) {
+        if (this.getContact().equals("") && another.getContact().equals("")) {
             erg = this.getMail().compareTo(another.getMail());
-        } else if(this.getContact().equals("")) {
+        } else if (this.getContact().equals("")) {
             erg = this.getMail().compareTo(another.getContact());
-        } else if(another.getContact().equals("")) {
+        } else if (another.getContact().equals("")) {
             erg = this.getContact().compareTo(another.getMail());
         } else {
             erg = this.getContact().compareTo(another.getContact());
@@ -201,6 +206,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
 
     /**
      * Compares mail address to this KeyInfo and another.
+     *
      * @param another Compare to this KeyInfo.
      * @return Comparison between mail address.
      */
@@ -215,6 +221,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
 
     /**
      * Compares expiration dates to this KeyInfo and another.
+     *
      * @param another Compare to this KeyInfo.
      * @return Comparison between expiration dates.
      */
@@ -229,6 +236,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
 
     /**
      * Compares if KeyInfo has a private key.
+     *
      * @param another Compare to this KeyInfo.
      * @return 1/-1 If one has a private key. Else they are compared by name.
      */
@@ -236,14 +244,14 @@ public class KeyInfo implements Comparable<KeyInfo> {
     public int comparePrivateKey(KeyInfo another) {
         int erg = 0;
         boolean otherPriv = another.getHasPrivateKey();
-        if(this.getHasPrivateKey()) {
-            if(otherPriv) {
+        if (this.getHasPrivateKey()) {
+            if (otherPriv) {
                 erg = compareName(another);
             } else {
                 erg = 1;
             }
         } else {
-            if(otherPriv) {
+            if (otherPriv) {
                 erg = -1;
             } else {
                 erg = compareName(another);

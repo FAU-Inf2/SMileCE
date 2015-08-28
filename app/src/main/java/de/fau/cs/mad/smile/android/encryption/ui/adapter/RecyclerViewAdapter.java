@@ -28,15 +28,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         TextView name;
         TextView email;
 
-        public ViewHolder(View itemView,int ViewType) {
+        public ViewHolder(View itemView, int ViewType) {
             super(itemView);
 
-            if(ViewType == TYPE_ITEM) {
+            if (ViewType == TYPE_ITEM) {
                 textView = (TextView) itemView.findViewById(R.id.rowText);
                 imageView = (ImageView) itemView.findViewById(R.id.rowIcon);
                 holderId = 1;
-            }
-            else {
+            } else {
                 name = (TextView) itemView.findViewById(R.id.name);
                 email = (TextView) itemView.findViewById(R.id.email);
                 holderId = 0;
@@ -66,9 +65,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
-        if(holder.holderId == 1) {
+        if (holder.holderId == 1) {
             holder.textView.setText(mNavigationTitles[position - 1]);
-            holder.imageView.setImageResource(mIcons[position -1]);
+            holder.imageView.setImageResource(mIcons[position - 1]);
         } else {
             holder.name.setText(mHeaderName);
             holder.email.setText(mHeaderEmail);

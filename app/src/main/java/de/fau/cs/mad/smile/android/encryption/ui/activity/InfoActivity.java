@@ -65,7 +65,7 @@ public class InfoActivity extends ActionBarActivity {
             }
         });
 
-        final Button license  = (Button) findViewById(R.id.button_license);
+        final Button license = (Button) findViewById(R.id.button_license);
         license.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 LayoutInflater inflater = LayoutInflater.from(InfoActivity.this);
