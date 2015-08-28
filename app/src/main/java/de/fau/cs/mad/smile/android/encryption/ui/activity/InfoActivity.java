@@ -2,10 +2,13 @@ package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class InfoActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -29,6 +33,16 @@ public class InfoActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        final TextView build = (TextView) findViewById(R.id.version);
+        PackageInfo pInfo = null;
+        try {
+            pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            build.setText(getString(R.string.build) + " " + version);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(SMileCrypto.LOG_TAG, "Cannot find package name: " + e.getMessage());
+            build.setVisibility(View.GONE);
+        }
         final Button author = (Button) findViewById(R.id.button_author);
         author.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {

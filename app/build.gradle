@@ -10,12 +10,21 @@ android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
+    def getVersionName = { ->
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+
     defaultConfig {
         applicationId "de.fau.cs.mad.smile.android.encryption"
         minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
-        versionName "0.1"
+        versionName getVersionName()
     }
 
     signingConfigs {
