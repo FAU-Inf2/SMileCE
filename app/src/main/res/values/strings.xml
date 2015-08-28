@@ -24,7 +24,6 @@
     <string name="navigation_drawer_import_certificate">Import S/MIME-Certificate</string>
     <string name="navigation_drawer_key_chain">Get Cert from KeyChain</string>
     <string name="navigation_decrypt_local_mail">Decrypt locally saved mail</string>
-    <string name="navigation_encrypt_local_mail">Encrypt locally saved mail</string>
     <string name="navigation_import_other_certificate">Import public certificate</string>
 
     <string name="navigation_drawer_header_name">FAU is MAD!</string>
@@ -35,7 +34,7 @@
         More information on <a href="https://mad.cs.fau.de/">https://mad.cs.fau.de/</a> \n
         Image credits: <a href="http://blog.spoongraphics.co.uk">http://blog.spoongraphics.co.uk</a>\n
         Material Design Icons: <a href="https://www.google.com/design/icons/">https://www.google.com/design/icons/</a>\n
-        Included Project: <a href="https://code.google.com/p/javamail-android/">https://code.google.com/p/javamail-android/</a>
+        Included Project: <a href="https://github.com/konradrenner/kore-javamail">Kore javamail an javamail-android fork</a>
     </string>
 
     <string name="author">Author</string>
@@ -278,4 +277,5 @@
     <string name="type_name">Name</string>
     <string name="type_email">Email</string>
     <string name="build">Current build:</string>
+    <string name="open_keystore_failed">Could not open key store for import</string>
 </resources>

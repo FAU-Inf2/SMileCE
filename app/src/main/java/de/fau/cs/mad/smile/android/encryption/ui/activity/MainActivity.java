@@ -2,10 +2,10 @@ package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,16 +22,18 @@ import android.widget.ImageButton;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.List;
 
+import de.fau.cs.mad.smile.android.encryption.KeyInfo;
+import de.fau.cs.mad.smile.android.encryption.R;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.DividerItemDecoration;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
-import de.fau.cs.mad.smile.android.encryption.KeyInfo;
-import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
-import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.RecyclerViewAdapter;
-import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -68,13 +70,7 @@ public class MainActivity extends ActionBarActivity {
 
         try {
             keyManager = new KeyManagement();
-        } catch (KeyStoreException e) { // TODO: display error message and die
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
+        } catch (KeyStoreException | NoSuchProviderException | CertificateException | NoSuchAlgorithmException | IOException e) { // TODO: display error message and die
             e.printStackTrace();
         }
 
@@ -108,7 +104,7 @@ public class MainActivity extends ActionBarActivity {
         mTitles[3] = getResources().getString(R.string.navigation_drawer_settings);
         mTitles[4] = getResources().getString(R.string.navigation_drawer_help);
 
-        ArrayList<KeyInfo> ownCertificates = new ArrayList<>();
+        List<KeyInfo> ownCertificates = new ArrayList<>();
 
         try {
             ownCertificates = new KeyManagement().getOwnCertificates();
@@ -244,10 +240,6 @@ public class MainActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.decrypt_local_mail) {
             Intent i = new Intent(MainActivity.this, DecryptLocalMailActivity.class);
-            startActivity(i);
-            return true;
-        } else if (id == R.id.encrypt_local_mail) {
-            Intent i = new Intent(MainActivity.this, EncryptLocalMailActivity.class);
             startActivity(i);
             return true;
         }

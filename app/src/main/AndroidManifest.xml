@@ -55,10 +55,6 @@
             android:name=".ui.activity.DecryptLocalMailActivity"
             android:label="@string/title_activity_decrypt_local_mail" >
         </activity>
-        <activity
-            android:name=".ui.activity.EncryptLocalMailActivity"
-            android:label="@string/title_activity_encrypt_local_mail" >
-        </activity>
 
         <service
             android:name=".remote.SMimeService"
