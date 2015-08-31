@@ -264,8 +264,9 @@ public class KeyManagement {
         }
     }
 
-    public ArrayList<KeyInfo> getKeyInfoByOwnAddress(final Address emailAddress) {
+    public ArrayList<KeyInfo> getKeyInfoByAddress(final Address emailAddress, final boolean onlyOwnKeys) {
         ArrayList<KeyInfo> keyInfos = new ArrayList<>();
+
         try {
             String mailAddress = emailAddress.toString();
             if (emailAddress instanceof InternetAddress) {
@@ -274,8 +275,15 @@ public class KeyManagement {
 
             Log.d(SMileCrypto.LOG_TAG, "Looking up alias for: " + mailAddress);
 
-            for (KeyInfo keyInfo : getOwnCertificates()) {
-                if (mailAddress.equals(keyInfo.getMail())) {
+            List<KeyInfo> keyInfoList;
+            if(onlyOwnKeys) {
+                keyInfoList = getOwnCertificates();
+            } else {
+                keyInfoList = getAllCertificates();
+            }
+
+            for (KeyInfo keyInfo : keyInfoList) {
+                if (mailAddress.equalsIgnoreCase(keyInfo.getMail())) {
                     keyInfos.add(keyInfo);
                 }
             }
@@ -283,7 +291,12 @@ public class KeyManagement {
             Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
             e.printStackTrace();
         }
+
         return keyInfos;
+    }
+
+    public ArrayList<KeyInfo> getKeyInfoByOwnAddress(final Address emailAddress) {
+        return getKeyInfoByAddress(emailAddress, true);
     }
 
     public ArrayList<String> getAliasesByOwnAddress(final Address emailAddress) {
@@ -371,7 +384,7 @@ public class KeyManagement {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Delete key with alias: " + alias);
             KeyInfo keyInfo = getKeyInfo(alias);
-            certificates.remove(keyInfo);
+            getAllCertificates().remove(keyInfo);
 
             if (androidKeyStore.containsAlias(alias)) {
                 androidKeyStore.deleteEntry(alias);

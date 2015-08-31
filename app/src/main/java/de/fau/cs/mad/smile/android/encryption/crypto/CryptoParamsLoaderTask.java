@@ -36,14 +36,14 @@ public class CryptoParamsLoaderTask extends AsyncTask<Void, Void, CryptoParams> 
         final String identityAlias;
         final String passphrase;
         if (identity != null) {
-            identityAlias = getNewestAlias(identity);
+            identityAlias = getNewestAlias(identity, true);
             passphrase = keyManagement.getPassphraseForAlias(identityAlias);
         } else {
             identityAlias = null;
             passphrase = null;
         }
 
-        final String otherPartyAlias = getNewestAlias(otherParty);
+        final String otherPartyAlias = getNewestAlias(otherParty, false);
 
         try {
             final KeyStore.PrivateKeyEntry sender = keyManagement.getPrivateKeyEntry(identityAlias, passphrase);
@@ -56,12 +56,18 @@ public class CryptoParamsLoaderTask extends AsyncTask<Void, Void, CryptoParams> 
         return cryptoParams;
     }
 
-    private String getNewestAlias(Address address) {
+    private String getNewestAlias(Address address, boolean ownAddress) {
         if (address == null) {
             return null;
         }
 
-        ArrayList<KeyInfo> keyInfos = keyManagement.getKeyInfoByOwnAddress(address);
+        ArrayList<KeyInfo> keyInfos;
+        if(ownAddress) {
+            keyInfos = keyManagement.getKeyInfoByOwnAddress(address);
+        } else {
+            keyInfos = keyManagement.getKeyInfoByAddress(address, false);
+        }
+
         if (keyInfos.size() == 0) {
             return null;
         }

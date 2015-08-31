@@ -122,12 +122,20 @@ public class VerifyMail {
                 // check signature
                 JcaSimpleSignerInfoVerifierBuilder verifierBuilder = new JcaSimpleSignerInfoVerifierBuilder();
                 verifierBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+
                 valid &= signer.verify(verifierBuilder.build(cert.getPublicKey()));
+                if(!valid) {
+                    return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
+                }
+
                 Log.d(SMileCrypto.LOG_TAG, "valid signature: " + valid);
+
                 valid &= checkSigner(cert, sender);
                 if (valid) {
                     //TODO: good place?
                     keyManagement.addFriendsCertificate(cert);
+                } else {
+                    return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
                 }
 
                 Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);
@@ -353,7 +361,13 @@ public class VerifyMail {
     private boolean checkMailAddresses(final X509Certificate cert, final String sender)
             throws CertificateParsingException, CertificateEncodingException {
         List<String> names = keyManagement.getAlternateNamesFromCert(cert);
-        return names.contains(sender);
+        for(String name : names) {
+            if(name.equalsIgnoreCase(sender)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean checkExtendedKeyUsage(final X509Certificate cert) throws CertificateParsingException {
