@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="de.fau.cs.mad.smile.android.encryption">
+    package="de.fau.cs.mad.smile.android.encryption" >
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -13,32 +13,28 @@
         android:allowBackup="false"
         android:icon="@mipmap/ic_smile_orange"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".ui.activity.MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activity.InfoActivity"
-            android:label="@string/title_activity_info"/>
-
+            android:label="@string/title_activity_info" />
         <activity
             android:name=".ui.activity.HelpActivity"
-            android:label="@string/title_activity_help"/>
-
+            android:label="@string/title_activity_help" />
         <activity
             android:name=".ui.activity.SettingsActivity"
-            android:label="@string/title_activity_settings"/>
-
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".ui.activity.ImportCertificateActivity"
-            android:label="@string/title_activity_import_certificate">
+            android:label="@string/title_activity_import_certificate" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -53,14 +49,14 @@
         </activity>
         <activity
             android:name=".ui.activity.DecryptLocalMailActivity"
-            android:label="@string/title_activity_decrypt_local_mail"></activity>
+            android:label="@string/title_activity_decrypt_local_mail" />
 
         <service
             android:name=".remote.SMimeService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote_api"
-            tools:ignore="ExportedService">
+            tools:ignore="ExportedService" >
             <intent-filter>
                 <action android:name="de.fau.cs.mad.ISMimeService" />
             </intent-filter>
@@ -68,14 +64,18 @@
 
         <activity
             android:name=".ui.activity.DisplayCertificateInformationActivity"
-            android:label="@string/title_activity_display_certificate_information"></activity>
+            android:label="@string/title_activity_display_certificate_information" />
         <activity
             android:name=".ui.activity.SearchActivity"
             android:label="@string/title_activity_search"
-            android:parentActivityName=".ui.activity.MainActivity">
+            android:parentActivityName=".ui.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activity.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.activity.CertificateCreationActivity"
+            android:label="@string/title_activity_certificate_ceration" >
         </activity>
     </application>
 

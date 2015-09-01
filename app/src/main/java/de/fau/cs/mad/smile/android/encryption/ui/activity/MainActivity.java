@@ -46,9 +46,9 @@ public class MainActivity extends ActionBarActivity {
     String mName;
     String mEmail;
     //titles and icons for ListView
-    int mIcons[] = {R.drawable.ic_add_black_24dp, R.drawable.ic_search_black_24dp,
-            R.drawable.ic_info_black_24dp, R.drawable.ic_settings_black_24dp,
-            R.drawable.ic_help_black_24dp};
+    int mIcons[] = {R.drawable.ic_add_black_24dp, R.drawable.ic_create_black_24dp,
+            R.drawable.ic_search_black_24dp, R.drawable.ic_info_black_24dp,
+            R.drawable.ic_settings_black_24dp, R.drawable.ic_help_black_24dp};
     String mTitles[];
 
     private Toolbar toolbar;
@@ -97,12 +97,13 @@ public class MainActivity extends ActionBarActivity {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources()));
 
-        mTitles = new String[5];
+        mTitles = new String[6];
         mTitles[0] = getResources().getString(R.string.navigation_drawer_import_certificate);
-        mTitles[1] = getResources().getString(R.string.navigation_drawer_search);
-        mTitles[2] = getResources().getString(R.string.navigation_drawer_info);
-        mTitles[3] = getResources().getString(R.string.navigation_drawer_settings);
-        mTitles[4] = getResources().getString(R.string.navigation_drawer_help);
+        mTitles[1] = getResources().getString(R.string.navigation_drawer_create_certificate);
+        mTitles[2] = getResources().getString(R.string.navigation_drawer_search);
+        mTitles[3] = getResources().getString(R.string.navigation_drawer_info);
+        mTitles[4] = getResources().getString(R.string.navigation_drawer_settings);
+        mTitles[5] = getResources().getString(R.string.navigation_drawer_help);
 
         List<KeyInfo> ownCertificates = new ArrayList<>();
 
@@ -165,6 +166,7 @@ public class MainActivity extends ActionBarActivity {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
+                        adapter.addKey(keyManager.getAllCertificates());
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_settings))) {
                         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(i);
@@ -178,6 +180,10 @@ public class MainActivity extends ActionBarActivity {
                         adapter.addKey(keyManager.getAllCertificates());
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_search))) {
                         Intent i = new Intent(MainActivity.this, SearchActivity.class);
+                        startActivity(i);
+                        adapter.addKey(keyManager.getAllCertificates());
+                    } else if(title.equals(getResources().getString(R.string.navigation_drawer_create_certificate))) {
+                        Intent i = new Intent(MainActivity.this, CertificateCreationActivity.class);
                         startActivity(i);
                         adapter.addKey(keyManager.getAllCertificates());
                     }

@@ -10,8 +10,8 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import de.fau.cs.mad.javax.activation.CommandMap;
-import de.fau.cs.mad.javax.activation.MailcapCommandMap;
+//import de.fau.cs.mad.javax.activation.CommandMap;
+//import de.fau.cs.mad.javax.activation.MailcapCommandMap;
 import de.fau.cs.mad.smile.android.encryption.crypto.EncryptMail;
 import korex.mail.Address;
 import korex.mail.Message;
@@ -82,7 +82,7 @@ public class EncryptDecryptMailTest {
 
     }
 
-    private MimeMessage encrypt(MimeMessage originalMimeMessage, PrivateKey key, X509Certificate cert) throws Exception {
+    /*private MimeMessage encrypt(MimeMessage originalMimeMessage, PrivateKey key, X509Certificate cert) throws Exception {
         System.out.println("Start encrypt.");
 
         EncryptMail encryptMail = new EncryptMail();
@@ -130,5 +130,5 @@ public class EncryptDecryptMailTest {
             }
             return null;
         }
-    }
+    }*/
 }
