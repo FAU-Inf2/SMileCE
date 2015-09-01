@@ -50,11 +50,21 @@ public class KeyManagement {
         Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 
+    private static KeyManagement instance;
+
     private final String certificateDirectory;
     private final KeyStore androidKeyStore;
     private final List<KeyInfo> certificates;
 
-    public KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException {
+    public static synchronized KeyManagement getInstance() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
+        if(instance == null) {
+            instance = new KeyManagement();
+        }
+
+        return instance;
+    }
+
+    private KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException {
         final Context context = App.getContext();
         this.certificateDirectory = context.getDir(
                 context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).

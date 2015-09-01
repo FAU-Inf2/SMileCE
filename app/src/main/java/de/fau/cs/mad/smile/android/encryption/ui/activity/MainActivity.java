@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
         setSupportActionBar(toolbar);
 
         try {
-            keyManager = new KeyManagement();
+            keyManager = KeyManagement.getInstance();
         } catch (KeyStoreException | NoSuchProviderException | CertificateException | NoSuchAlgorithmException | IOException e) { // TODO: display error message and die
             e.printStackTrace();
         }
@@ -107,7 +107,7 @@ public class MainActivity extends ActionBarActivity {
         List<KeyInfo> ownCertificates = new ArrayList<>();
 
         try {
-            ownCertificates = new KeyManagement().getOwnCertificates();
+            ownCertificates = KeyManagement.getInstance().getOwnCertificates();
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
         }

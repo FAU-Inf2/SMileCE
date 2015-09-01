@@ -77,7 +77,7 @@ public class VerifyMail {
     private final KeyManagement keyManagement;
 
     public VerifyMail() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, NoSuchProviderException {
-        keyManagement = new KeyManagement();
+        keyManagement = KeyManagement.getInstance();
     }
 
     public int verifySignature(final MimeBodyPart bodyPart, final String sender)
