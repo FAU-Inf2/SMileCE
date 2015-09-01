@@ -285,4 +285,7 @@
     <string name="passphrase">Passphrase:</string>
     <string name="passphrase_repeat">Repeat\nPassphrase:</string>
     <string name="wrong_date">Cannot create an invalid certificate.</string>
+    <string name="empty_name">Please enter a name.</string>
+    <string name="no_name">The given name was not recognised. Please try again.</string>
+    <string name="invalid_name">The name contains forbidden characters (\'=\' or \',\'). Please change your name.</string>
 </resources>

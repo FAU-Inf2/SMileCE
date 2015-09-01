@@ -6,6 +6,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.SelfSignedCertificateCreator;
 
 public class CertificateCreationActivity extends ActionBarActivity {
     private EditText name;
@@ -135,6 +138,9 @@ public class CertificateCreationActivity extends ActionBarActivity {
                 new DatePickerDialog(v.getContext(), onDateSetListener, now.getYear(), now.getMonthOfYear() - 1, now.getDayOfMonth()).show();
             }
         });
+
+        // TextWatcher
+        name.addTextChangedListener(new NameWatcher());
     }
 
     @Override
@@ -150,6 +156,48 @@ public class CertificateCreationActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class NameWatcher implements TextWatcher {
+        private void error() {
+            wrongName.setVisibility(View.VISIBLE);
+            name.setBackgroundColor(Color.RED);
+            nameOk = false;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // Do nothing
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // Do nothing
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            int status = SelfSignedCertificateCreator.validateName(s.toString());
+            switch (status) {
+                case SMileCrypto.STATUS_NAME_OK :
+                    nameOk = true;
+                    name.setBackgroundColor(Color.GREEN);
+                    wrongName.setVisibility(View.GONE);
+                    break;
+                case  SMileCrypto.STATUS_NAME_EMPTY:
+                    wrongName.setText(getString(R.string.empty_name));
+                    error();
+                    break;
+                case SMileCrypto.STATUS_NO_NAME:
+                    wrongName.setText(getString(R.string.no_name));
+                    error();
+                    break;
+                case SMileCrypto.STATUS_NAME_INVALID_CHARACTER:
+                    wrongName.setText(getString(R.string.invalid_name));
+                    error();
+                    break;
+            }
+        }
     }
 
 }
