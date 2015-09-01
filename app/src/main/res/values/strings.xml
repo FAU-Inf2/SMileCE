@@ -278,4 +278,10 @@
     <string name="type_email">Email</string>
     <string name="build">Current build:</string>
     <string name="open_keystore_failed">Could not open key store for import</string>
+    <string name="title_activity_certificate_ceration">CertificateCerationActivity</string>
+    <string name="create_certificate">Create Certificate</string>
+    <string name="navigation_drawer_create_certificate">Create self signed Certificate</string>
+    <string name="default_date">Tap to select a date.</string>
+    <string name="passphrase">Passphrase:</string>
+    <string name="passphrase_repeat">Repeat\nPassphrase:</string>
 </resources>

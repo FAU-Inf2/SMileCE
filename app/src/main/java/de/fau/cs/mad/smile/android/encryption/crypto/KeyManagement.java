@@ -18,6 +18,7 @@ import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -63,6 +64,39 @@ public class KeyManagement {
         androidKeyStore.load(null);
 
         this.certificates = new ArrayList<>();
+    }
+
+    public boolean addPrivateKeyFromCert(X509Certificate certificate, PrivateKey key, String passphrase) {
+        if(certificate == null || passphrase == null || key == null) {
+            return false;
+        }
+
+        final String new_alias = addCertificateToKeyStore(key, certificate);
+        if (new_alias == null) {
+            return false;
+        }
+
+        try {
+            addKeyInfo(new_alias);
+        } catch (KeyStoreException | CertificateParsingException | NoSuchAlgorithmException | CertificateEncodingException e) {
+            Log.d(SMileCrypto.LOG_TAG, "Error while adding certificate. " + e.getMessage());
+            return false;
+        }
+
+        File certDirectory = App.getContext().getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE);
+        try {
+            char[] password = passphrase.toCharArray();
+            FileOutputStream fos = new FileOutputStream(certDirectory);
+            KeyStore ks = KeyStore.getInstance("PKCS12");
+            ks.load(null);
+            ks.setKeyEntry("alias", key, password, new java.security.cert.Certificate[]{certificate});
+            ks.store(fos, password);
+            fos.close();
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            Log.d(SMileCrypto.LOG_TAG, "Error writing certificate´to internal storage. " + e.getMessage());
+            return false;
+        }
+        return savePassphrase(new_alias, passphrase);
     }
 
     public Boolean addPrivateKeyFromP12ToKeyStore(final String pathToFile, final String passphrase) {

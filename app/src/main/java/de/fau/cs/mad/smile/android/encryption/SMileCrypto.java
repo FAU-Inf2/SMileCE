@@ -37,6 +37,20 @@ public class SMileCrypto extends Application {
     public static final int STATUS_INVALID_PARAMETER = 20; // e.g. null as param, could not be resolved to smth working
     public static final int STATUS_ERROR_ASYNC_TASK = 21;
 
+    // Certificate creation
+    public static int STATUS_NO_NAME = 30;
+    public static int STATUS_NAME_EMPTY = 31;
+    public static int STATUS_NAME_INVALID_CHARACTER = 32;
+    public static int STATUS_NAME_OK = 33;
+    public static int STATUS_NO_EMAIL = 34;
+    public static int STATUS_EMAIL_EMPTY = 35;
+    public static int STATUS_EMAIL_INVALID = 36;
+    public static int STATUS_EMAIL_OK = 37;
+    public static int STATUS_EMAIL_INVALID_CHARACTER = 38;
+    public static int STATUS_FAILED_SAVE_CERT = 39;
+    public static int STATUS_SAVED_CERT = 40;
+    public static int STATUS_NO_PASSPHRASE = 41;
+
     //unknown error -- status code is the answer ;-)
     public static final int STATUS_UNKNOWN_ERROR = 42;
 
@@ -46,7 +60,7 @@ public class SMileCrypto extends Application {
      * TODO: Use this flag.
      */
 
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     static {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
