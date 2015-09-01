@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
@@ -54,7 +55,7 @@ public class KeyManagement {
 
     private final String certificateDirectory;
     private final KeyStore androidKeyStore;
-    private final List<KeyInfo> certificates;
+    private final CopyOnWriteArrayList<KeyInfo> certificates;
 
     public static synchronized KeyManagement getInstance() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
         if(instance == null) {
@@ -72,7 +73,7 @@ public class KeyManagement {
         this.androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
         androidKeyStore.load(null);
 
-        this.certificates = new ArrayList<>();
+        this.certificates = new CopyOnWriteArrayList<>();
     }
 
     public Boolean addPrivateKeyFromP12ToKeyStore(final String pathToFile, final String passphrase) {
