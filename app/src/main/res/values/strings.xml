@@ -284,4 +284,5 @@
     <string name="default_date">Tap to select a date.</string>
     <string name="passphrase">Passphrase:</string>
     <string name="passphrase_repeat">Repeat\nPassphrase:</string>
+    <string name="wrong_date">Cannot create an invalid certificate.</string>
 </resources>
