@@ -7,12 +7,24 @@ import org.joda.time.DateTime;
 import org.spongycastle.asn1.x500.X500Name;
 import org.spongycastle.asn1.x500.X500NameBuilder;
 import org.spongycastle.asn1.x500.style.BCStyle;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.ExtendedKeyUsage;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.KeyPurposeId;
+import org.spongycastle.asn1.x509.KeyUsage;
+import org.spongycastle.asn1.x509.SubjectKeyIdentifier;
+import org.spongycastle.asn1.x509.X509Extension;
 import org.spongycastle.cert.X509CertificateHolder;
 import org.spongycastle.cert.X509v1CertificateBuilder;
 import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.spongycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.spongycastle.cert.jcajce.JcaX509v1CertificateBuilder;
+import org.spongycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.operator.ContentSigner;
 import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.spongycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -104,15 +116,33 @@ public class SelfSignedCertificateCreator {
         RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(4096, RSAKeyGenParameterSpec.F4);
         KeyPairGenerator generator = null;
         try {
-            generator = KeyPairGenerator.getInstance("RSA", "SC");
+            generator = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
             generator.initialize(spec, random);
             KeyPair pair = generator.generateKeyPair();
 
-            JcaX509v1CertificateBuilder v1CertGen = new JcaX509v1CertificateBuilder(x500Name,
+            JcaX509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(x500Name,
                     BigInteger.valueOf(1), DateTime.now().toDate(), end.toDate(), x500Name,
                     pair.getPublic());
-            X509CertificateHolder certificateHolderh = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(pair.getPrivate()));
-            X509Certificate certificate = new JcaX509CertificateConverter().setProvider("SC").getCertificate(certificateHolderh);
+            JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA1WithRSA");
+            signerBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+            ContentSigner contentSigner = signerBuilder.build(pair.getPrivate());
+            v3CertGen.addExtension(X509Extension.basicConstraints, true, new BasicConstraints(1));
+
+            JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+
+            SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(pair.getPublic());
+            v3CertGen.addExtension(X509Extension.subjectKeyIdentifier, false, subjectKeyIdentifier);
+
+            KeyUsage keyUsage = new KeyUsage(KeyUsage.keyCertSign);
+            v3CertGen.addExtension(X509Extension.keyUsage, true, keyUsage);
+
+            ExtendedKeyUsage extendedKeyUsage  = new ExtendedKeyUsage(KeyPurposeId.anyExtendedKeyUsage);
+            v3CertGen.addExtension(X509Extension.extendedKeyUsage, false, extendedKeyUsage);
+
+            X509CertificateHolder certificateHolder = v3CertGen.build(contentSigner);
+            JcaX509CertificateConverter certificateConverter = new JcaX509CertificateConverter();
+            certificateConverter.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+            X509Certificate certificate = certificateConverter.getCertificate(certificateHolder);
             KeyManagement km = KeyManagement.getInstance();
             if(km.addPrivateKeyFromCert(certificate, pair.getPrivate(), passphrase)) {
                 return SMileCrypto.STATUS_SAVED_CERT;
