@@ -56,7 +56,7 @@ public class KeyManagement {
 
     private final String certificateDirectory;
     private final KeyStore androidKeyStore;
-    private final CopyOnWriteArrayList<KeyInfo> certificates;
+    private final List<KeyInfo> certificates;
 
     public static synchronized KeyManagement getInstance() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
         if(instance == null) {
@@ -74,7 +74,7 @@ public class KeyManagement {
         this.androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
         androidKeyStore.load(null);
 
-        this.certificates = new CopyOnWriteArrayList<>();
+        this.certificates = new ArrayList<>();
     }
 
     public boolean addPrivateKeyFromCert(X509Certificate certificate, PrivateKey key, String passphrase) {
