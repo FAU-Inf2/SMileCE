@@ -288,4 +288,12 @@
     <string name="empty_name">Please enter a name.</string>
     <string name="no_name">The given name was not recognised. Please try again.</string>
     <string name="invalid_name">The name contains forbidden characters (\'=\' or \',\'). Please change your name.</string>
+    <string name="empty_email">Please enter an email address.</string>
+    <string name="no_email">The given email was not recognised. Please try again.</string>
+    <string name="invalid_email_character">The email contains forbidden characters (\'=\' or \',\'). Please change your email. </string>
+    <string name="invalid_email">Your input does not seem to be an email address. Please enter an email address.</string>
+    <string name="passphrases_dont_match">Passphrases do not match. Please reenter your password.</string>
+    <string name="passphrases_empty">Please enter a passphrase.</string>
+    <string name="creation_success">Successfully created certificate.</string>
+    <string name="creation_failed">Failed to create certificate. Please try again.</string>
 </resources>

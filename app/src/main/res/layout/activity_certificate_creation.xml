@@ -183,6 +183,16 @@
                 android:visibility="gone"
                 android:layout_marginTop="8dp"/>
 
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/create"
+                android:src="@drawable/ic_create_black_48dp"
+                android:layout_below="@id/passphrase_wrong"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"/>
+
         </RelativeLayout>
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
