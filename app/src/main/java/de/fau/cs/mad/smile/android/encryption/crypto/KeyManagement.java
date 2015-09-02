@@ -4,9 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
@@ -18,7 +17,6 @@ import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -38,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
@@ -51,11 +50,21 @@ public class KeyManagement {
         Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 
+    private static KeyManagement instance;
+
     private final String certificateDirectory;
     private final KeyStore androidKeyStore;
     private final List<KeyInfo> certificates;
 
-    public KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException {
+    public static synchronized KeyManagement getInstance() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
+        if(instance == null) {
+            instance = new KeyManagement();
+        }
+
+        return instance;
+    }
+
+    private KeyManagement() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException {
         final Context context = App.getContext();
         this.certificateDirectory = context.getDir(
                 context.getString(R.string.smime_certificates_folder), Context.MODE_PRIVATE).
@@ -137,6 +146,10 @@ public class KeyManagement {
 
     private void addKeyInfo(final String alias) throws KeyStoreException, CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         KeyInfo keyInfo = getKeyInfo(alias);
+        if(keyInfo == null) {
+            return;
+        }
+
         if (!certificates.contains(keyInfo)) {
             certificates.add(keyInfo);
         }
@@ -317,8 +330,11 @@ public class KeyManagement {
             }
 
             for (KeyInfo keyInfo : keyInfoList) {
-                if (mailAddress.equalsIgnoreCase(keyInfo.getMail())) {
-                    keyInfos.add(keyInfo);
+                for(String address : keyInfo.getMailAddresses()) {
+                    if (mailAddress.equalsIgnoreCase(address)) {
+                        keyInfos.add(keyInfo);
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -334,9 +350,9 @@ public class KeyManagement {
     }
 
     public ArrayList<String> getAliasesByOwnAddress(final Address emailAddress) {
-        ArrayList<KeyInfo> keyInfos = getKeyInfoByOwnAddress(emailAddress);
+        ArrayList<KeyInfo> keyInfoList = getKeyInfoByOwnAddress(emailAddress);
         ArrayList<String> aliases = new ArrayList<>();
-        for (KeyInfo keyInfo : keyInfos) {
+        for (KeyInfo keyInfo : keyInfoList) {
             String alias = keyInfo.getAlias();
             if (alias != null) {
                 aliases.add(alias);
@@ -345,10 +361,14 @@ public class KeyManagement {
         return aliases;
     }
 
-    @NonNull
+    @Nullable
     public final KeyInfo getKeyInfo(final String alias) throws KeyStoreException,
             CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         Certificate c = androidKeyStore.getCertificate(alias); // maybe hand in certificate?
+        if(c == null) {
+            return null;
+        }
+
         KeyInfo keyInfo = new KeyInfo();
         keyInfo.setAlias(alias);
         Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
@@ -418,6 +438,10 @@ public class KeyManagement {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Delete key with alias: " + alias);
             KeyInfo keyInfo = getKeyInfo(alias);
+            if(keyInfo == null) { // already deleted
+                return true;
+            }
+
             getAllCertificates().remove(keyInfo);
 
             if (androidKeyStore.containsAlias(alias)) {
@@ -532,7 +556,6 @@ public class KeyManagement {
             }
 
             androidKeyStore.setKeyEntry(alias, key, null, new Certificate[]{certificate});
-
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return alias;
         } catch (Exception e) {

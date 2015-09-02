@@ -69,7 +69,7 @@ public abstract class CryptoOperation<T> implements Closeable {
             contentLoaderTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
-        KeyManagement keyManagement = new KeyManagement();
+        KeyManagement keyManagement = KeyManagement.getInstance();
         InternetAddress identityAddress = null;
 
         if (identity != null) {

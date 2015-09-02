@@ -561,7 +561,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     private void deleteOwnCertificate(final KeyInfo keyInfo, final int position) {
         final KeyManagement keyManagement;
         try {
-            keyManagement = new KeyManagement();
+            keyManagement = KeyManagement.getInstance();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
             printError();
             return;
@@ -609,7 +609,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     private void deleteOtherCertificate(final KeyInfo keyInfo, final int position) {
         final KeyManagement keyManagement;
         try {
-            keyManagement = new KeyManagement();
+            keyManagement = KeyManagement.getInstance();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
             printError();
             return;

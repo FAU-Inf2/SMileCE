@@ -53,7 +53,7 @@ public class DecryptMail {
 
     public DecryptMail() throws KeyStoreException, IOException, NoSuchAlgorithmException,
             CertificateException, NoSuchProviderException {
-        keyManagement = new KeyManagement();
+        keyManagement = KeyManagement.getInstance();
     }
 
     public final MimeBodyPart decryptMail(final MimeBodyPart mimeBodyPart, final CryptoParams cryptoParams)

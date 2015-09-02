@@ -112,7 +112,7 @@ public class SelfSignedCertificateCreator {
                     pair.getPublic());
             X509CertificateHolder ch = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(pair.getPrivate()));
             X509Certificate c = new JcaX509CertificateConverter().setProvider("SC").getCertificate(ch);
-            KeyManagement km = new KeyManagement();
+            KeyManagement km = KeyManagement.getInstance();
             if(km.addPrivateKeyFromCert(c, pair.getPrivate(), passphrase)) {
                 return SMileCrypto.STATUS_SAVED_CERT;
             } else {

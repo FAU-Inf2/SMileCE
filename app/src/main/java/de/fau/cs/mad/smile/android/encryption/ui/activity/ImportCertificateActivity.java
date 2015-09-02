@@ -72,7 +72,7 @@ public class ImportCertificateActivity extends ActionBarActivity {
         }
 
         try {
-            keyManagement = new KeyManagement();
+            keyManagement = KeyManagement.getInstance();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
             Toast.makeText(this, R.string.open_keystore_failed, Toast.LENGTH_SHORT);
             finish();

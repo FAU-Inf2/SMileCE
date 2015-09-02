@@ -109,7 +109,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
     private void getKeyInfo() {
         try {
-            KeyManagement keyManagement = new KeyManagement();
+            KeyManagement keyManagement = KeyManagement.getInstance();
             KeyInfo keyInfo = keyManagement.getKeyInfo(this.alias);
             this.keyInfo = keyInfo;
             extractCertificateInformation(keyInfo);
@@ -359,7 +359,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private void deleteKey(final KeyInfo keyInfo) {
         final KeyManagement keyManagement;
         try {
-            keyManagement = new KeyManagement();
+            keyManagement = KeyManagement.getInstance();
         } catch (Exception e) {
             showErrorPrompt();
             return;

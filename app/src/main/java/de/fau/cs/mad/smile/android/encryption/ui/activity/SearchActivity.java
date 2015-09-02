@@ -63,7 +63,7 @@ public class SearchActivity extends ActionBarActivity {
         }
 
         try {
-            keyManager = new KeyManagement();
+            keyManager = KeyManagement.getInstance();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) { // TODO: display error message and die
             e.printStackTrace();
         }
