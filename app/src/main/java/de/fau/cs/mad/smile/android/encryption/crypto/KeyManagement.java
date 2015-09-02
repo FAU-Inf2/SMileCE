@@ -4,10 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
@@ -19,7 +17,6 @@ import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -559,13 +556,10 @@ public class KeyManagement {
             }
 
             androidKeyStore.setKeyEntry(alias, key, null, new Certificate[]{certificate});
-
-            Toast.makeText(App.getContext(), R.string.import_certificate_successful, Toast.LENGTH_SHORT).show();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return alias;
         } catch (Exception e) {
             Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
-            Toast.makeText(App.getContext(), R.string.error + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
             return null;
         }
     }
