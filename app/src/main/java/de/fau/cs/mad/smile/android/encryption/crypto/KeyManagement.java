@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -148,6 +149,10 @@ public class KeyManagement {
 
     private void addKeyInfo(final String alias) throws KeyStoreException, CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         KeyInfo keyInfo = getKeyInfo(alias);
+        if(keyInfo == null) {
+            return;
+        }
+
         if (!certificates.contains(keyInfo)) {
             certificates.add(keyInfo);
         }
@@ -359,10 +364,14 @@ public class KeyManagement {
         return aliases;
     }
 
-    @NonNull
+    @Nullable
     public final KeyInfo getKeyInfo(final String alias) throws KeyStoreException,
             CertificateParsingException, CertificateEncodingException, NoSuchAlgorithmException {
         Certificate c = androidKeyStore.getCertificate(alias); // maybe hand in certificate?
+        if(c == null) {
+            return null;
+        }
+
         KeyInfo keyInfo = new KeyInfo();
         keyInfo.setAlias(alias);
         Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
@@ -432,6 +441,10 @@ public class KeyManagement {
         try {
             Log.d(SMileCrypto.LOG_TAG, "Delete key with alias: " + alias);
             KeyInfo keyInfo = getKeyInfo(alias);
+            if(keyInfo == null) { // already deleted
+                return true;
+            }
+
             getAllCertificates().remove(keyInfo);
 
             if (androidKeyStore.containsAlias(alias)) {
