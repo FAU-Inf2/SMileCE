@@ -110,10 +110,10 @@ public class SelfSignedCertificateCreator {
             JcaX509v1CertificateBuilder v1CertGen = new JcaX509v1CertificateBuilder(x500Name,
                     BigInteger.valueOf(1), DateTime.now().toDate(), end.toDate(), x500Name,
                     pair.getPublic());
-            X509CertificateHolder ch = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(pair.getPrivate()));
-            X509Certificate c = new JcaX509CertificateConverter().setProvider("SC").getCertificate(ch);
+            X509CertificateHolder certificateHolderh = v1CertGen.build(new JcaContentSignerBuilder("SHA1WithRSA").setProvider("SC").build(pair.getPrivate()));
+            X509Certificate certificate = new JcaX509CertificateConverter().setProvider("SC").getCertificate(certificateHolderh);
             KeyManagement km = KeyManagement.getInstance();
-            if(km.addPrivateKeyFromCert(c, pair.getPrivate(), passphrase)) {
+            if(km.addPrivateKeyFromCert(certificate, pair.getPrivate(), passphrase)) {
                 return SMileCrypto.STATUS_SAVED_CERT;
             } else {
                 return SMileCrypto.STATUS_FAILED_SAVE_CERT;
