@@ -80,6 +80,7 @@ public class SelfSignedCertificateCreator {
         if(passphrase == null || passphrase.length() == 0) {
             return SMileCrypto.STATUS_NO_PASSPHRASE;
         }
+
         X500Name x500Name;
         if(expert != null && expert.length() > 0) {
             x500Name = new X500Name(expert);

@@ -92,10 +92,12 @@ public class KeyManagement {
             return false;
         }
 
-        File certDirectory = App.getContext().getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE);
+        File certDirectory = new File(certificateDirectory);
+        File exportFile = new File(certDirectory, new_alias + ".p12");
+
         try {
             char[] password = passphrase.toCharArray();
-            FileOutputStream fos = new FileOutputStream(certDirectory);
+            FileOutputStream fos = new FileOutputStream(exportFile);
             KeyStore ks = KeyStore.getInstance("PKCS12");
             ks.load(null);
             ks.setKeyEntry("alias", key, password, new java.security.cert.Certificate[]{certificate});
@@ -105,6 +107,7 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Error writing certificate´to internal storage. " + e.getMessage());
             return false;
         }
+
         return savePassphrase(new_alias, passphrase);
     }
 
