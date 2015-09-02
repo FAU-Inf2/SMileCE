@@ -249,6 +249,9 @@ public class MainActivity extends ActionBarActivity {
             Intent i = new Intent(MainActivity.this, DecryptLocalMailActivity.class);
             startActivity(i);
             return true;
+        } else if (id == R.id.action_refresh) {
+            adapter.addKey(keyManager.getAllCertificates());
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

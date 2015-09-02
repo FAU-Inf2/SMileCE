@@ -16,6 +16,13 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="300"
+        android:title="@string/navigation_drawer_refresh"
+        android:icon="@drawable/ic_refresh_white_48dp"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/decrypt_local_mail"
         android:orderInCategory="200"
         android:title="@string/navigation_decrypt_local_mail"

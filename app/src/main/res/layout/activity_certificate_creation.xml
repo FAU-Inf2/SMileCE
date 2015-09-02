@@ -41,9 +41,9 @@
                 android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/name_label"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="8dp"
+                android:layout_below="@id/name_label"
                 android:inputType="textPersonName"
                 android:layout_marginStart="8dp"/>
 
@@ -76,10 +76,9 @@
                 android:id="@+id/email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/email_label"
-                android:layout_below="@id/name_wrong"
+                android:layout_below="@id/email_label"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="8dp"
                 android:inputType="textEmailAddress"
                 android:layout_marginStart="8dp"/>
 
@@ -97,7 +96,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/valid_label"
                 android:layout_below="@id/email_wrong"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="18dp"/>
 
             <TextView
                 android:id="@+id/valid"
@@ -106,8 +106,9 @@
                 android:layout_below="@id/email_wrong"
                 android:layout_toEndOf="@id/valid_label"
                 android:text="@string/default_date"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="18dp"/>
 
             <TextView
                 android:id="@+id/valid_wrong"
@@ -140,10 +141,9 @@
                 android:id="@+id/passphrase"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/passphrase_label"
-                android:layout_below="@id/valid_wrong"
+                android:layout_below="@id/passphrase_label"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="8dp"
                 android:inputType="textPassword"
                 android:layout_marginStart="8dp"/>
 
@@ -168,10 +168,9 @@
                 android:id="@+id/passphrase_repeat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/passphrase_label"
-                android:layout_below="@id/passphrase"
+                android:layout_below="@id/passphrase_repeat_label"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="8dp"
                 android:inputType="textPassword"
                 android:layout_marginStart="8dp"/>
 
