@@ -328,8 +328,11 @@ public class KeyManagement {
             }
 
             for (KeyInfo keyInfo : keyInfoList) {
-                if (mailAddress.equalsIgnoreCase(keyInfo.getMail())) {
-                    keyInfos.add(keyInfo);
+                for(String address : keyInfo.getMailAddresses()) {
+                    if (mailAddress.equalsIgnoreCase(address)) {
+                        keyInfos.add(keyInfo);
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -345,9 +348,9 @@ public class KeyManagement {
     }
 
     public ArrayList<String> getAliasesByOwnAddress(final Address emailAddress) {
-        ArrayList<KeyInfo> keyInfos = getKeyInfoByOwnAddress(emailAddress);
+        ArrayList<KeyInfo> keyInfoList = getKeyInfoByOwnAddress(emailAddress);
         ArrayList<String> aliases = new ArrayList<>();
-        for (KeyInfo keyInfo : keyInfos) {
+        for (KeyInfo keyInfo : keyInfoList) {
             String alias = keyInfo.getAlias();
             if (alias != null) {
                 aliases.add(alias);

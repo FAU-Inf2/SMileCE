@@ -24,14 +24,16 @@ public class KeyInfo implements Comparable<KeyInfo> {
     private String trust;
     private String thumbprint;
     private DateTime termination_date;
-    private Boolean hasPrivateKey = false;
+    private Boolean hasPrivateKey;
     private DateTime valid_after;
-    private X509Certificate certificate = null;
+    private X509Certificate certificate;
 
     public KeyInfo() {
         mailAddresses = new ArrayList<>();
         setTerminationDate(new DateTime());
         setValidAfter(new DateTime());
+        setHasPrivateKey(false);
+        setCertificate(null);
     }
 
     @Override
