@@ -1,5 +1,6 @@
 package de.fau.cs.mad.smile.android.encryption.crypto;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -16,17 +17,13 @@ import org.spongycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.spongycastle.asn1.x509.Extension;
 import org.spongycastle.asn1.x509.KeyPurposeId;
 import org.spongycastle.cert.jcajce.JcaCertStoreBuilder;
-import org.spongycastle.cms.CMSException;
 import org.spongycastle.cms.SignerId;
 import org.spongycastle.cms.SignerInformation;
 import org.spongycastle.cms.SignerInformationStore;
 import org.spongycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.spongycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
-import org.spongycastle.mail.smime.SMIMEException;
 import org.spongycastle.mail.smime.SMIMESigned;
-import org.spongycastle.operator.OperatorCreationException;
-import org.spongycastle.x509.CertPathReviewerException;
 import org.spongycastle.x509.PKIXCertPathReviewer;
 
 import java.io.IOException;
@@ -60,19 +57,19 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smime_api.SMimeApi;
-import korex.mail.MessagingException;
 import korex.mail.internet.MimeBodyPart;
 import korex.mail.internet.MimeMultipart;
 
 public class VerifyMail {
+    private static final int SHORT_KEY_LENGTH = 512;
+
     static {
         Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
-
-    private static final int SHORT_KEY_LENGTH = 512;
 
     private final KeyManagement keyManagement;
 
@@ -80,85 +77,20 @@ public class VerifyMail {
         keyManagement = KeyManagement.getInstance();
     }
 
-    public int verifySignature(final MimeBodyPart bodyPart, final String sender)
-            throws MessagingException, CMSException, SMIMEException, IOException,
-            GeneralSecurityException, OperatorCreationException, CertPathReviewerException {
+    public int verifySignature(final MimeBodyPart bodyPart, final String sender) {
         if (bodyPart == null) {
             throw new IllegalArgumentException("bodyPart should not be null");
         }
 
-        boolean valid = true;
-        SMIMESigned signed;
+        VerifyAsyncTask task = new VerifyAsyncTask(bodyPart, sender);
 
-        if (bodyPart.isMimeType("multipart/signed")) {
-            signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
-        } else {
-            return SMimeApi.RESULT_SIGNATURE_UNSIGNED;
+        try {
+            return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(SMileCrypto.LOG_TAG, "failed to verify mail ", e);
         }
 
-        JcaCertStoreBuilder jcaCertStoreBuilder = new JcaCertStoreBuilder();
-        jcaCertStoreBuilder.addCertificates(signed.getCertificates());
-        jcaCertStoreBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-
-        CertStore certs = jcaCertStoreBuilder.build();
-        SignerInformationStore signers = signed.getSignerInfos();
-
-        KeyStore keyStore = KeyStore.getInstance("AndroidCAStore");
-        keyStore.load(null);
-        PKIXParameters pkixParameters = new PKIXParameters(keyStore);
-        PKIXParameters usedParameters = (PKIXParameters) pkixParameters.clone();
-        usedParameters.addCertStore(certs);
-        usedParameters.setRevocationEnabled(false); // TODO: add crls?
-
-        Collection signersCollection = signers.getSigners();
-        Iterator iterator = signersCollection.iterator();
-
-        int status = SMimeApi.RESULT_SIGNATURE_UNSIGNED;
-
-        while (iterator.hasNext()) {
-            SignerInformation signer = (SignerInformation) iterator.next();
-            List<X509Certificate> certCollection = findCerts(usedParameters.getCertStores(), signer.getSID());
-            for (X509Certificate cert : certCollection) {
-                // check signature
-                JcaSimpleSignerInfoVerifierBuilder verifierBuilder = new JcaSimpleSignerInfoVerifierBuilder();
-                verifierBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-
-                valid &= signer.verify(verifierBuilder.build(cert.getPublicKey()));
-                if(!valid) {
-                    return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
-                }
-
-                Log.d(SMileCrypto.LOG_TAG, "valid signature: " + valid);
-
-                valid &= checkSigner(cert, sender);
-                if (valid) {
-                    //TODO: good place?
-                    keyManagement.addFriendsCertificate(cert);
-                } else {
-                    return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
-                }
-
-                Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);
-                Date signTime = checkSignatureTime(usedParameters, signer, cert);
-                usedParameters.setDate(signTime);
-                List<CertStore> userCertStores = new ArrayList<>();
-                userCertStores.add(certs);
-                final List<Boolean> userProvidedList = new ArrayList<>();
-                CertPath certPath = createCertPath(cert, usedParameters.getTrustAnchors(), pkixParameters.getCertStores(), userCertStores, userProvidedList);
-
-                PKIXCertPathReviewer review = new PKIXCertPathReviewer(certPath, usedParameters);
-
-                if (review.isValidCertPath()) {
-                    status = SMimeApi.RESULT_SIGNATURE_SIGNED;
-                } else {
-                    status = SMimeApi.RESULT_SIGNATURE_SIGNED_UNCOFIRMED;
-                }
-
-                Log.d(SMileCrypto.LOG_TAG, "valid certificate path: " + valid);
-            }
-        }
-
-        return status;
+        return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
     }
 
     @NonNull
@@ -331,11 +263,6 @@ public class VerifyMail {
         return result;
     }
 
-    static class FindTrustAnchorResult {
-        X509Certificate trustAnchorCert;
-        boolean trustAnchorFound;
-    }
-
     private X509Certificate findNextCert(List<CertStore> certStores, X509CertSelector selector, Set<X509Certificate> certSet)
             throws CertStoreException {
         List<X509Certificate> certificates = findCerts(certStores, selector);
@@ -361,8 +288,8 @@ public class VerifyMail {
     private boolean checkMailAddresses(final X509Certificate cert, final String sender)
             throws CertificateParsingException, CertificateEncodingException {
         List<String> names = keyManagement.getAlternateNamesFromCert(cert);
-        for(String name : names) {
-            if(name.equalsIgnoreCase(sender)) {
+        for (String name : names) {
+            if (name.equalsIgnoreCase(sender)) {
                 return true;
             }
         }
@@ -450,5 +377,99 @@ public class VerifyMail {
         }
 
         return certificates;
+    }
+
+    static class FindTrustAnchorResult {
+        X509Certificate trustAnchorCert;
+        boolean trustAnchorFound;
+    }
+
+    class VerifyAsyncTask extends AsyncTask<Void, Void, Integer> {
+        private final MimeBodyPart bodyPart;
+        private final String sender;
+
+        public VerifyAsyncTask(MimeBodyPart bodyPart, String sender) {
+            this.bodyPart = bodyPart;
+            this.sender = sender;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            boolean valid = true;
+            SMIMESigned signed;
+            int status = SMimeApi.RESULT_SIGNATURE_UNSIGNED;
+
+            try {
+                if (bodyPart.isMimeType("multipart/signed")) {
+                    signed = new SMIMESigned((MimeMultipart) bodyPart.getContent());
+                } else {
+                    return SMimeApi.RESULT_SIGNATURE_UNSIGNED;
+                }
+
+                JcaCertStoreBuilder jcaCertStoreBuilder = new JcaCertStoreBuilder();
+                jcaCertStoreBuilder.addCertificates(signed.getCertificates());
+                jcaCertStoreBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+
+                CertStore certs = jcaCertStoreBuilder.build();
+                SignerInformationStore signers = signed.getSignerInfos();
+
+                KeyStore keyStore = KeyStore.getInstance("AndroidCAStore");
+                keyStore.load(null);
+                PKIXParameters pkixParameters = new PKIXParameters(keyStore);
+                PKIXParameters usedParameters = (PKIXParameters) pkixParameters.clone();
+                usedParameters.addCertStore(certs);
+                usedParameters.setRevocationEnabled(false); // TODO: add crls?
+
+                Collection signersCollection = signers.getSigners();
+                Iterator iterator = signersCollection.iterator();
+
+                while (iterator.hasNext()) {
+                    SignerInformation signer = (SignerInformation) iterator.next();
+                    List<X509Certificate> certCollection = findCerts(usedParameters.getCertStores(), signer.getSID());
+                    for (X509Certificate cert : certCollection) {
+                        // check signature
+                        JcaSimpleSignerInfoVerifierBuilder verifierBuilder = new JcaSimpleSignerInfoVerifierBuilder();
+                        verifierBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+
+                        valid &= signer.verify(verifierBuilder.build(cert.getPublicKey()));
+                        if (!valid) {
+                            return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
+                        }
+
+                        Log.d(SMileCrypto.LOG_TAG, "valid signature: " + valid);
+
+                        valid &= checkSigner(cert, sender);
+                        if (valid) {
+                            //TODO: good place?
+                            keyManagement.addFriendsCertificate(cert);
+                        } else {
+                            return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
+                        }
+
+                        Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);
+                        Date signTime = checkSignatureTime(usedParameters, signer, cert);
+                        usedParameters.setDate(signTime);
+                        List<CertStore> userCertStores = new ArrayList<>();
+                        userCertStores.add(certs);
+                        final List<Boolean> userProvidedList = new ArrayList<>();
+                        CertPath certPath = createCertPath(cert, usedParameters.getTrustAnchors(), pkixParameters.getCertStores(), userCertStores, userProvidedList);
+
+                        PKIXCertPathReviewer review = new PKIXCertPathReviewer(certPath, usedParameters);
+
+                        if (review.isValidCertPath()) {
+                            status = SMimeApi.RESULT_SIGNATURE_SIGNED;
+                        } else {
+                            status = SMimeApi.RESULT_SIGNATURE_SIGNED_UNCOFIRMED;
+                        }
+
+                        Log.d(SMileCrypto.LOG_TAG, "valid certificate path: " + valid);
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+            return status;
+        }
     }
 }

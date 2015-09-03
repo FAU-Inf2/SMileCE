@@ -21,6 +21,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.danlew.android.joda.DateUtils;
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -96,12 +99,14 @@ public class CertificateCreationActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_certificate_creation);
+        JodaTimeAndroid.init(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.navigation_drawer_info);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.create_certificate);
         ActionBar bar = getSupportActionBar();
+
         if (bar != null) {
             bar.setDisplayHomeAsUpEnabled(true);
         } else {
@@ -175,6 +180,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 DateTime now = DateTime.now();
+                now = now.plusYears(3);
                 // DatePicker starts months with 0
                 new DatePickerDialog(v.getContext(), onDateSetListener, now.getYear(), now.getMonthOfYear() - 1, now.getDayOfMonth()).show();
             }
