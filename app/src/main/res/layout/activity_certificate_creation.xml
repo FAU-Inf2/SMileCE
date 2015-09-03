@@ -99,22 +99,19 @@
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="18dp"/>
 
-            <TextView
+            <Button
                 android:id="@+id/valid"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/email_wrong"
-                android:layout_toEndOf="@id/valid_label"
+                android:layout_below="@id/valid_label"
                 android:text="@string/default_date"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="18dp"
-                android:layout_marginBottom="18dp"/>
+                android:layout_margin="8dp"/>
 
             <TextView
                 android:id="@+id/valid_wrong"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/valid_label"
+                android:layout_below="@id/valid"
                 android:visibility="gone"
                 android:text="@string/wrong_date"
                 android:layout_marginTop="8dp"

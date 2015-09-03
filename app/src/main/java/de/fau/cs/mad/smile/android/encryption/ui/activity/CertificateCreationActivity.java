@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -42,7 +43,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
     private TextView nameLabel;
     private TextView emailLabel;
     private TextView expertLabel;
-    private TextView date;
+    private Button date;
     private TextView wrongDate;
     private TextView wrongName;
     private TextView wrongEmail;
@@ -116,7 +117,9 @@ public class CertificateCreationActivity extends ActionBarActivity {
         nameLabel = (TextView) findViewById(R.id.name_label);
         emailLabel = (TextView) findViewById(R.id.email_label);
         expertLabel = (TextView) findViewById(R.id.expert_label);
-        date = (TextView) findViewById(R.id.valid);
+
+        date = (Button) findViewById(R.id.valid);
+
         wrongDate = (TextView) findViewById(R.id.valid_wrong);
         wrongName = (TextView) findViewById(R.id.name_wrong);
         wrongEmail = (TextView) findViewById(R.id.email_wrong);
