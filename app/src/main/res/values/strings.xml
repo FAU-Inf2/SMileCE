@@ -297,4 +297,7 @@
     <string name="passphrases_empty">Please enter a passphrase.</string>
     <string name="creation_success">Successfully created certificate.</string>
     <string name="creation_failed">Failed to create certificate. Please try again.</string>
+    <string name="expert_label">Expert input:</string>
+    <string name="navigation_drawer_expert">Expert mode</string>
+    <string name="wrong_rdn_format">The expert string contains errors. Please correct them or use default mode.</string>
 </resources>

@@ -38,6 +38,7 @@ public class SMileCrypto extends Application {
     public static final int STATUS_ERROR_ASYNC_TASK = 21;
 
     // Certificate creation
+    public static final int STATUS_EXPERT_WRONG_STRING = 29;
     public static final int STATUS_NO_NAME = 30;
     public static final int STATUS_NAME_EMPTY = 31;
     public static final int STATUS_NAME_INVALID_CHARACTER = 32;

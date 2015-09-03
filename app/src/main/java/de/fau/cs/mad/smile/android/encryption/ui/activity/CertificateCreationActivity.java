@@ -29,11 +29,19 @@ import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.SelfSignedCertificateCreator;
 
+
+/**
+ * User interface to create self signed v3 X500 Certificates.
+ */
 public class CertificateCreationActivity extends ActionBarActivity {
     private EditText name;
     private EditText email;
     private EditText passphrase;
     private EditText passphraseRepeat;
+    private EditText expert;
+    private TextView nameLabel;
+    private TextView emailLabel;
+    private TextView expertLabel;
     private TextView date;
     private TextView wrongDate;
     private TextView wrongName;
@@ -42,15 +50,21 @@ public class CertificateCreationActivity extends ActionBarActivity {
     private ImageView clearName;
     private ImageView clearEmail;
     private ImageView clearPassphrase;
-    private ImageView getClearPassphraseRepeat;
+    private ImageView clearPassphraseRepeat;
+    private ImageView clearExpert;
     private ImageButton create;
     private boolean nameOk;
     private boolean emailOk;
     private boolean passphraseOk;
     private boolean dateOk;
+    private boolean expertMode;
     private DateTime valid;
     DateTimeFormatter format = DateTimeFormat.forPattern("dd. MMMM yyyy");
 
+
+    /**
+     * Check if the user chooses a date in the past. If date is correct, notify activity, that a new value is set.
+     */
     private DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
 
         @Override
@@ -97,7 +111,11 @@ public class CertificateCreationActivity extends ActionBarActivity {
         email = (EditText) findViewById(R.id.email);
         passphrase = (EditText) findViewById(R.id.passphrase);
         passphraseRepeat = (EditText) findViewById(R.id.passphrase_repeat);
+        expert = (EditText) findViewById(R.id.expert);
 
+        nameLabel = (TextView) findViewById(R.id.name_label);
+        emailLabel = (TextView) findViewById(R.id.email_label);
+        expertLabel = (TextView) findViewById(R.id.expert_label);
         date = (TextView) findViewById(R.id.valid);
         wrongDate = (TextView) findViewById(R.id.valid_wrong);
         wrongName = (TextView) findViewById(R.id.name_wrong);
@@ -107,7 +125,8 @@ public class CertificateCreationActivity extends ActionBarActivity {
         clearName = (ImageView) findViewById(R.id.clear_name);
         clearEmail = (ImageView) findViewById(R.id.clear_email);
         clearPassphrase = (ImageView) findViewById(R.id.clear_passphrase);
-        getClearPassphraseRepeat = (ImageView) findViewById(R.id.clear_passphrase_repeat);
+        clearPassphraseRepeat = (ImageView) findViewById(R.id.clear_passphrase_repeat);
+        clearExpert = (ImageView) findViewById(R.id.clear_expert);
 
         create = (ImageButton) findViewById(R.id.create);
 
@@ -135,10 +154,16 @@ public class CertificateCreationActivity extends ActionBarActivity {
                 passphrase.setText("");
             }
         });
-        getClearPassphraseRepeat.setOnClickListener(new View.OnClickListener() {
+        clearPassphraseRepeat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 passphraseRepeat.setText("");
+            }
+        });
+        clearExpert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                expert.setText("");
             }
         });
 
@@ -165,27 +190,45 @@ public class CertificateCreationActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_info, menu);
+        getMenuInflater().inflate(R.menu.menu_certificate_ceration, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
+        // Items in Toolbar/ActionBar
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
             finish();
             return true;
+        } else if (id == R.id.action_expert) {
+            toggleExpert();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * If all fields are set, make create button accessible.
+     */
     private void booleanSet() {
-        if(nameOk && emailOk && dateOk && passphraseOk) {
-            create.setVisibility(View.VISIBLE);
+        if(!expertMode) {
+            if (nameOk && emailOk && dateOk && passphraseOk) {
+                create.setVisibility(View.VISIBLE);
+            } else {
+                create.setVisibility(View.GONE);
+            }
         } else {
-            create.setVisibility(View.GONE);
+            if(dateOk && passphraseOk) {
+                create.setVisibility(View.VISIBLE);
+            } else {
+                create.setVisibility(View.GONE);
+            }
         }
     }
 
+    /**
+     * Check if the user choose a valid name.
+     */
     private class NameWatcher implements TextWatcher {
         private void error() {
             wrongName.setVisibility(View.VISIBLE);
@@ -229,7 +272,9 @@ public class CertificateCreationActivity extends ActionBarActivity {
         }
     }
 
-
+    /**
+     * Check if the email address is formatted correctly.
+     */
     private class EmailWatcher implements TextWatcher {
         private void error() {
             wrongEmail.setVisibility(View.VISIBLE);
@@ -278,6 +323,9 @@ public class CertificateCreationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Check if passphrase and its repetition match.
+     */
     private class PassphraseWatcher implements TextWatcher {
 
         @Override
@@ -321,6 +369,9 @@ public class CertificateCreationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Create certificate in background task.
+     */
     private class AsyncClickListener implements View.OnClickListener {
 
         private class CreateCertTask extends AsyncTask<Object, Object, Object> {
@@ -329,6 +380,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
             private String email;
             private DateTime valid;
             private String passphrase;
+            private String expert;
             private int status;
 
             public CreateCertTask(String name, String email, DateTime valid, String passphrase) {
@@ -338,17 +390,31 @@ public class CertificateCreationActivity extends ActionBarActivity {
                 this.passphrase = passphrase;
             }
 
+            public CreateCertTask(String expert, DateTime valid, String passphrase) {
+                this.expert = expert;
+                this.valid = valid;
+                this.passphrase = passphrase;
+            }
+
             @Override
             protected Object doInBackground(Object[] params) {
-                status = SelfSignedCertificateCreator.createCert(name, email, null, valid, passphrase);
+                if(expert != null) {
+                    status = SelfSignedCertificateCreator.createCert(null, null, expert, valid, passphrase);
+                } else {
+                    status = SelfSignedCertificateCreator.createCert(name, email, null, valid, passphrase);
+                }
                 return null;
             }
 
             @Override
             protected void onPostExecute(Object o) {
+                // Output result.
                 switch (status) {
                     case SMileCrypto.STATUS_SAVED_CERT:
                         Toast.makeText(App.getContext(), getString(R.string.creation_success), Toast.LENGTH_SHORT).show();
+                        break;
+                    case SMileCrypto.STATUS_EXPERT_WRONG_STRING:
+                        Toast.makeText(App.getContext(), getString(R.string.wrong_rdn_format), Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         Toast.makeText(App.getContext(), getString(R.string.creation_failed), Toast.LENGTH_SHORT).show();
@@ -360,11 +426,53 @@ public class CertificateCreationActivity extends ActionBarActivity {
 
         @Override
         public void onClick(View v) {
-            String myName = name.getText().toString();
-            String myEmail = email.getText().toString();
-            String pass = passphrase.getText().toString();
-            CreateCertTask cct = new CreateCertTask(myName, myEmail, valid, pass);
-            cct.execute();
+            if(!expertMode) {
+                String myName = name.getText().toString();
+                String myEmail = email.getText().toString();
+                String pass = passphrase.getText().toString();
+                CreateCertTask cct = new CreateCertTask(myName, myEmail, valid, pass);
+                cct.execute();
+            } else {
+                String myExpert = expert.getText().toString();
+                String pass = passphrase.getText().toString();
+                CreateCertTask cct = new CreateCertTask(myExpert, valid, pass);
+                cct.execute();
+            }
+        }
+    }
+
+    /**
+     * Toggle expert mode.
+     */
+    private void toggleExpert() {
+        if(expertMode) {
+            expertMode = false;
+            expert.setVisibility(View.GONE);
+            clearExpert.setVisibility(View.GONE);
+            expertLabel.setVisibility(View.GONE);
+            nameLabel.setVisibility(View.VISIBLE);
+            emailLabel.setVisibility(View.VISIBLE);
+            email.setVisibility(View.VISIBLE);
+            name.setVisibility(View.VISIBLE);
+            clearEmail.setVisibility(View.VISIBLE);
+            clearName.setVisibility(View.VISIBLE);
+            wrongEmail.setVisibility(View.VISIBLE);
+            wrongName.setVisibility(View.VISIBLE);
+            booleanSet();
+        } else {
+            expertMode = true;
+            expert.setVisibility(View.VISIBLE);
+            clearExpert.setVisibility(View.VISIBLE);
+            expertLabel.setVisibility(View.VISIBLE);
+            nameLabel.setVisibility(View.GONE);
+            emailLabel.setVisibility(View.GONE);
+            email.setVisibility(View.GONE);
+            name.setVisibility(View.GONE);
+            clearEmail.setVisibility(View.GONE);
+            clearName.setVisibility(View.GONE);
+            wrongEmail.setVisibility(View.GONE);
+            wrongName.setVisibility(View.GONE);
+            booleanSet();
         }
     }
 

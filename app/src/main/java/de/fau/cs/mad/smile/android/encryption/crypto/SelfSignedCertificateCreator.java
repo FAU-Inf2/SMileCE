@@ -46,12 +46,23 @@ import java.security.spec.RSAKeyGenParameterSpec;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 
+/**
+ * Create self signed v3 X500 Certificates.
+ * Use validate to check for correct user input.
+ * Use createCert to build the certificate. It is then stored in the KeyStore and
+ * exported to p12 in the internal storage.
+ */
 public class SelfSignedCertificateCreator {
 
     static {
         Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 
+    /**
+     * Test if the name contains illegal characters or is empty.
+     * @param name The name to test.
+     * @return A status code representing success or failure.
+     */
     public static int validateName(String name) {
         if(name != null) {
             if(name.length() > 0) {
@@ -68,6 +79,11 @@ public class SelfSignedCertificateCreator {
         }
     }
 
+    /**
+     * Test is email is a correct formatted email address.
+     * @param email The email to test.
+     * @return A status code representing success or failure.
+     */
     public static int validateEmail(String email) {
         if(email != null) {
             if(email.length() > 0) {
@@ -88,6 +104,16 @@ public class SelfSignedCertificateCreator {
         }
     }
 
+    /**
+     * Create a new self signed v3 X500 Certificate.
+     * @param name The username.
+     * @param email Email address to use this certificate with.
+     * @param expert RDN string containing more data.
+     * @param end Certificate termination date.
+     * @param passphrase Passphrase to encrypt certificate.
+     * @return Status code representing errors or success.
+     * @see SMileCrypto for Status code representation.
+     */
     public static int createCert(String name, String email, String expert, DateTime end , String passphrase) {
         if(passphrase == null || passphrase.length() == 0) {
             return SMileCrypto.STATUS_NO_PASSPHRASE;
@@ -95,7 +121,12 @@ public class SelfSignedCertificateCreator {
 
         X500Name x500Name;
         if(expert != null && expert.length() > 0) {
-            x500Name = new X500Name(expert);
+            try {
+                x500Name = new X500Name(expert);
+            } catch (IllegalArgumentException iae) {
+                Log.e(SMileCrypto.LOG_TAG, "Wrong expert sting: " + iae.getMessage());
+                return SMileCrypto.STATUS_EXPERT_WRONG_STRING;
+            }
         } else {
             int vname = validateName(name);
             if (vname != SMileCrypto.STATUS_NAME_OK) {
