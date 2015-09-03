@@ -397,6 +397,11 @@ public class CertificateCreationActivity extends ActionBarActivity {
             }
 
             @Override
+            protected void onPreExecute() {
+                Toast.makeText(App.getContext(), getString(R.string.start_creation), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
             protected Object doInBackground(Object[] params) {
                 if(expert != null) {
                     status = SelfSignedCertificateCreator.createCert(null, null, expert, valid, passphrase);
