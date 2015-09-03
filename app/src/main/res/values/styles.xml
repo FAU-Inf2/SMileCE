@@ -4,7 +4,6 @@
         <item name="colorPrimary">@color/ColorPrimary</item>
         <item name="colorPrimaryDark">@color/ColorPrimaryDark</item>
         <!-- Customize your theme here. -->
-        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="FloatingActionButton" parent="android:Widget.Material.Button">

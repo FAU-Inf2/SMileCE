@@ -128,7 +128,7 @@
                     android:layout_toEndOf="@id/badge"
                     android:layout_below="@id/email_label"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -146,14 +146,14 @@
                     android:layout_toEndOf="@id/valid_label"
                     android:layout_below="@id/email"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="8dp" />
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/email"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginTop="8dp">
 
                     <ImageView
                         android:layout_width="12dp"

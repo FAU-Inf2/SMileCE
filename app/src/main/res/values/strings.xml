@@ -300,4 +300,6 @@
     <string name="expert_label">Expert input:</string>
     <string name="navigation_drawer_expert">Expert mode</string>
     <string name="wrong_rdn_format">The expert string contains errors. Please correct them or use default mode.</string>
+    <string name="faq_expert_mode_q">What is \"expert mode\" in Create Certificate?</string>
+    <string name="faq_expert_mode">You can use a formatted string to enter your certificate date.\nFor example: \"CN=Max Muster, E=max.muster@firm.org, O=Firm".\nThis will set the name to Max Muster, the email address to \"max.muster@firm.org\" and the organisation to \"Firm\".</string>
 </resources>

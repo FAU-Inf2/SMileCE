@@ -109,6 +109,7 @@ public class HelpActivity extends ActionBarActivity {
         listDataHeader.add(getString(R.string.faq_meaning_coloured_keys_q));
         listDataHeader.add(getString(R.string.faq_additional_certificate_info_q));
         listDataHeader.add(getString(R.string.faq_delete_certificate_q));
+        listDataHeader.add(getString(R.string.faq_expert_mode_q));
         listDataHeader.add(getString(R.string.faq_author));
         listDataHeader.add(getString(R.string.faq_license));
         listDataHeader.add(getString(R.string.faq_other_projects));
@@ -150,6 +151,11 @@ public class HelpActivity extends ActionBarActivity {
         List<Pair<Integer, String[]>> delList = new ArrayList<>();
         delList.add(del);
 
+        String[] expertText = {getString(R.string.faq_expert_mode)};
+        Pair<Integer, String[]> exp = Pair.create(0, expertText);
+        List<Pair<Integer, String[]>> expList = new ArrayList<>();
+        expList.add(exp);
+
         String[] authorText = {getString(R.string.author_text)};
         Pair<Integer, String[]> author = Pair.create(0, authorText);
         List<Pair<Integer, String[]>> authorList = new ArrayList<>();
@@ -172,9 +178,10 @@ public class HelpActivity extends ActionBarActivity {
         listDataChild.put(listDataHeader.get(4), colKList);
         listDataChild.put(listDataHeader.get(5), certInfoList);
         listDataChild.put(listDataHeader.get(6), delList);
-        listDataChild.put(listDataHeader.get(7), authorList);
-        listDataChild.put(listDataHeader.get(8), licenceList);
-        listDataChild.put(listDataHeader.get(9), othersList);
+        listDataChild.put(listDataHeader.get(7), expList);
+        listDataChild.put(listDataHeader.get(8), authorList);
+        listDataChild.put(listDataHeader.get(9), licenceList);
+        listDataChild.put(listDataHeader.get(10), othersList);
 
     }
 }

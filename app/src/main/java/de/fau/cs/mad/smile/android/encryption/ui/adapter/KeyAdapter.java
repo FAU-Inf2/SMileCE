@@ -272,7 +272,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         if (keyInfo.getTerminationDate() != null && keyInfo.getValidAfter() != null) {
             DateTime valid = keyInfo.getTerminationDate();
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
             String displayDate = valid.toString(fmt);
             holder.termination_date.setText(displayDate);
             DateTime today = new DateTime();
