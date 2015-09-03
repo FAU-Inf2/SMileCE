@@ -1,22 +1,26 @@
 package de.fau.cs.mad.smile.android.encryption.remote;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import korex.mail.MessagingException;
 import korex.mail.internet.MimeBodyPart;
 
 public class MimeBodyLoaderTask extends ContentLoaderTask<MimeBodyPart> {
-    private final InputStream inputStream;
+    private File inputFile;
 
     public MimeBodyLoaderTask(final InputStream inputStream) {
-        this.inputStream = inputStream;
+        super(inputStream);
     }
 
     @Override
     protected MimeBodyPart doInBackground(Void... params) {
         try {
-            return new MimeBodyPart(inputStream);
-        } catch (MessagingException e) {
+            inputFile = copyToFile(getInputStream());
+            return new MimeBodyPart(new FileInputStream(inputFile));
+        } catch (MessagingException | IOException e) {
             return null;
         }
     }
