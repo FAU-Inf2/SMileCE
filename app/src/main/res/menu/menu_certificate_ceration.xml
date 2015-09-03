@@ -6,6 +6,5 @@
         android:id="@+id/action_expert"
         android:orderInCategory="100"
         android:title="@string/navigation_drawer_expert"
-        android:icon="@drawable/ic_security_white_48dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

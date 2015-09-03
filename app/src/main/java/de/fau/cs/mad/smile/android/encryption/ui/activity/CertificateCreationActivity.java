@@ -426,6 +426,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
 
         @Override
         public void onClick(View v) {
+            v.setVisibility(View.GONE);
             if(!expertMode) {
                 String myName = name.getText().toString();
                 String myEmail = email.getText().toString();
