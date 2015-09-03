@@ -23,4 +23,18 @@
         android:title="@string/debug_info"
         android:defaultValue="false" />
 
+    <de.fau.cs.mad.smile.android.encryption.ui.Preferences.SeekBarPreference
+        android:key="delete_distance"
+        android:title="@string/delete_distance"
+        android:summary="@string/swipe_distance_summary"
+        android:defaultValue="30"
+        />
+
+    <de.fau.cs.mad.smile.android.encryption.ui.Preferences.SeekBarPreference
+        android:key="share_distance"
+        android:title="@string/share_distance"
+        android:summary="@string/swipe_distance_summary"
+        android:defaultValue="20"
+        />
+
 </PreferenceScreen>

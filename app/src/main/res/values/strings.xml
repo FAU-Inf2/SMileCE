@@ -273,6 +273,9 @@
     <string name="dec">Descending</string>
     <string name="sort_type_summary">Currently certificates are sorted by: %1$s</string>
     <string name="sort_type">Sort by</string>
+    <string name="delete_distance">Swipe to delete distance </string>
+    <string name="swipe_distance_summary">Currently you have to pull %1$d %% to activate swipe. </string>
+    <string name="share_distance">Swipe to share distance </string>
     <string name="valid">Expiration date</string>
     <string name="key_type">Has private key</string>
     <string name="type_name">Name</string>

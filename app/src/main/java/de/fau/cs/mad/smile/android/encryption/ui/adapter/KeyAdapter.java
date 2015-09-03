@@ -361,12 +361,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         holder.swipe.addRevealListener(R.id.delete, new SwipeLayout.OnRevealListener() {
             @Override
             public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+                float deleteDistance = sharedPreferences.getInt("delete_distance", 30) / 100.0f;
                 if (dragEdge != SwipeLayout.DragEdge.Right) {
                     return;
                 }
-                if (v <= 0.3 && holder.delete_icon.isShown()) {
+                if (v <= deleteDistance && holder.delete_icon.isShown()) {
                     holder.delete_icon.setVisibility(View.INVISIBLE);
-                } else if (v > 0.3 && !holder.delete_icon.isShown()) {
+                } else if (v > deleteDistance && !holder.delete_icon.isShown()) {
                     holder.delete_icon.setVisibility(View.VISIBLE);
                 }
             }
@@ -374,12 +375,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         holder.swipe.addRevealListener(R.id.share, new SwipeLayout.OnRevealListener() {
             @Override
             public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+                float shareDistance = sharedPreferences.getInt("share_distance", 20) / 100.0f;
                 if (dragEdge != SwipeLayout.DragEdge.Left) {
                     return;
                 }
-                if (v <= 0.2 && holder.share_icon.isShown()) {
+                if (v <= shareDistance && holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.INVISIBLE);
-                } else if (v > 0.2 && !holder.share_icon.isShown()) {
+                } else if (v > shareDistance && !holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.VISIBLE);
                 }
             }
