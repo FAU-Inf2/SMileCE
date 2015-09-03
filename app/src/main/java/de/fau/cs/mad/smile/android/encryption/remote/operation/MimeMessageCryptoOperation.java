@@ -42,10 +42,7 @@ public abstract class MimeMessageCryptoOperation extends CryptoOperation<MimeMes
         if(processed != null) {
             copyHeaders(source, processed);
             processed.saveChanges();
-            final File externalStorage = Environment.getExternalStorageDirectory();
-            final String targetDirName = FilenameUtils.concat(externalStorage.getAbsolutePath(), App.getContext().getPackageName());
-            final File targetDir = new File(targetDirName);
-            final File targetFile = new File(targetDir, "processed.eml");
+            final File targetFile = getOutputFile();
             processed.writeTo(new FileOutputStream(targetFile));
             processed.writeTo(outputStream);
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
