@@ -2,6 +2,8 @@ package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
 import org.spongycastle.asn1.x500.style.BCStyle;
@@ -26,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +44,7 @@ import de.fau.cs.mad.smile.android.encryption.ui.CryptographicInformationItem;
 import de.fau.cs.mad.smile.android.encryption.ui.PersonalInformationItem;
 import de.fau.cs.mad.smile.android.encryption.ui.ValidityItem;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableCertificateListAdapter;
+import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 
 public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private Toolbar toolbar;
@@ -134,7 +139,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         listDataHeader = new ArrayList<>();
         listDataHeader.add(getString(R.string.personal));
         listDataChild = new HashMap<>();
-        HashMap<String, String> data = new HashMap<>();
+        LinkedHashMap<String, String[]> data = new LinkedHashMap<>();
         X509Certificate certificate = keyInfo.getCertificate();
         if (certificate == null) {
             Log.e(SMileCrypto.LOG_TAG, "Certificate was null -- abort.");
@@ -146,27 +151,27 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             parseX500Name(data, x500name);
             ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
             PersonalInformationItem persI = new PersonalInformationItem();
-            persI.build(data);
+            persI.buildComplex(data);
             pers.add(persI);
             listDataChild.put(listDataHeader.get(0), pers);
         } catch (CertificateEncodingException e) {
             Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
-            Toast.makeText(App.getContext(), "Failed to extract personal information.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
         }
         listDataHeader.add(getString(R.string.CA));
-        HashMap<String, String> cadata = new HashMap<>();
+        LinkedHashMap<String, String[]> cadata = new LinkedHashMap<>();
 
         try {
             x500name = new JcaX509CertificateHolder(certificate).getIssuer();
             parseX500Name(cadata, x500name);
             ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
             PersonalInformationItem persI = new PersonalInformationItem();
-            persI.build(cadata);
+            persI.buildComplex(cadata);
             pers.add(persI);
             listDataChild.put(listDataHeader.get(1), pers);
         } catch (CertificateEncodingException e) {
             Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
-            Toast.makeText(App.getContext(), "Failed to extract personal information.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
         }
 
         Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
@@ -228,131 +233,18 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         · Cryptographic: Public Key, Signature algo, Signature */
     }
 
-    private void parseX500Name(HashMap<String, String> data, X500Name x500name) {
-        RDN[] Name = x500name.getRDNs(BCStyle.CN);
-        if (Name.length > 0) {
-            data.put("Name", IETFUtils.valueToString(Name[0].getFirst().getValue()));
-        }
-        RDN[] mail = x500name.getRDNs(BCStyle.E);
-        if (mail.length > 0) {
-            data.put("Email", IETFUtils.valueToString(mail[0].getFirst().getValue()));
-        }
-        RDN[] L = x500name.getRDNs(BCStyle.L);
-        if (L.length > 0) {
-            data.put("L", IETFUtils.valueToString(L[0].getFirst().getValue()));
-        }
-        RDN[] DC = x500name.getRDNs(BCStyle.DC);
-        if (DC.length > 0) {
-            data.put("DC", IETFUtils.valueToString(DC[0].getFirst().getValue()));
-        }
-        RDN[] O = x500name.getRDNs(BCStyle.O);
-        if (O.length > 0) {
-            data.put("O", IETFUtils.valueToString(O[0].getFirst().getValue()));
-        }
-        RDN[] OU = x500name.getRDNs(BCStyle.OU);
-        if (OU.length > 0) {
-            data.put("OU", IETFUtils.valueToString(OU[0].getFirst().getValue()));
-        }
-        RDN[] business = x500name.getRDNs(BCStyle.BUSINESS_CATEGORY);
-        if (business.length > 0) {
-            data.put("business", IETFUtils.valueToString(business[0].getFirst().getValue()));
-        }
-        RDN[] C = x500name.getRDNs(BCStyle.C);
-        if (C.length > 0) {
-            String iso2country = IETFUtils.valueToString(C[0].getFirst().getValue());
-            data.put("C", new Locale("en", iso2country).getDisplayCountry());
-        }
-        RDN[] COF = x500name.getRDNs(BCStyle.COUNTRY_OF_CITIZENSHIP);
-        if (COF.length > 0) {
-            data.put("COF", IETFUtils.valueToString(COF[0].getFirst().getValue()));
-        }
-        RDN[] COR = x500name.getRDNs(BCStyle.COUNTRY_OF_RESIDENCE);
-        if (COR.length > 0) {
-            data.put("COR", IETFUtils.valueToString(COR[0].getFirst().getValue()));
-        }
-        RDN[] DOB = x500name.getRDNs(BCStyle.DATE_OF_BIRTH);
-        if (DOB.length > 0) {
-            data.put("DOB", IETFUtils.valueToString(DOB[0].getFirst().getValue()));
-        }
-        RDN[] DMD = x500name.getRDNs(BCStyle.DMD_NAME);
-        if (DMD.length > 0) {
-            data.put("DMD", IETFUtils.valueToString(DMD[0].getFirst().getValue()));
-        }
-        RDN[] DNQ = x500name.getRDNs(BCStyle.DN_QUALIFIER);
-        if (DNQ.length > 0) {
-            data.put("DNQ", IETFUtils.valueToString(DNQ[0].getFirst().getValue()));
-        }
-        RDN[] gender = x500name.getRDNs(BCStyle.GENDER);
-        if (gender.length > 0) {
-            data.put("gender", IETFUtils.valueToString(gender[0].getFirst().getValue()));
-        }
-        RDN[] gen = x500name.getRDNs(BCStyle.GENERATION);
-        if (gen.length > 0) {
-            data.put("gen", IETFUtils.valueToString(gen[0].getFirst().getValue()));
-        }
-        RDN[] GN = x500name.getRDNs(BCStyle.GIVENNAME);
-        if (GN.length > 0) {
-            data.put("GN", IETFUtils.valueToString(GN[0].getFirst().getValue()));
-        }
-        RDN[] INIT = x500name.getRDNs(BCStyle.INITIALS);
-        if (INIT.length > 0) {
-            data.put("INIT", IETFUtils.valueToString(INIT[0].getFirst().getValue()));
-        }
-        RDN[] name = x500name.getRDNs(BCStyle.NAME);
-        if (name.length > 0) {
-            data.put("name", IETFUtils.valueToString(name[0].getFirst().getValue()));
-        }
-        RDN[] NAB = x500name.getRDNs(BCStyle.NAME_AT_BIRTH);
-        if (NAB.length > 0) {
-            data.put("NAB", IETFUtils.valueToString(NAB[0].getFirst().getValue()));
-        }
-        RDN[] POB = x500name.getRDNs(BCStyle.PLACE_OF_BIRTH);
-        if (POB.length > 0) {
-            data.put("POB", IETFUtils.valueToString(POB[0].getFirst().getValue()));
-        }
-        RDN[] POA = x500name.getRDNs(BCStyle.POSTAL_ADDRESS);
-        if (POA.length > 0) {
-            data.put("POA", IETFUtils.valueToString(POA[0].getFirst().getValue()));
-        }
-        RDN[] POC = x500name.getRDNs(BCStyle.POSTAL_CODE);
-        if (POC.length > 0) {
-            data.put("POC", IETFUtils.valueToString(POC[0].getFirst().getValue()));
-        }
-        RDN[] pseudonym = x500name.getRDNs(BCStyle.PSEUDONYM);
-        if (pseudonym.length > 0) {
-            data.put("pseudonym", IETFUtils.valueToString(pseudonym[0].getFirst().getValue()));
-        }
-        RDN[] SN = x500name.getRDNs(BCStyle.SN);
-        if (SN.length > 0) {
-            data.put("SN", IETFUtils.valueToString(SN[0].getFirst().getValue()));
-        }
-        RDN[] ST = x500name.getRDNs(BCStyle.ST);
-        if (ST.length > 0) {
-            data.put("ST", IETFUtils.valueToString(ST[0].getFirst().getValue()));
-        }
-        RDN[] street = x500name.getRDNs(BCStyle.STREET);
-        if (street.length > 0) {
-            data.put("street", IETFUtils.valueToString(street[0].getFirst().getValue()));
-        }
-        RDN[] surname = x500name.getRDNs(BCStyle.SURNAME);
-        if (surname.length > 0) {
-            data.put("surname", IETFUtils.valueToString(surname[0].getFirst().getValue()));
-        }
-        RDN[] title = x500name.getRDNs(BCStyle.T);
-        if (title.length > 0) {
-            data.put("title", IETFUtils.valueToString(title[0].getFirst().getValue()));
-        }
-        RDN[] TEL = x500name.getRDNs(BCStyle.TELEPHONE_NUMBER);
-        if (TEL.length > 0) {
-            data.put("TEL", IETFUtils.valueToString(TEL[0].getFirst().getValue()));
-        }
-        RDN[] UID = x500name.getRDNs(BCStyle.UID);
-        if (UID.length > 0) {
-            data.put("UID", IETFUtils.valueToString(UID[0].getFirst().getValue()));
-        }
-        RDN[] UI = x500name.getRDNs(BCStyle.UNIQUE_IDENTIFIER);
-        if (UI.length > 0) {
-            data.put("UI", IETFUtils.valueToString(UI[0].getFirst().getValue()));
+    private void parseX500Name(LinkedHashMap<String, String[]> data, X500Name x500name) {
+        Resources res = getResources();
+        String[] keys = res.getStringArray(R.array.info_keys);
+        String[] entries = res.getStringArray(R.array.info_names);
+        for (int i = 0; i < Utils.asn1ObjectIdentifiers.length && i < keys.length && i < entries.length; ++i) {
+            RDN[] rdns = x500name.getRDNs(Utils.asn1ObjectIdentifiers[i]);
+            if (rdns.length > 0) {
+                String[] values = new String[2];
+                values[0] = entries[i];
+                values[1] = IETFUtils.valueToString(rdns[0].getFirst().getValue());
+                data.put(keys[i], values);
+            }
         }
     }
 

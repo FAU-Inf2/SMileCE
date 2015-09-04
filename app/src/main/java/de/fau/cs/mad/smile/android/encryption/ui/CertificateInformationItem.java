@@ -15,7 +15,6 @@ import de.fau.cs.mad.smile.android.encryption.R;
 public class CertificateInformationItem extends AbstractCertificateInfoItem {
     private HashMap<String, String> data;
 
-    @Override
     public void build(HashMap<String, String> data) {
         if (data.keySet().contains("Thumbprint") && data.keySet().contains("Serial number")
                 && data.keySet().contains("Version")) {

@@ -15,7 +15,6 @@ import de.fau.cs.mad.smile.android.encryption.R;
 public class ValidityItem extends AbstractCertificateInfoItem {
     private HashMap<String, String> data;
 
-    @Override
     public void build(HashMap<String, String> data) {
         if (data.keySet().contains("Startdate") && data.keySet().contains("Enddate")) {
             this.data = data;

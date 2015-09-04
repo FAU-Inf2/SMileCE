@@ -217,4 +217,70 @@
         <item>#ff90a4ae</item>
     </array>
 
+    <string-array name="info_keys">
+        <item>Name</item>
+        <item>Email</item>
+        <item>title</item>
+        <item>INIT</item>
+        <item>gender</item>
+        <item>GN</item>
+        <item>NAB</item>
+        <item>pseudonym</item>
+        <item>surname</item>
+        <item>UID</item>
+        <item>DOB</item>
+        <item>TEL</item>
+        <item>gen</item>
+        <item>business</item>
+        <item>O</item>
+        <item>OU</item>
+        <item>COF</item>
+        <item>COR</item>
+        <item>POB</item>
+        <item>C</item>
+        <item>ST</item>
+        <item>L</item>
+        <item>street</item>
+        <item>POA</item>
+        <item>POC</item>
+        <item>DC</item>
+        <item>DMD</item>
+        <item>DNQ</item>
+        <item>SN</item>
+        <item>UI</item>
+    </string-array>
+
+    <string-array name="info_names">
+        <item>@string/name</item>
+        <item>@string/email</item>
+        <item>@string/title</item>
+        <item>@string/INIT</item>
+        <item>@string/gender</item>
+        <item>@string/GN</item>
+        <item>@string/NAB</item>
+        <item>@string/pseudonym</item>
+        <item>@string/surname</item>
+        <item>@string/UID</item>
+        <item>@string/DOB</item>
+        <item>@string/TEL</item>
+        <item>@string/gen</item>
+        <item>@string/business</item>
+        <item>@string/O</item>
+        <item>@string/OU</item>
+        <item>@string/COF</item>
+        <item>@string/COR</item>
+        <item>@string/POB</item>
+        <item>@string/C</item>
+        <item>@string/ST</item>
+        <item>@string/L</item>
+        <item>@string/street</item>
+        <item>@string/POA</item>
+        <item>@string/POC</item>
+        <item>@string/DC</item>
+        <item>@string/DMD</item>
+        <item>@string/DNQ</item>
+        <item>@string/SN</item>
+        <item>@string/UI</item>
+    </string-array>
+
 </resources>

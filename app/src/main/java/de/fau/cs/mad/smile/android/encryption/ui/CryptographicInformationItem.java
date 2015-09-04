@@ -15,7 +15,6 @@ import de.fau.cs.mad.smile.android.encryption.R;
 public class CryptographicInformationItem extends AbstractCertificateInfoItem {
     private HashMap<String, String> data;
 
-    @Override
     public void build(HashMap<String, String> data) {
         if (data.keySet().contains("Public Key") && data.keySet().contains("Signature Algorithm")
                 && data.keySet().contains("Signature")) {
