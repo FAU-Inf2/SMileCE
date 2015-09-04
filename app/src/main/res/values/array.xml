@@ -31,4 +31,170 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+
+    <string-array name="faq_questions">
+        <item>@string/faq_import_cert_q</item>
+        <item>@string/faq_passphrase_saved_q</item>
+        <item>@string/faq_import_other_cert_q</item>
+        <item>@string/faq_meaning_colour_q</item>
+        <item>@string/faq_meaning_coloured_keys_q</item>
+        <item>@string/faq_additional_certificate_info_q</item>
+        <item>@string/faq_delete_certificate_q</item>
+        <item>@string/faq_expert_mode_q</item>
+        <item>@string/faq_author</item>
+        <item>@string/faq_license</item>
+        <item>@string/faq_other_projects</item>
+    </string-array>
+
+    <string-array name="faq_key_array">
+        <item>import_cert</item>
+        <item>passphrase_saved</item>
+        <item>import_other</item>
+        <item>meaning_colour</item>
+        <item>meaning_coloured_keys</item>
+        <item>additional_info</item>
+        <item>delete</item>
+        <item>expert</item>
+        <item>author</item>
+        <item>license</item>
+        <item>other</item>
+    </string-array>
+
+    <array name="import_cert_0">
+        <item>0</item>
+        <item>@string/faq_import_cert</item>
+    </array>
+
+    <array name="passphrase_saved_0">
+        <item>0</item>
+        <item>@string/faq_passphrase_saved</item>
+    </array>
+
+    <array name="import_other_0">
+        <item>0</item>
+        <item>@string/faq_import_other_cert</item>
+    </array>
+
+    <array name="meaning_colour_0">
+        <item>0</item>
+        <item>@string/faq_meaning_colour</item>
+    </array>
+
+    <array name="meaning_colour_1">
+        <item>1</item>
+        <item>"#0000ff"</item>
+        <item>"#0000ff"</item>
+        <item>"#0000ff"</item>
+        <item>"#0000ff"</item>
+        <item>"#0000ff"</item>
+        <item>@string/faq_colour_00</item>
+    </array>
+
+    <array name="meaning_colour_2">
+        <item>1</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>@string/faq_colour_01</item>
+    </array>
+
+    <array name="meaning_colour_3">
+        <item>1</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>"#00ff00"</item>
+        <item>"#d3d3d3"</item>
+        <item>@string/faq_colour_02</item>
+    </array>
+
+    <array name="meaning_colour_4">
+        <item>1</item>
+        <item>"#FFA500"</item>
+        <item>"#FFA500"</item>
+        <item>"#FFA500"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>@string/faq_colour_03</item>
+    </array>
+
+    <array name="meaning_colour_5">
+        <item>1</item>
+        <item>"#FFA500"</item>
+        <item>"#FFA500"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>@string/faq_colour_04</item>
+    </array>
+
+    <array name="meaning_colour_6">
+        <item>1</item>
+        <item>"#FFA500"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>@string/faq_colour_05</item>
+    </array>
+
+    <array name="meaning_colour_7">
+        <item>1</item>
+        <item>"#ff0000"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>"#d3d3d3"</item>
+        <item>@string/faq_colour_06</item>
+    </array>
+
+    <array name="meaning_coloured_keys_0">
+        <item>0</item>
+        <item>@string/faq_meaning_coloured_keys</item>
+    </array>
+
+    <array name="meaning_coloured_keys_1">
+        <item>2</item>
+        <item>@drawable/ic_public_key_silver_48dp</item>
+        <item>@string/faq_public_key_saved</item>
+    </array>
+
+    <array name="meaning_coloured_keys_2">
+        <item>2</item>
+        <item>@drawable/ic_private_key_black_48dp</item>
+        <item>@string/faq_private_key_saved</item>
+    </array>
+
+    <array name="additional_info_0">
+        <item>0</item>
+        <item>@string/faq_additional_certificate_info</item>
+    </array>
+
+    <array name="delete_0">
+        <item>0</item>
+        <item>@string/faq_delete_certificate</item>
+    </array>
+
+    <array name="expert_0">
+        <item>0</item>
+        <item>@string/faq_expert_mode</item>
+    </array>
+
+    <array name="author_0">
+        <item>0</item>
+        <item>@string/author_text</item>
+    </array>
+
+    <array name="license_0">
+        <item>0</item>
+        <item>@string/apache</item>
+    </array>
+
+    <array name="other_0">
+        <item>0</item>
+        <item>@string/other_projects_list</item>
+    </array>
+
 </resources>

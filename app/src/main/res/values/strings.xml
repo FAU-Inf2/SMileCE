@@ -173,7 +173,7 @@
     shows you all kind of information about the certificate, will be started.</string>
 
     <string name="faq_delete_certificate_q">How can I delete a certificate?</string>
-    <string name="faq_delete_certificate">Longpress on the card will delete this certificate. You
+    <string name="faq_delete_certificate">Swipe the card from right to left will delete this certificate or open the popupmenue and select delete. You
         can also tap on the card to open the Activity which gives you additional information about the
         certificate and use the delete functionality in the toolbar.</string>
 

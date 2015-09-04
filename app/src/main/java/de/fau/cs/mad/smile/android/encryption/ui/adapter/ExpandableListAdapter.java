@@ -2,9 +2,6 @@ package de.fau.cs.mad.smile.android.encryption.ui.adapter;
 
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.util.Pair;
@@ -15,11 +12,13 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -42,17 +41,44 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition)).size();
+        int size = getGroupCount();
+        if(groupPosition < 0 || size < groupPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
+        String header = this.listDataHeader.get(groupPosition);
+        if(this.listDataChild.containsKey(header)) {
+            return this.listDataChild.get(header).size();
+        } else {
+            throw new IllegalArgumentException(header + " has no children.");
+        }
     }
 
     @Override
     public Object getGroup(int groupPosition) {
+        int size = getGroupCount();
+        if(groupPosition < 0 || size < groupPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
         return this.listDataHeader.get(groupPosition);
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition)).get(childPosition);
+        int groupSize = getGroupCount();
+        if(groupPosition < 0 || groupSize < groupPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
+        int childSize = getChildrenCount(groupPosition);
+        if(childPosition < 0 || childSize < childPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
+        String header = this.listDataHeader.get(groupPosition);
+        if(this.listDataChild.containsKey(header)) {
+            List<Pair<Integer, String[]>> child = this.listDataChild.get(header);
+            return child.get(childPosition);
+        } else {
+            throw new IllegalArgumentException(header + " has no children.");
+        }
     }
 
     @Override
@@ -90,43 +116,44 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         final Pair<Integer, String[]> item = (Pair<Integer, String[]>) getChild(groupPosition, childPosition);
-        if (item.first.equals((Integer.valueOf(0)))) {
-            LayoutInflater infalInflater = (LayoutInflater) this.context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.activity_help_list_item, parent, false);
+        LayoutInflater layoutInflater = (LayoutInflater) this.context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        String[] data;
+        switch (item.first) {
+            case 0:
+                convertView = layoutInflater.inflate(R.layout.activity_help_list_item, parent, false);
 
-            TextView listChild = (TextView) convertView.findViewById(R.id.listItem);
-            listChild.setText(item.second[0]);
-        } else if (item.first.equals((Integer.valueOf(1)))) {
-            LayoutInflater infalInflater = (LayoutInflater) this.context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.validity_circles, parent, false);
-            String[] data = item.second;
-            if (data.length == 6) {
-                ImageView validCircle0 = (ImageView) convertView.findViewById(R.id.valid_circle_0);
-                ImageView validCircle1 = (ImageView) convertView.findViewById(R.id.valid_circle_1);
-                ImageView validCircle2 = (ImageView) convertView.findViewById(R.id.valid_circle_2);
-                ImageView validCircle3 = (ImageView) convertView.findViewById(R.id.valid_circle_3);
-                ImageView validCircle4 = (ImageView) convertView.findViewById(R.id.valid_circle_4);
-                TextView text = (TextView) convertView.findViewById(R.id.valid_text);
-                validCircle0.getBackground().setColorFilter(getColorFilter(data[0]));
-                validCircle1.getBackground().setColorFilter(getColorFilter(data[1]));
-                validCircle2.getBackground().setColorFilter(getColorFilter(data[2]));
-                validCircle3.getBackground().setColorFilter(getColorFilter(data[3]));
-                validCircle4.getBackground().setColorFilter(getColorFilter(data[4]));
-                text.setText(data[5]);
-            }
-        } else if (item.first.equals((Integer.valueOf(2)))) {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.image_text, parent, false);
-            String[] data = item.second;
-            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_part);
-            imageView.setImageDrawable(context.getResources().getDrawable(Integer.parseInt(data[0])));
-            TextView text = (TextView) convertView.findViewById(R.id.text_part);
-            text.setText(data[1]);
-        } else {
-            Log.d(SMileCrypto.LOG_TAG, "This case shouldn't occur. Check if you forgot to add a new case.");
+                TextView listChild = (TextView) convertView.findViewById(R.id.listItem);
+                listChild.setText(item.second[0]);
+                break;
+            case 1:
+                convertView = layoutInflater.inflate(R.layout.validity_circles, parent, false);
+                data = item.second;
+                if (data.length == 6) {
+                    ImageView validCircle0 = (ImageView) convertView.findViewById(R.id.valid_circle_0);
+                    ImageView validCircle1 = (ImageView) convertView.findViewById(R.id.valid_circle_1);
+                    ImageView validCircle2 = (ImageView) convertView.findViewById(R.id.valid_circle_2);
+                    ImageView validCircle3 = (ImageView) convertView.findViewById(R.id.valid_circle_3);
+                    ImageView validCircle4 = (ImageView) convertView.findViewById(R.id.valid_circle_4);
+                    TextView text = (TextView) convertView.findViewById(R.id.valid_text);
+                    validCircle0.getBackground().setColorFilter(Utils.getColorFilter(data[0]));
+                    validCircle1.getBackground().setColorFilter(Utils.getColorFilter(data[1]));
+                    validCircle2.getBackground().setColorFilter(Utils.getColorFilter(data[2]));
+                    validCircle3.getBackground().setColorFilter(Utils.getColorFilter(data[3]));
+                    validCircle4.getBackground().setColorFilter(Utils.getColorFilter(data[4]));
+                    text.setText(data[5]);
+                }
+                break;
+            case 2:
+                convertView = layoutInflater.inflate(R.layout.image_text, parent, false);
+                data = item.second;
+                ImageView imageView = (ImageView) convertView.findViewById(R.id.image_part);
+                imageView.setImageDrawable(context.getResources().getDrawable(Integer.parseInt(data[0])));
+                TextView text = (TextView) convertView.findViewById(R.id.text_part);
+                text.setText(data[1]);
+                break;
+            default:
+                Log.d(SMileCrypto.LOG_TAG, "This case shouldn't occur. Check if you forgot to add a new case.");
         }
         return convertView;
     }
@@ -134,20 +161,5 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return false;
-    }
-
-    private ColorFilter getColorFilter(String color) {
-        int iColor = Color.parseColor(color);
-
-        int red = (iColor & 0xFF0000) / 0xFFFF;
-        int green = (iColor & 0xFF00) / 0xFF;
-        int blue = iColor & 0xFF;
-
-        float[] matrix = {0, 0, 0, 0, red
-                , 0, 0, 0, 0, green
-                , 0, 0, 0, 0, blue
-                , 0, 0, 0, 1, 0};
-
-        return new ColorMatrixColorFilter(matrix);
     }
 }
