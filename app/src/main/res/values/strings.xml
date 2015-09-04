@@ -173,7 +173,7 @@
     shows you all kind of information about the certificate, will be started.</string>
 
     <string name="faq_delete_certificate_q">How can I delete a certificate?</string>
-    <string name="faq_delete_certificate">Longpress on the card will delete this certificate. You
+    <string name="faq_delete_certificate">Swipe the card from right to left will delete this certificate or open the popupmenue and select delete. You
         can also tap on the card to open the Activity which gives you additional information about the
         certificate and use the delete functionality in the toolbar.</string>
 
@@ -273,6 +273,9 @@
     <string name="dec">Descending</string>
     <string name="sort_type_summary">Currently certificates are sorted by: %1$s</string>
     <string name="sort_type">Sort by</string>
+    <string name="delete_distance">Swipe to delete distance </string>
+    <string name="swipe_distance_summary">Currently you have to pull %1$d %% to activate swipe. </string>
+    <string name="share_distance">Swipe to share distance </string>
     <string name="valid">Expiration date</string>
     <string name="key_type">Has private key</string>
     <string name="type_name">Name</string>

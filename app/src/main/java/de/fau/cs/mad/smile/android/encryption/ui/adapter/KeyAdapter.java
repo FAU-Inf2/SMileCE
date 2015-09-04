@@ -6,26 +6,15 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -57,7 +46,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.App;
@@ -66,31 +54,13 @@ import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;
+import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 
 
 public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> implements SharedPreferences.OnSharedPreferenceChangeListener {
     private SortedList<KeyInfo> keylist;
     private Activity activity;
     private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-    private static List<Integer> materialColors = Arrays.asList(
-            0xffe57373,
-            0xfff06292,
-            0xffba68c8,
-            0xff9575cd,
-            0xff7986cb,
-            0xff64b5f6,
-            0xff4fc3f7,
-            0xff4dd0e1,
-            0xff4db6ac,
-            0xff81c784,
-            0xffaed581,
-            0xffff8a65,
-            0xffd4e157,
-            0xffffd54f,
-            0xffffb74d,
-            0xffa1887f,
-            0xff90a4ae
-    );
 
     public void switchCards(List<KeyInfo> cardsFiltered) {
         keylist.clear();
@@ -280,47 +250,47 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             Months months = Months.monthsBetween(today, valid);
 
             if (valid.getMillis() <= today.getMillis()) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#ff0000"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#ff0000"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
             } else if (keyInfo.getValidAfter().getMillis() > today.getMillis()) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#0000ff"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#0000ff"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#0000ff"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#0000ff"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#0000ff"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
             } else if (years.getYears() > 1 || (years.getYears() == 1 && months.getMonths() > 0)) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#00ff00"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
             } else if (months.getMonths() > 5) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#00ff00"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
             } else if (months.getMonths() > 2) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#FFA500"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#FFA500"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#FFA500"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
             } else if (months.getMonths() > 0) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#FFA500"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#FFA500"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
             } else if (valid.getMillis() > today.getMillis()) {
-                holder.validCircle0.getBackground().setColorFilter(getColorFilter("#FFA500"));
-                holder.validCircle1.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle2.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle3.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(getColorFilter("#d3d3d3"));
+                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
+                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
             }
         }
         setContactBadge(keyInfo.getMail(), holder, keyInfo);
@@ -361,12 +331,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         holder.swipe.addRevealListener(R.id.delete, new SwipeLayout.OnRevealListener() {
             @Override
             public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+                float deleteDistance = sharedPreferences.getInt("delete_distance", 30) / 100.0f;
                 if (dragEdge != SwipeLayout.DragEdge.Right) {
                     return;
                 }
-                if (v <= 0.3 && holder.delete_icon.isShown()) {
+                if (v <= deleteDistance && holder.delete_icon.isShown()) {
                     holder.delete_icon.setVisibility(View.INVISIBLE);
-                } else if (v > 0.3 && !holder.delete_icon.isShown()) {
+                } else if (v > deleteDistance && !holder.delete_icon.isShown()) {
                     holder.delete_icon.setVisibility(View.VISIBLE);
                 }
             }
@@ -374,31 +345,17 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         holder.swipe.addRevealListener(R.id.share, new SwipeLayout.OnRevealListener() {
             @Override
             public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+                float shareDistance = sharedPreferences.getInt("share_distance", 20) / 100.0f;
                 if (dragEdge != SwipeLayout.DragEdge.Left) {
                     return;
                 }
-                if (v <= 0.2 && holder.share_icon.isShown()) {
+                if (v <= shareDistance && holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.INVISIBLE);
-                } else if (v > 0.2 && !holder.share_icon.isShown()) {
+                } else if (v > shareDistance && !holder.share_icon.isShown()) {
                     holder.share_icon.setVisibility(View.VISIBLE);
                 }
             }
         });
-    }
-
-    private ColorFilter getColorFilter(String color) {
-        int iColor = Color.parseColor(color);
-
-        int red = (iColor & 0xFF0000) / 0xFFFF;
-        int green = (iColor & 0xFF00) / 0xFF;
-        int blue = iColor & 0xFF;
-
-        float[] matrix = {0, 0, 0, 0, red
-                , 0, 0, 0, 0, green
-                , 0, 0, 0, 0, blue
-                , 0, 0, 0, 1, 0};
-
-        return new ColorMatrixColorFilter(matrix);
     }
 
     @Override
@@ -427,71 +384,6 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         if (position >= 0 && position < getItemCount()) {
             keylist.removeItemAt(position);
         }
-    }
-
-    private Bitmap getCroppedBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
-        //return _bmp;
-        return output;
-    }
-
-    private Bitmap generateCircleBitmap(int circleColor, float diameterDP, String text) {
-        /**
-         *
-         * http://stackoverflow.com/questions/31168636/rounded-quickcontactbadge-with-text
-         */
-        final int textColor = 0xffffffff;
-
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        float diameterPixels = diameterDP * (metrics.densityDpi / 160f);
-        float radiusPixels = diameterPixels / 2;
-
-        // Create the bitmap
-        Bitmap output = Bitmap.createBitmap((int) diameterPixels, (int) diameterPixels, Bitmap.Config.ARGB_8888);
-
-        // Create the canvas to draw on
-        Canvas canvas = new Canvas(output);
-        canvas.drawARGB(0, 0, 0, 0);
-
-        // Draw the circle
-        final Paint paintC = new Paint();
-        paintC.setAntiAlias(true);
-        paintC.setColor(circleColor);
-        canvas.drawCircle(radiusPixels, radiusPixels, radiusPixels, paintC);
-
-        // Draw the text
-        if (text != null && text.length() > 0) {
-            final Paint paintT = new Paint();
-            paintT.setColor(textColor);
-            paintT.setAntiAlias(true);
-            paintT.setTextSize(radiusPixels * 2);
-            paintT.setTypeface(Typeface.SANS_SERIF);
-            final Rect textBounds = new Rect();
-            paintT.getTextBounds(text, 0, text.length(), textBounds);
-            canvas.drawText(text, radiusPixels - textBounds.exactCenterX(), radiusPixels - textBounds.exactCenterY(), paintT);
-        }
-
-        return output;
-    }
-
-    private int getMaterialColor(Object key) {
-        return materialColors.get(Math.abs(key.hashCode()) % materialColors.size());
     }
 
     private void setContactBadge(final String email, KeyViewHolder holder, KeyInfo keyInfo) {
@@ -525,7 +417,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         if (thumb != null && thumb.length() > 0) {
             InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(App.getContext().getContentResolver(), lookupUri, false);
-            Bitmap bmp = getCroppedBitmap(BitmapFactory.decodeStream(input));
+            Bitmap bmp = Utils.getCroppedBitmap(BitmapFactory.decodeStream(input));
             BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), bmp);
             holder.contactimage.setBackground(bdrawable);
             Log.d(SMileCrypto.LOG_TAG, "Thumbnail found.");
@@ -545,7 +437,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 }
             }
 
-            BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), generateCircleBitmap(getMaterialColor(initial), 42, initial));
+            BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), Utils.generateCircleBitmap(Utils.getMaterialColor(initial), 42, initial));
             holder.contactimage.setBackground(bdrawable);
         }
 
