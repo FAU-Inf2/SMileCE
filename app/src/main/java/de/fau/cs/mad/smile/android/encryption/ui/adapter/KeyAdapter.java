@@ -6,9 +6,11 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -203,7 +205,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
             @Override
             public boolean areContentsTheSame(KeyInfo oldItem, KeyInfo newItem) {
-                return oldItem.getContact().equals(newItem.getContact()) && oldItem.getMail().equals(newItem.getMail()) && oldItem.getTerminationDate().equals(newItem.getTerminationDate());
+                if(oldItem == null || newItem == null) {
+                    return false;
+                }
+                int contact = oldItem.compareName(newItem);
+                int email = oldItem.compareMail(newItem);
+                int date = oldItem.compareTermination(newItem);
+                return contact == 0 && email == 0 && date == 0;
             }
 
             @Override
@@ -249,50 +257,39 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             Years years = Years.yearsBetween(today, valid);
             Months months = Months.monthsBetween(today, valid);
 
+            int config = 0;
+
             if (valid.getMillis() <= today.getMillis()) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#ff0000"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                config = 7;
             } else if (keyInfo.getValidAfter().getMillis() > today.getMillis()) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#0000ff"));
+                config = 1;
             } else if (years.getYears() > 1 || (years.getYears() == 1 && months.getMonths() > 0)) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
+                config = 2;
             } else if (months.getMonths() > 5) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#00ff00"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                config = 3;
             } else if (months.getMonths() > 2) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                config = 4;
             } else if (months.getMonths() > 0) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                config = 5;
             } else if (valid.getMillis() > today.getMillis()) {
-                holder.validCircle0.getBackground().setColorFilter(Utils.getColorFilter("#FFA500"));
-                holder.validCircle1.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle2.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle3.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
-                holder.validCircle4.getBackground().setColorFilter(Utils.getColorFilter("#d3d3d3"));
+                config = 6;
+            }
+            if(config != 0) {
+                List<TypedArray> colours = Utils.getMultiTypedArray(App.getContext(), "meaning_colour");
+                TypedArray colour = colours.get(config);
+                ColorFilter circleFilter1 = Utils.getColorFilter(colour.getString(1));
+                ColorFilter circleFilter2 = Utils.getColorFilter(colour.getString(2));
+                ColorFilter circleFilter3 = Utils.getColorFilter(colour.getString(3));
+                ColorFilter circleFilter4 = Utils.getColorFilter(colour.getString(4));
+                ColorFilter circleFilter5 = Utils.getColorFilter(colour.getString(5));
+                holder.validCircle0.getBackground().setColorFilter(circleFilter1);
+                holder.validCircle1.getBackground().setColorFilter(circleFilter2);
+                holder.validCircle2.getBackground().setColorFilter(circleFilter3);
+                holder.validCircle3.getBackground().setColorFilter(circleFilter4);
+                holder.validCircle4.getBackground().setColorFilter(circleFilter5);
             }
         }
+
         setContactBadge(keyInfo.getMail(), holder, keyInfo);
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
