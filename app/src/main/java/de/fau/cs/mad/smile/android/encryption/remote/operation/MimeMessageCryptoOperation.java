@@ -3,6 +3,7 @@ package de.fau.cs.mad.smile.android.encryption.remote.operation;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import org.apache.commons.io.FilenameUtils;
 import org.spongycastle.cms.CMSException;
@@ -21,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.util.concurrent.ExecutionException;
 
 import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.CryptoParams;
 import de.fau.cs.mad.smile.android.encryption.remote.MimeMessageLoaderTaskBuilder;
 import de.fau.cs.mad.smime_api.SMimeApi;
@@ -39,13 +41,15 @@ public abstract class MimeMessageCryptoOperation extends CryptoOperation<MimeMes
         final MimeMessage source = preProcess();
         final CryptoParams cryptoParams = cryptoParamsLoaderTask.get();
         final MimeMessage processed = process(source, cryptoParams);
-        if(processed != null) {
+        if(processed != null && outputStream != null) {
             copyHeaders(source, processed);
             processed.saveChanges();
             final File targetFile = getOutputFile();
             processed.writeTo(new FileOutputStream(targetFile));
             processed.writeTo(outputStream);
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
+        } else {
+            Log.wtf(SMileCrypto.LOG_TAG, "processed or outputstream was null, cannot write to output");
         }
     }
 }

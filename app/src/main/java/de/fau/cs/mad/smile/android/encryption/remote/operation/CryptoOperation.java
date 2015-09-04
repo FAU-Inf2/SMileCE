@@ -57,7 +57,9 @@ public abstract class CryptoOperation<T> implements Closeable {
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
             NoSuchProviderException, AddressException {
         identity = data.getStringExtra(SMimeApi.EXTRA_IDENTITY);
-        otherParty = Arrays.asList(data.getStringArrayExtra(SMimeApi.EXTRA_OTHERPARTY));
+
+        String[] tmp = data.getStringArrayExtra(SMimeApi.EXTRA_OTHERPARTY);
+        otherParty = Arrays.asList(tmp);
         inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
 
         if (output != null) {
@@ -108,7 +110,10 @@ public abstract class CryptoOperation<T> implements Closeable {
 
     @Override
     public void close() throws IOException {
-        getInputStream().close();
+        if(inputStream != null) {
+            inputStream.close();
+        }
+
         if (outputStream != null) {
             outputStream.close();
         }
