@@ -16,9 +16,11 @@ import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.x500.style.BCStyle;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.App;
@@ -29,6 +31,39 @@ import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
  * Collection of usefull static methods.
  */
 public class Utils {
+
+    public static final ASN1ObjectIdentifier[] asn1ObjectIdentifiers = {
+            BCStyle.CN,
+            BCStyle.E,
+            BCStyle.T,
+            BCStyle.INITIALS,
+            BCStyle.GENDER,
+            BCStyle.GIVENNAME,
+            BCStyle.NAME_AT_BIRTH,
+            BCStyle.PSEUDONYM,
+            BCStyle.SURNAME,
+            BCStyle.UID,
+            BCStyle.DATE_OF_BIRTH,
+            BCStyle.TELEPHONE_NUMBER,
+            BCStyle.GENERATION,
+            BCStyle.BUSINESS_CATEGORY,
+            BCStyle.O,
+            BCStyle.OU,
+            BCStyle.COUNTRY_OF_CITIZENSHIP,
+            BCStyle.COUNTRY_OF_RESIDENCE,
+            BCStyle.PLACE_OF_BIRTH,
+            BCStyle.C,
+            BCStyle.ST,
+            BCStyle.L,
+            BCStyle.STREET,
+            BCStyle.POSTAL_ADDRESS,
+            BCStyle.POSTAL_CODE,
+            BCStyle.DC,
+            BCStyle.DMD_NAME,
+            BCStyle.DN_QUALIFIER,
+            BCStyle.SN,
+            BCStyle.UNIQUE_IDENTIFIER
+    };
 
     public static ColorFilter getColorFilter(String color) {
         int iColor = Color.parseColor(color);

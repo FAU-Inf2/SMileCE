@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,17 +37,44 @@ public class ExpandableCertificateListAdapter extends BaseExpandableListAdapter 
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition)).size();
+        int size = getGroupCount();
+        if(groupPosition < 0 || size < groupPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
+        String header = this.listDataHeader.get(groupPosition);
+        if(this.listDataChild.containsKey(header)) {
+            return this.listDataChild.get(header).size();
+        } else {
+            throw new IllegalArgumentException(header + " has no children.");
+        }
     }
 
     @Override
     public Object getGroup(int groupPosition) {
+        int size = getGroupCount();
+        if(groupPosition < 0 || size < groupPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
         return this.listDataHeader.get(groupPosition);
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition)).get(childPosition);
+        int groupSize = getGroupCount();
+        if(groupPosition < 0 || groupSize < groupPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
+        int childSize = getChildrenCount(groupPosition);
+        if(childPosition < 0 || childSize < childPosition) {
+            throw new IllegalArgumentException("Position not available." );
+        }
+        String header = this.listDataHeader.get(groupPosition);
+        if(this.listDataChild.containsKey(header)) {
+            List<AbstractCertificateInfoItem> children = this.listDataChild.get(header);
+            return children.get(childPosition);
+        } else {
+            throw new IllegalArgumentException(header + " has no children.");
+        }
     }
 
     @Override

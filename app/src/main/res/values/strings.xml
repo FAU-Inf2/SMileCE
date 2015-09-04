@@ -306,5 +306,6 @@
     <string name="faq_expert_mode_q">What is \"expert mode\" in Create Certificate?</string>
     <string name="faq_expert_mode">You can use a formatted string to enter your certificate date.\nFor example: \"CN=Max Muster, E=max.muster@firm.org, O=Firm".\nThis will set the name to Max Muster, the email address to \"max.muster@firm.org\" and the organisation to \"Firm\".</string>
     <string name="start_creation">Started certificate creation. This may take a while.</string>
+    <string name="failed_extract">Failed to extract personal information.</string>
 </resources>
 
