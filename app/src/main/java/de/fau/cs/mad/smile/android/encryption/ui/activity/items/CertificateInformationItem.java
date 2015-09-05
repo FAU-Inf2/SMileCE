@@ -1,4 +1,4 @@
-package de.fau.cs.mad.smile.android.encryption.ui;
+package de.fau.cs.mad.smile.android.encryption.ui.activity.items;
 
 import android.content.Context;
 import android.view.LayoutInflater;

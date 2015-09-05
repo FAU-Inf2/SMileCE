@@ -31,7 +31,7 @@ import de.fau.cs.mad.smile.android.encryption.KeyInfo;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
-import de.fau.cs.mad.smile.android.encryption.ui.DividerItemDecoration;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.DividerItemDecoration;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.RecyclerViewAdapter;
 
