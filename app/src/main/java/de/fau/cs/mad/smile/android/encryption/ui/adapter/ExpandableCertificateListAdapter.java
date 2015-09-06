@@ -9,12 +9,11 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.R;
-import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.AbstractCertificateInfoItem;
 
 public class ExpandableCertificateListAdapter extends BaseExpandableListAdapter {
 

@@ -283,4 +283,16 @@
         <item>@string/UI</item>
     </string-array>
 
+    <string-array name="dateSearchFormats">
+        <item>G C Y x w e E yy yyyy D M MM MMM MMMM d</item>
+        <item>dd.MM.yy</item>
+        <item>dd.MM.yyyy</item>
+        <item>d.MM.yy</item>
+        <item>d.MM.yyyy</item>
+        <item>dd.M.yyyy</item>
+        <item>d.M.yy</item>
+        <item>yyyy-MM-dd</item>
+        <item>yyyy-MM-d</item>
+    </string-array>
+
 </resources>

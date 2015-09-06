@@ -131,12 +131,11 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         }
     }
 
-    private class oncClickCreatePopup implements PopupMenu.OnMenuItemClickListener, View.OnClickListener {
+    private class onClickCreatePopup implements PopupMenu.OnMenuItemClickListener, View.OnClickListener {
+        private KeyInfo keyInfo;
 
-        private int position;
-
-        public oncClickCreatePopup(int position) {
-            this.position = position;
+        public onClickCreatePopup(KeyInfo keyInfo) {
+            this.keyInfo = keyInfo;
         }
 
         @Override
@@ -151,14 +150,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            KeyInfo keyInfo = keylist.get(position);
             int id = item.getItemId();
             boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
             if (id == R.id.delete) {
                 if (own) {
-                    deleteOwnCertificate(keyInfo, position);
+                    deleteOwnCertificate(keyInfo);
                 } else {
-                    deleteOtherCertificate(keyInfo, position);
+                    deleteOtherCertificate(keyInfo);
                 }
             } else if (id == R.id.export) {
                 if (own) {
@@ -234,6 +232,8 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         return new KeyViewHolder(itemView);
     }
 
+
+
     @Override
     public void onBindViewHolder(final KeyViewHolder holder, final int position) {
         final KeyInfo keyInfo = keylist.get(position);
@@ -299,60 +299,15 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 activity.startActivity(i);
             }
         });
-        holder.contextButton.setOnClickListener(new oncClickCreatePopup(position));
-        holder.swipe.addSwipeListener(new SimpleSwipeListener() {
-            @Override
-            public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
-                layout.setDragDistance(0);
-                boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
-                if (holder.delete_icon.isShown()) {
-                    holder.delete_icon.setVisibility(View.INVISIBLE);
-                    if (own) {
-                        deleteOwnCertificate(keyInfo, position);
-                    } else {
-                        deleteOtherCertificate(keyInfo, position);
-                    }
-                }
+        holder.contextButton.setOnClickListener(new onClickCreatePopup(keyInfo));
+        holder.swipe.addSwipeListener(new ExecuteSwipe(keyInfo));
+        holder.swipe.addRevealListener(R.id.delete, new DeleteRevealListener());
+        holder.swipe.addRevealListener(R.id.share, new ShareRevealListener());
+    }
 
-                if (holder.share_icon.isShown()) {
-                    holder.share_icon.setVisibility(View.INVISIBLE);
-                    if (own) {
-                        shareOwnCertificate(keyInfo);
-                    } else {
-                        shareOtherCertificate(keyInfo);
-                    }
-                }
-                super.onHandRelease(layout, xvel, yvel);
-            }
-        });
-        holder.swipe.addRevealListener(R.id.delete, new SwipeLayout.OnRevealListener() {
-            @Override
-            public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
-                float deleteDistance = sharedPreferences.getInt("delete_distance", 30) / 100.0f;
-                if (dragEdge != SwipeLayout.DragEdge.Right) {
-                    return;
-                }
-                if (v <= deleteDistance && holder.delete_icon.isShown()) {
-                    holder.delete_icon.setVisibility(View.INVISIBLE);
-                } else if (v > deleteDistance && !holder.delete_icon.isShown()) {
-                    holder.delete_icon.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-        holder.swipe.addRevealListener(R.id.share, new SwipeLayout.OnRevealListener() {
-            @Override
-            public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
-                float shareDistance = sharedPreferences.getInt("share_distance", 20) / 100.0f;
-                if (dragEdge != SwipeLayout.DragEdge.Left) {
-                    return;
-                }
-                if (v <= shareDistance && holder.share_icon.isShown()) {
-                    holder.share_icon.setVisibility(View.INVISIBLE);
-                } else if (v > shareDistance && !holder.share_icon.isShown()) {
-                    holder.share_icon.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -447,7 +402,8 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         });
     }
 
-    private void deleteOwnCertificate(final KeyInfo keyInfo, final int position) {
+    private void deleteOwnCertificate(final KeyInfo keyInfo) {
+        final int position = getPosition(keyInfo);
         final KeyManagement keyManagement;
         try {
             keyManagement = KeyManagement.getInstance();
@@ -495,7 +451,8 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         builder.create().show();
     }
 
-    private void deleteOtherCertificate(final KeyInfo keyInfo, final int position) {
+    private void deleteOtherCertificate(final KeyInfo keyInfo) {
+        final int position = getPosition(keyInfo);
         final KeyManagement keyManagement;
         try {
             keyManagement = KeyManagement.getInstance();
@@ -609,6 +566,89 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             Uri uri = Uri.fromFile(new File((dst)));
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             activity.startActivity(shareIntent);
+        }
+    }
+
+    /**
+     * Returns items position in the list.
+     * @param item The Key info to search.
+     * @return The index in the list.
+     */
+    private int getPosition(KeyInfo item) {
+        return keylist.indexOf(item);
+    }
+
+    /**
+     * Detect share swipe.
+     */
+    private class ShareRevealListener implements SwipeLayout.OnRevealListener {
+
+        @Override
+        public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+            View share_icon = view.findViewById(R.id.share_icon);
+            float shareDistance = sharedPreferences.getInt("share_distance", 20) / 100.0f;
+            if (dragEdge != SwipeLayout.DragEdge.Left) {
+                return;
+            }
+            if (v <= shareDistance && share_icon.isShown()) {
+                share_icon.setVisibility(View.INVISIBLE);
+            } else if (v > shareDistance && !share_icon.isShown()) {
+                share_icon.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    /**
+     * Detect delete swipe
+     */
+    private class DeleteRevealListener implements SwipeLayout.OnRevealListener {
+
+        @Override
+        public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+            View delete_icon = view.findViewById(R.id.delete_icon);
+            float deleteDistance = sharedPreferences.getInt("delete_distance", 30) / 100.0f;
+            if (dragEdge != SwipeLayout.DragEdge.Right) {
+                return;
+            }
+            if (v <= deleteDistance && delete_icon.isShown()) {
+                delete_icon.setVisibility(View.INVISIBLE);
+            } else if (v > deleteDistance && !delete_icon.isShown()) {
+                delete_icon.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private class ExecuteSwipe extends SimpleSwipeListener {
+        private KeyInfo keyInfo;
+
+        public ExecuteSwipe(KeyInfo keyInfo) {
+            this.keyInfo = keyInfo;
+        }
+
+        @Override
+        public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
+            layout.setDragDistance(0);
+            boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
+            View delete_icon = layout.findViewById(R.id.delete_icon);
+            View share_icon = layout.findViewById(R.id.share_icon);
+            if (delete_icon.isShown()) {
+                delete_icon.setVisibility(View.INVISIBLE);
+                if (own) {
+                    deleteOwnCertificate(keyInfo);
+                } else {
+                    deleteOtherCertificate(keyInfo);
+                }
+            }
+
+            if (share_icon.isShown()) {
+                share_icon.setVisibility(View.INVISIBLE);
+                if (own) {
+                    shareOwnCertificate(keyInfo);
+                } else {
+                    shareOtherCertificate(keyInfo);
+                }
+            }
+            super.onHandRelease(layout, xvel, yvel);
         }
     }
 }

@@ -1,5 +1,8 @@
 package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +17,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -31,6 +35,9 @@ import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
 
+/**
+ * Display all certificates. User can use a search bar to find certificates.
+ */
 public class SearchActivity extends ActionBarActivity {
     private KeyAdapter adapter;
     private KeyManagement keyManager;
@@ -65,7 +72,8 @@ public class SearchActivity extends ActionBarActivity {
         try {
             keyManager = KeyManagement.getInstance();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) { // TODO: display error message and die
-            e.printStackTrace();
+            Log.e(SMileCrypto.LOG_TAG, "Error while getting KeyManagement instance. " + e.getMessage());
+            showErrorPrompt();
         }
 
         cards = keyManager.getAllCertificates();
@@ -122,6 +130,9 @@ public class SearchActivity extends ActionBarActivity {
         super.onResume();
     }
 
+    /**
+     * Listen for user input.
+     */
     private class SearchWatcher implements TextWatcher {
 
         @Override
@@ -148,19 +159,47 @@ public class SearchActivity extends ActionBarActivity {
 
     }
 
+    /**
+     * Search fpr certificates matching a given string.
+     * @param cardList The certificates to search.
+     * @param query The string to search after.
+     * @return A list containing all matches.
+     */
     private ArrayList<KeyInfo> performSearch(List<KeyInfo> cardList, String query) {
         String[] queryByWords = query.toLowerCase().split("\\s+");
 
         ArrayList<KeyInfo> cardsFiltered = new ArrayList<KeyInfo>();
 
         for (KeyInfo ki : cardList) {
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy");
-            String content = (
-                    ki.getContact() + " " +
-                            ki.getMail() + " " +
-                            ki.getTerminationDate().toString(fmt) + " " +
-                            ki.getValidAfter().toString(fmt)
-            ).toLowerCase();
+            StringBuilder stringBuilder = new StringBuilder();
+            Resources res = getResources();
+            for (String fmt : res.getStringArray(R.array.dateSearchFormats)) {
+                DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(fmt);
+                DateTime termination = ki.getTerminationDate();
+                if (termination != null) {
+                    stringBuilder.append(termination.toString(dateTimeFormatter));
+                }
+                stringBuilder.append(" ");
+                DateTime validAfter = ki.getValidAfter();
+                if (validAfter != null) {
+                    stringBuilder.append(validAfter.toString(dateTimeFormatter));
+                }
+                stringBuilder.append(" ");
+            }
+
+            String mail = ki.getMail();
+            if (mail != null) {
+                stringBuilder.append(mail);
+                stringBuilder.append(" ");
+            }
+
+            String name = ki.getContact();
+            if(name != null) {
+                stringBuilder.append(name);
+                stringBuilder.append(" ");
+            }
+
+            String content = stringBuilder.toString().toLowerCase();
 
             int numberOfMatches = queryByWords.length;
 
@@ -185,5 +224,22 @@ public class SearchActivity extends ActionBarActivity {
         }
 
         return cardsFiltered;
+    }
+
+    /**
+     * Show prompt for internal errors.
+     */
+    private void showErrorPrompt() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        builder.setMessage(getResources().getString(R.string.internal_error));
+        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+        builder.create().show();
     }
 }

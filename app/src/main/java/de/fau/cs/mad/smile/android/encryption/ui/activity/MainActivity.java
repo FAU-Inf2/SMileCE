@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import org.joda.time.DateTime;
+
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -31,7 +33,8 @@ import de.fau.cs.mad.smile.android.encryption.KeyInfo;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
-import de.fau.cs.mad.smile.android.encryption.ui.DividerItemDecoration;
+import de.fau.cs.mad.smile.android.encryption.crypto.SelfSignedCertificateCreator;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.DividerItemDecoration;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.RecyclerViewAdapter;
 

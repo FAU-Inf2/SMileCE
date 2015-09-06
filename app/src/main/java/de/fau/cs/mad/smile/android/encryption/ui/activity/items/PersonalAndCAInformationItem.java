@@ -1,23 +1,22 @@
-package de.fau.cs.mad.smile.android.encryption.ui;
+package de.fau.cs.mad.smile.android.encryption.ui.activity.items;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.R;
 
-public class PersonalInformationItem extends AbstractCertificateInfoItem {
+/**
+ * Represents personal and CA information
+ */
+public class PersonalAndCAInformationItem extends AbstractCertificateInfoItem {
     private LinkedHashMap<String, String[]> data;
 
     public void buildComplex(LinkedHashMap<String, String[]> data) {

@@ -3,7 +3,6 @@ package de.fau.cs.mad.smile.android.encryption.ui.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,10 +14,8 @@ import android.widget.Toast;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.spongycastle.asn1.ASN1ObjectIdentifier;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
-import org.spongycastle.asn1.x500.style.BCStyle;
 import org.spongycastle.asn1.x500.style.IETFUtils;
 import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
@@ -31,21 +28,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
-import de.fau.cs.mad.smile.android.encryption.ui.AbstractCertificateInfoItem;
-import de.fau.cs.mad.smile.android.encryption.ui.CertificateInformationItem;
-import de.fau.cs.mad.smile.android.encryption.ui.CryptographicInformationItem;
-import de.fau.cs.mad.smile.android.encryption.ui.PersonalInformationItem;
-import de.fau.cs.mad.smile.android.encryption.ui.ValidityItem;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.AbstractCertificateInfoItem;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.CertificateInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.CryptographicInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.PersonalAndCAInformationItem;
+import de.fau.cs.mad.smile.android.encryption.ui.activity.items.ValidityItem;
 import de.fau.cs.mad.smile.android.encryption.ui.adapter.ExpandableCertificateListAdapter;
 import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 
+
+/**
+ * Display extended information about a certificate.
+ */
 public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private Toolbar toolbar;
     private String name;
@@ -60,6 +60,10 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         Log.d(SMileCrypto.LOG_TAG, "Started DisplayCertificateInformationActivity.");
         Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            Log.e(SMileCrypto.LOG_TAG, "intent was null.");
+            showErrorPrompt();
+        }
         this.alias = extras.getString("Alias");
         if (this.alias == null) {
             Log.e(SMileCrypto.LOG_TAG, "Called without alias.");
@@ -112,6 +116,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Get the key info representing the certificate with the specified alias.
+     */
     private void getKeyInfo() {
         try {
             KeyManagement keyManagement = KeyManagement.getInstance();
@@ -124,6 +131,10 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Extract certificate information for display.
+     * @param keyInfo The key info representing the certificate.
+     */
     private void extractCertificateInformation(KeyInfo keyInfo) {
         if (this.name == null) {
             this.name = keyInfo.getContact();
@@ -131,14 +142,22 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             toolbar.setTitle(this.name);
             setSupportActionBar(toolbar);
         }
-        generatePersonalInformation(keyInfo);
-    }
-
-    private void generatePersonalInformation(KeyInfo keyInfo) {
-        Log.d(SMileCrypto.LOG_TAG, "Setting personal information");
         listDataHeader = new ArrayList<>();
         listDataHeader.add(getString(R.string.personal));
         listDataChild = new HashMap<>();
+        generatePersonalInformation(keyInfo);
+        generateCaInformation(keyInfo);
+        generateValidityInformation(keyInfo);
+        generatingCertificateInformation(keyInfo);
+        generateCryptographicInformation(keyInfo);
+    }
+
+    /**
+     * Extract personal information.
+     * @param keyInfo The key info representing the certificate
+     */
+    private void generatePersonalInformation(KeyInfo keyInfo) {
+        Log.d(SMileCrypto.LOG_TAG, "Setting personal information");
         LinkedHashMap<String, String[]> data = new LinkedHashMap<>();
         X509Certificate certificate = keyInfo.getCertificate();
         if (certificate == null) {
@@ -150,7 +169,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             x500name = new JcaX509CertificateHolder(certificate).getSubject();
             parseX500Name(data, x500name);
             ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
-            PersonalInformationItem persI = new PersonalInformationItem();
+            PersonalAndCAInformationItem persI = new PersonalAndCAInformationItem();
             persI.buildComplex(data);
             pers.add(persI);
             listDataChild.put(listDataHeader.get(0), pers);
@@ -158,48 +177,13 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
             Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
         }
-        listDataHeader.add(getString(R.string.CA));
-        LinkedHashMap<String, String[]> cadata = new LinkedHashMap<>();
+    }
 
-        try {
-            x500name = new JcaX509CertificateHolder(certificate).getIssuer();
-            parseX500Name(cadata, x500name);
-            ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
-            PersonalInformationItem persI = new PersonalInformationItem();
-            persI.buildComplex(cadata);
-            pers.add(persI);
-            listDataChild.put(listDataHeader.get(1), pers);
-        } catch (CertificateEncodingException e) {
-            Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
-            Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
-        }
-
-        Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
-        listDataHeader.add(getString(R.string.validity));
-        HashMap<String, String> validity = new HashMap<>();
-        validity.put("Startdate", keyInfo.getValidAfter().toString(fmt));
-        validity.put("Enddate", keyInfo.getTerminationDate().toString(fmt));
-        ArrayList<AbstractCertificateInfoItem> val = new ArrayList<>();
-        ValidityItem validityItem = new ValidityItem();
-        validityItem.build(validity);
-        val.add(validityItem);
-        listDataChild.put(listDataHeader.get(2), val);
-
-
-        Log.d(SMileCrypto.LOG_TAG, "Setting certificate information");
-        listDataHeader.add(getString(R.string.certificate));
-        HashMap<String, String> certificateInfo = new HashMap<>();
-        certificateInfo.put("Thumbprint", keyInfo.getThumbprint());
-        BigInteger serialNumber = keyInfo.getCertificate().getSerialNumber();
-        certificateInfo.put("Serial number", serialNumber.toString(16));
-        certificateInfo.put("Version", Integer.toString(keyInfo.getCertificate().getVersion()));
-        ArrayList<AbstractCertificateInfoItem> cert = new ArrayList<>();
-        CertificateInformationItem certificateInformationItem = new CertificateInformationItem();
-        certificateInformationItem.build(certificateInfo);
-        cert.add(certificateInformationItem);
-        listDataChild.put(listDataHeader.get(3), cert);
-
+    /**
+     * Extract cryptographic information.
+     * @param keyInfo The key info representing the certificate
+     */
+    private void generateCryptographicInformation(KeyInfo keyInfo) {
         Log.d(SMileCrypto.LOG_TAG, "Setting cryptographic information");
         listDataHeader.add(getString(R.string.cryptographic));
         HashMap<String, String> cryptographicInfo = new HashMap<>();
@@ -224,15 +208,75 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         cryptographicInformationItem.build(cryptographicInfo);
         crypto.add(cryptographicInformationItem);
         listDataChild.put(listDataHeader.get(4), crypto);
-
-        /*
-        * · Personal: Name, Email, SubjectDN
-        · Validity: start date, end date
-        · Certificate: Version, Serial Number, Thumbprint
-        · Issuer: IssuerDN (splitted)
-        · Cryptographic: Public Key, Signature algo, Signature */
     }
 
+    /**
+     * Extract certificate information.
+     * @param keyInfo The key info representing the certificate
+     */
+    private void generatingCertificateInformation(KeyInfo keyInfo) {
+        Log.d(SMileCrypto.LOG_TAG, "Setting certificate information");
+        listDataHeader.add(getString(R.string.certificate));
+        HashMap<String, String> certificateInfo = new HashMap<>();
+        certificateInfo.put("Thumbprint", keyInfo.getThumbprint());
+        BigInteger serialNumber = keyInfo.getCertificate().getSerialNumber();
+        certificateInfo.put("Serial number", serialNumber.toString(16));
+        certificateInfo.put("Version", Integer.toString(keyInfo.getCertificate().getVersion()));
+        ArrayList<AbstractCertificateInfoItem> cert = new ArrayList<>();
+        CertificateInformationItem certificateInformationItem = new CertificateInformationItem();
+        certificateInformationItem.build(certificateInfo);
+        cert.add(certificateInformationItem);
+        listDataChild.put(listDataHeader.get(3), cert);
+    }
+
+    /**
+     * Extract validity information.
+     * @param keyInfo The key info representing the certificate
+     */
+    private void generateValidityInformation(KeyInfo keyInfo) {
+        Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
+        listDataHeader.add(getString(R.string.validity));
+        HashMap<String, String> validity = new HashMap<>();
+        validity.put("Startdate", keyInfo.getValidAfter().toString(fmt));
+        validity.put("Enddate", keyInfo.getTerminationDate().toString(fmt));
+        ArrayList<AbstractCertificateInfoItem> val = new ArrayList<>();
+        ValidityItem validityItem = new ValidityItem();
+        validityItem.build(validity);
+        val.add(validityItem);
+        listDataChild.put(listDataHeader.get(2), val);
+    }
+
+    /**
+     * Extract ca information.
+     * @param keyInfo The key info representing the certificate
+     */
+    private void generateCaInformation(KeyInfo keyInfo) {
+        X500Name x500name;
+        Log.d(SMileCrypto.LOG_TAG, "Setting ca information");
+        X509Certificate certificate = keyInfo.getCertificate();
+        listDataHeader.add(getString(R.string.CA));
+        LinkedHashMap<String, String[]> cadata = new LinkedHashMap<>();
+
+        try {
+            x500name = new JcaX509CertificateHolder(certificate).getIssuer();
+            parseX500Name(cadata, x500name);
+            ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
+            PersonalAndCAInformationItem persI = new PersonalAndCAInformationItem();
+            persI.buildComplex(cadata);
+            pers.add(persI);
+            listDataChild.put(listDataHeader.get(1), pers);
+        } catch (CertificateEncodingException e) {
+            Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+            Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Extracts data from a X500Name. The searched fields are defined in utils.
+     * @param data The LinkedHashMap to fill with the extracted data.
+     * @param x500name The name to parse.
+     */
     private void parseX500Name(LinkedHashMap<String, String[]> data, X500Name x500name) {
         Resources res = getResources();
         String[] keys = res.getStringArray(R.array.info_keys);
@@ -248,6 +292,10 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Delete the key represented by a key info.
+     * @param keyInfo The certificate to be deleted.
+     */
     private void deleteKey(final KeyInfo keyInfo) {
         final KeyManagement keyManagement;
         try {
@@ -301,6 +349,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Export a certificate.
+     */
     private void exportCertificate() {
         Log.d(SMileCrypto.LOG_TAG, "Try to export certificate.");
         if (this.alias.contains("_own_")) {
@@ -313,6 +364,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Helper to export certificates containing private keys.
+     */
     private void exportOwnCertificate() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(getString(R.string.alert_header_export));
@@ -340,6 +394,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         alertDialogBuilder.create().show();
     }
 
+    /**
+     * Helper to export public certificates.
+     */
     private void exportOtherCertificate() {
         String dst = KeyManagement.copyCertificateToSDCard(keyInfo.getCertificate(), alias);
         if (dst == null) {
@@ -351,6 +408,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Show prompt for internal errors.
+     */
     private void showErrorPrompt() {
         AlertDialog.Builder builder = new AlertDialog.Builder(DisplayCertificateInformationActivity.this);
         builder.setTitle(getResources().getString(R.string.error));

@@ -32,6 +32,9 @@ import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
  */
 public class Utils {
 
+    /**
+     * All possible identifiers used in X500 certificates.
+     */
     public static final ASN1ObjectIdentifier[] asn1ObjectIdentifiers = {
             BCStyle.CN,
             BCStyle.E,
@@ -65,6 +68,11 @@ public class Utils {
             BCStyle.UNIQUE_IDENTIFIER
     };
 
+    /**
+     * Generate a color filter with a given color.
+     * @param color The color the filter represents.
+     * @return A color filter that can be used to set background colors of image views.
+     */
     public static ColorFilter getColorFilter(String color) {
         int iColor = Color.parseColor(color);
 
