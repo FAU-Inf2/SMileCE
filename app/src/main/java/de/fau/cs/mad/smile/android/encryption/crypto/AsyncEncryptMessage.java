@@ -7,11 +7,13 @@ import org.spongycastle.cms.CMSAlgorithm;
 import org.spongycastle.cms.RecipientInfoGenerator;
 import org.spongycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.spongycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.spongycastle.operator.OutputEncryptor;
 
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Properties;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
@@ -25,11 +27,11 @@ public class AsyncEncryptMessage extends AsyncTask<Void, Void, MimeMessage> {
     }
 
     private final MimeMessage mimeMessage;
-    private final X509Certificate certificate;
+    private final List<X509Certificate> certificates;
 
-    public AsyncEncryptMessage(final MimeMessage mimeMessage, final X509Certificate certificate) {
+    public AsyncEncryptMessage(final MimeMessage mimeMessage, final List<X509Certificate> certificates) {
         this.mimeMessage = mimeMessage;
-        this.certificate = certificate;
+        this.certificates = certificates;
     }
 
     @Override
@@ -40,8 +42,10 @@ public class AsyncEncryptMessage extends AsyncTask<Void, Void, MimeMessage> {
     private MimeMessage encryptMessage() {
         SMIMEEnvelopedGenerator envelopedGenerator = new SMIMEEnvelopedGenerator();
         try {
-            RecipientInfoGenerator recipientInfoGen = new JceKeyTransRecipientInfoGenerator(certificate);
-            envelopedGenerator.addRecipientInfoGenerator(recipientInfoGen);
+            for(X509Certificate certificate : certificates) {
+                RecipientInfoGenerator recipientInfoGen = new JceKeyTransRecipientInfoGenerator(certificate);
+                envelopedGenerator.addRecipientInfoGenerator(recipientInfoGen);
+            }
 
             OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(
                     CMSAlgorithm.AES256_CBC).build();

@@ -2,14 +2,18 @@ package de.fau.cs.mad.smile.android.encryption.remote.operation;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.spongycastle.cms.CMSException;
 import org.spongycastle.mail.smime.SMIMEException;
 import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.x509.CertPathReviewerException;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +23,14 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.crypto.CryptoParams;
 import de.fau.cs.mad.smile.android.encryption.crypto.CryptoParamsLoaderTask;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
@@ -34,7 +43,7 @@ import korex.mail.internet.InternetAddress;
 import korex.mail.internet.MimeMessage;
 
 public abstract class CryptoOperation<T> implements Closeable {
-    protected final String otherParty;
+    protected final List<String> otherParty;
     protected final String identity;
     private final InputStream inputStream;
     protected final OutputStream outputStream;
@@ -48,7 +57,9 @@ public abstract class CryptoOperation<T> implements Closeable {
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
             NoSuchProviderException, AddressException {
         identity = data.getStringExtra(SMimeApi.EXTRA_IDENTITY);
-        otherParty = data.getStringExtra(SMimeApi.EXTRA_OTHERPARTY);
+
+        String[] tmp = data.getStringArrayExtra(SMimeApi.EXTRA_OTHERPARTY);
+        otherParty = Arrays.asList(tmp);
         inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
 
         if (output != null) {
@@ -76,9 +87,11 @@ public abstract class CryptoOperation<T> implements Closeable {
             identityAddress = new InternetAddress(identity);
         }
 
-        InternetAddress otherPartyAddress = null;
+        List<InternetAddress> otherPartyAddress = new ArrayList<>();
         if (otherParty != null) {
-            otherPartyAddress = new InternetAddress(otherParty);
+            for(String party : otherParty) {
+                otherPartyAddress.add(new InternetAddress(party));
+            }
         }
 
         cryptoParamsLoaderTask = new CryptoParamsLoaderTask(keyManagement, identityAddress, otherPartyAddress);
@@ -97,7 +110,10 @@ public abstract class CryptoOperation<T> implements Closeable {
 
     @Override
     public void close() throws IOException {
-        getInputStream().close();
+        if(inputStream != null) {
+            inputStream.close();
+        }
+
         if (outputStream != null) {
             outputStream.close();
         }
@@ -119,6 +135,21 @@ public abstract class CryptoOperation<T> implements Closeable {
             target.addHeaderLine(headerLine);
             //}
         }
+    }
+
+    protected File getOutputFile() throws IOException {
+        final File externalStorage = Environment.getExternalStorageDirectory();
+        final String targetDirName = FilenameUtils.concat(externalStorage.getAbsolutePath(), App.getContext().getPackageName());
+        final File targetDir = new File(targetDirName);
+
+        File targetFile = null;
+        int fileNumber = 0;
+
+        do {
+            targetFile = new File(targetDir, String.format("processed-%05d.eml", fileNumber++));
+        } while (targetFile.exists());
+
+        return targetFile;
     }
 
     public InputStream getInputStream() {

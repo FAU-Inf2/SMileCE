@@ -40,10 +40,7 @@ abstract class MimeBodyCryptoOperation extends CryptoOperation<MimeBodyPart> {
         final CryptoParams cryptoParams = cryptoParamsLoaderTask.get();
         final MimeBodyPart processed = process(source, cryptoParams);
         if (processed != null && outputStream != null) {
-            final File externalStorage = Environment.getExternalStorageDirectory();
-            final String targetDirName = FilenameUtils.concat(externalStorage.getAbsolutePath(), App.getContext().getPackageName());
-            final File targetDir = new File(targetDirName);
-            final File targetFile = new File(targetDir, "processed.eml");
+            final File targetFile = getOutputFile();
             processed.writeTo(new FileOutputStream(targetFile));
             processed.writeTo(outputStream);
         } else {

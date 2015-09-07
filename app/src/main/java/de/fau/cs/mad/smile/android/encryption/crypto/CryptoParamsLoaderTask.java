@@ -13,6 +13,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
 import korex.mail.Address;
@@ -21,9 +22,9 @@ import korex.mail.internet.InternetAddress;
 public class CryptoParamsLoaderTask extends AsyncTask<Void, Void, CryptoParams> {
     private final KeyManagement keyManagement;
     private final InternetAddress identity;
-    private final InternetAddress otherParty;
+    private final List<InternetAddress> otherParty;
 
-    public CryptoParamsLoaderTask(KeyManagement keyManagement, InternetAddress identity, InternetAddress otherParty) {
+    public CryptoParamsLoaderTask(KeyManagement keyManagement, InternetAddress identity, List<InternetAddress> otherParty) {
         this.keyManagement = keyManagement;
         this.identity = identity;
         this.otherParty = otherParty;
@@ -43,12 +44,16 @@ public class CryptoParamsLoaderTask extends AsyncTask<Void, Void, CryptoParams> 
             passphrase = null;
         }
 
-        final String otherPartyAlias = getNewestAlias(otherParty, false);
 
         try {
             final KeyStore.PrivateKeyEntry sender = keyManagement.getPrivateKeyEntry(identityAlias, passphrase);
-            final X509Certificate trustedParty = keyManagement.getCertificateForAlias(otherPartyAlias);
-            cryptoParams = new CryptoParams(sender, trustedParty);
+            cryptoParams = new CryptoParams(sender);
+
+            for(InternetAddress otherPartyAddress : otherParty) {
+                final String otherPartyAlias = getNewestAlias(otherPartyAddress, false);
+                final X509Certificate trustedParty = keyManagement.getCertificateForAlias(otherPartyAlias);
+                cryptoParams.addTrustedParty(trustedParty);
+            }
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
             return null;
         }

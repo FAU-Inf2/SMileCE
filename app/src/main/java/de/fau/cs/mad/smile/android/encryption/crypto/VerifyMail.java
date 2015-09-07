@@ -77,7 +77,7 @@ public class VerifyMail {
         keyManagement = KeyManagement.getInstance();
     }
 
-    public int verifySignature(final MimeBodyPart bodyPart, final String sender) {
+    public int verifySignature(final MimeBodyPart bodyPart, final List<String> sender) {
         if (bodyPart == null) {
             throw new IllegalArgumentException("bodyPart should not be null");
         }
@@ -276,7 +276,7 @@ public class VerifyMail {
         return null;
     }
 
-    private boolean checkSigner(final X509Certificate cert, final String sender) throws CertificateParsingException, CertificateEncodingException, IOException {
+    private boolean checkSigner(final X509Certificate cert, final List<String> sender) throws CertificateParsingException, CertificateEncodingException, IOException {
         boolean valid = true;
         valid &= checkKeyLength(cert);
         valid &= checkKeyUsage(cert);
@@ -285,11 +285,19 @@ public class VerifyMail {
         return valid;
     }
 
-    private boolean checkMailAddresses(final X509Certificate cert, final String sender)
+    private boolean checkMailAddresses(final X509Certificate cert, final List<String> sender)
             throws CertificateParsingException, CertificateEncodingException {
+        if(sender == null) {
+            return false;
+        }
+
+        if(sender.size() == 0) {
+            return false;
+        }
+
         List<String> names = keyManagement.getAlternateNamesFromCert(cert);
         for (String name : names) {
-            if (name.equalsIgnoreCase(sender)) {
+            if (name.equalsIgnoreCase(sender.get(0))) {
                 return true;
             }
         }
@@ -386,9 +394,9 @@ public class VerifyMail {
 
     class VerifyAsyncTask extends AsyncTask<Void, Void, Integer> {
         private final MimeBodyPart bodyPart;
-        private final String sender;
+        private final List<String> sender;
 
-        public VerifyAsyncTask(MimeBodyPart bodyPart, String sender) {
+        public VerifyAsyncTask(MimeBodyPart bodyPart, List<String> sender) {
             this.bodyPart = bodyPart;
             this.sender = sender;
         }
