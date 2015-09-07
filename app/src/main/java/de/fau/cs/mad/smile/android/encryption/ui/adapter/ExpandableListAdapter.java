@@ -153,7 +153,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 text.setText(data[1]);
                 break;
             default:
-                Log.d(SMileCrypto.LOG_TAG, "This case shouldn't occur. Check if you forgot to add a new case.");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "This case shouldn't occur. Check if you forgot to add a new case.");
+                }
         }
         return convertView;
     }

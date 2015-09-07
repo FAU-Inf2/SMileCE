@@ -53,21 +53,29 @@ public class ImportCertificateActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Log.d(SMileCrypto.LOG_TAG, "Started ImportCertificateActivity.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Started ImportCertificateActivity.");
+        }
         final Intent intent = getIntent();
         final String action = intent.getAction();
 
         if (Intent.ACTION_VIEW.equals(action)) {
-            Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
+            }
             Uri uri = intent.getData();
             String path = PathConverter.getPath(this, uri);
             TextView textView = (TextView) findViewById(R.id.import_text_view);
             textView.setText(getString(R.string.import_certificate_show_path) + path);
-            Log.d(SMileCrypto.LOG_TAG, "Path to file is " + path);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Path to file is " + path);
+            }
             handleFile(path);
         } else {
-            Log.d(SMileCrypto.LOG_TAG, "Intent was something else: " + action);
-            Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Intent was something else: " + action);
+                Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
+            }
             showFileChooser();
         }
 
@@ -105,13 +113,17 @@ public class ImportCertificateActivity extends ActionBarActivity {
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
 
         try {
-            Log.d(SMileCrypto.LOG_TAG, "Call file manager to choose certificate file.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Call file manager to choose certificate file.");
+            }
             startActivityForResult(Intent.createChooser(intent,
                             getResources().getString(R.string.fab_select_import_certificate)),
                     FILE_CHOOSER_REQUEST_CODE);
 
         } catch (android.content.ActivityNotFoundException anfe) {
-            Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
+            }
             AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
             builder.setTitle(getResources().getString(R.string.error));
             builder.setMessage(getResources().getString(R.string.no_file_manager));
@@ -135,7 +147,9 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
                     String path = PathConverter.getPath(this, uri);
-                    Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
+                    }
                     TextView textView = (TextView) this.findViewById(R.id.import_text_view);
                     textView.setText(getString(R.string.import_certificate_show_path) + path);
                     handleFile(path);
@@ -171,21 +185,27 @@ public class ImportCertificateActivity extends ActionBarActivity {
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(pathToFile);
         if (mimeType == null) {
-            Log.e(SMileCrypto.LOG_TAG, "MimeType was null.");
-            Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "MimeType was null.");
+                Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+            }
             importError(getResources().getString(R.string.unknown_filetype));
             return;
         }
 
         switch (mimeType) {
             case "application/x-pkcs12":
-                Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
+                }
                 showPassphrasePrompt(pathToFile);
 
                 break;
             case "application/x-x509-ca-cert":
             case "application/x-x509-user-cert":
-                Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
+                }
                 X509Certificate certificate = getCertificate(pathToFile);
 
                 if (certificate == null) {
@@ -199,8 +219,10 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 }
                 break;
             default:
-                Log.e(SMileCrypto.LOG_TAG, "Unknown mime type: " + mimeType);
-                Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Unknown mime type: " + mimeType);
+                    Log.e(SMileCrypto.LOG_TAG, "Filename was: " + pathToFile);
+                }
                 importError(getResources().getString(R.string.unknown_filetype));
                 break;
         }
@@ -239,7 +261,9 @@ public class ImportCertificateActivity extends ActionBarActivity {
     }
 
     private void wrongPassphrase(final String pathToFile) {
-        Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
         builder.setTitle(getResources().getString(R.string.error));
@@ -273,7 +297,9 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 buf.read(certificateBytes, 0, certificateBytes.length);
                 buf.close();
             } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Error reading certificate file.");
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Error reading certificate file.");
+                }
                 return null;
             }
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
@@ -281,13 +307,17 @@ public class ImportCertificateActivity extends ActionBarActivity {
             x509cert = (X509Certificate) factory.generateCertificate(bias);
             return x509cert;
         } catch (CertificateException e) {
-            Log.e(SMileCrypto.LOG_TAG, "CertificateException: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "CertificateException: " + e.getMessage());
+            }
             return null;
         }
     }
 
     private void importSuccessful() {
-        Log.d(SMileCrypto.LOG_TAG, "Exit-Status: " + SMileCrypto.EXIT_STATUS);
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Exit-Status: " + SMileCrypto.EXIT_STATUS);
+        }
         if (SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED) {
             AlertDialog.Builder builderImported = new AlertDialog.Builder(ImportCertificateActivity.this);
             builderImported.setTitle(getResources().getString(R.string.info));

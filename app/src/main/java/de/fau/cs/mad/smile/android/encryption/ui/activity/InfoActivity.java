@@ -40,7 +40,9 @@ public class InfoActivity extends ActionBarActivity {
             String version = pInfo.versionName;
             build.setText(getString(R.string.build) + " " + version);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.d(SMileCrypto.LOG_TAG, "Cannot find package name: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Cannot find package name: " + e.getMessage());
+            }
             build.setVisibility(View.GONE);
         }
         final Button author = (Button) findViewById(R.id.button_author);

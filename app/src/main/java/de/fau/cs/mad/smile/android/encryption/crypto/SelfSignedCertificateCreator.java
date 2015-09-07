@@ -131,7 +131,9 @@ public class SelfSignedCertificateCreator {
             try {
                 x500Name = new X500Name(expert);
             } catch (IllegalArgumentException iae) {
-                Log.e(SMileCrypto.LOG_TAG, "Wrong expert string: " + iae.getMessage());
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Wrong expert string: " + iae.getMessage());
+                }
                 return SMileCrypto.STATUS_EXPERT_WRONG_STRING;
             }
         } else {
@@ -194,7 +196,9 @@ public class SelfSignedCertificateCreator {
                 return SMileCrypto.STATUS_FAILED_SAVE_CERT;
             }
         } catch (NoSuchAlgorithmException | NoSuchProviderException | OperatorCreationException | InvalidAlgorithmParameterException | CertificateException | KeyStoreException | IOException e) {
-            Log.d(SMileCrypto.LOG_TAG, "Error creating self signed certificate. " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Error creating self signed certificate. " + e.getMessage());
+            }
             return SMileCrypto.STATUS_FAILED_SAVE_CERT;
         }
     }

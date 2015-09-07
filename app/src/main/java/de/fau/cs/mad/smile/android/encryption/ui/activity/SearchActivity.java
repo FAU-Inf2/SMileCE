@@ -71,8 +71,10 @@ public class SearchActivity extends ActionBarActivity {
 
         try {
             keyManager = KeyManagement.getInstance();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) { // TODO: display error message and die
-            Log.e(SMileCrypto.LOG_TAG, "Error while getting KeyManagement instance. " + e.getMessage());
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error while getting KeyManagement instance. " + e.getMessage());
+            }
             showErrorPrompt();
         }
 
@@ -148,7 +150,9 @@ public class SearchActivity extends ActionBarActivity {
         @Override
         public void afterTextChanged(Editable editable) {
             searchQuery = searchEt.getText().toString();
-            Log.d(SMileCrypto.LOG_TAG, "Search for: " + searchQuery);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Search for: " + searchQuery);
+            }
             if (!searchQuery.equals("")) {
                 cardsFiltered = performSearch(cards, searchQuery);
                 adapter.switchCards(cardsFiltered);
@@ -204,18 +208,26 @@ public class SearchActivity extends ActionBarActivity {
             int numberOfMatches = queryByWords.length;
 
             for (String word : queryByWords) {
-                Log.d(SMileCrypto.LOG_TAG, "Search for " + word + " in " + content);
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Search for " + word + " in " + content);
+                }
 
                 if (content.contains(word)) {
-                    Log.d(SMileCrypto.LOG_TAG, "Found");
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Found");
+                    }
                     numberOfMatches--;
                 } else {
-                    Log.d(SMileCrypto.LOG_TAG, "Not found");
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Not found");
+                    }
                     break;
                 }
 
                 if (numberOfMatches == 0) {
-                    Log.d(SMileCrypto.LOG_TAG, "Found complete query");
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Found complete query");
+                    }
                     cardsFiltered.add(ki);
                 }
 
@@ -232,7 +244,9 @@ public class SearchActivity extends ActionBarActivity {
     private void showErrorPrompt() {
         AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);
         builder.setTitle(getResources().getString(R.string.error));
-        Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        if(SMileCrypto.DEBUG) {
+            Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        }
         builder.setMessage(getResources().getString(R.string.internal_error));
         builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override

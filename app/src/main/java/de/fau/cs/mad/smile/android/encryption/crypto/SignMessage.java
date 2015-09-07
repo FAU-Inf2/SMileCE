@@ -30,13 +30,17 @@ public class SignMessage {
 
     public MimeMultipart sign(MimeBodyPart mimeBodyPart, KeyStore.PrivateKeyEntry privateKey) {
         if (mimeBodyPart == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
 
         if (privateKey == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Could not sign, privateKeyEntry was null.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Could not sign, privateKeyEntry was null.");
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
@@ -44,7 +48,9 @@ public class SignMessage {
         try {
             return new AsyncSign(mimeBodyPart, privateKey).execute().get();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception in sign: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception in sign: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
@@ -68,7 +74,9 @@ public class SignMessage {
             MimeMultipart signedMimeMultipart = null;
 
             try {
-                Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
+                }
 
                 JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
                 builder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -88,7 +96,9 @@ public class SignMessage {
 
                 signedMimeMultipart = gen.generate(mimeBodyPart);
             } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
+                }
                 e.printStackTrace();
             }
 

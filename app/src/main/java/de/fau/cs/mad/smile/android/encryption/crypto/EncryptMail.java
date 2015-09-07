@@ -40,7 +40,9 @@ public class EncryptMail {
 
             return new AsyncEncryptMessage(message, certificate).execute().get();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
@@ -81,7 +83,9 @@ public class EncryptMail {
 
                 return envelopedGenerator.generate(bodyPart, encryptor);
             } catch (Exception e) {
-                Log.e(SMileCrypto.LOG_TAG, "Exception while encrypting MimeBodyPart: " + e.getMessage());
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Exception while encrypting MimeBodyPart: " + e.getMessage());
+                }
                 e.printStackTrace();
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
                 return null;

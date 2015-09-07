@@ -113,16 +113,22 @@ public class MainActivity extends ActionBarActivity {
         try {
             ownCertificates = KeyManagement.getInstance().getOwnCertificates();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+            }
         }
 
         int i = 0;
         while (mName == null && i < ownCertificates.size()) { // use first certificate with name set
             KeyInfo keyInfo = ownCertificates.get(i);
             mName = keyInfo.getContact();
-            Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
+            }
             mEmail = keyInfo.getMail();
-            Log.d(SMileCrypto.LOG_TAG, "mEmail: " + mEmail);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "mEmail: " + mEmail);
+            }
             i++;
         }
 
@@ -161,9 +167,10 @@ public class MainActivity extends ActionBarActivity {
                     else
                         title = mTitles[position - 1];
 
-                    Log.d(SMileCrypto.LOG_TAG, "Clicked on NavigationDrawerItem " + position + ": "
-                            + title);
-
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Clicked on NavigationDrawerItem " + position + ": "
+                                + title);
+                    }
                     //switch not possible here :-(
                     if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {

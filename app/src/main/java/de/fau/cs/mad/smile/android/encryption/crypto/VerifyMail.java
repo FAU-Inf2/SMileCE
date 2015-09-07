@@ -87,7 +87,9 @@ public class VerifyMail {
         try {
             return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
         } catch (InterruptedException | ExecutionException e) {
-            Log.e(SMileCrypto.LOG_TAG, "failed to verify mail ", e);
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "failed to verify mail ", e);
+            }
         }
 
         return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
@@ -444,7 +446,9 @@ public class VerifyMail {
                             return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
                         }
 
-                        Log.d(SMileCrypto.LOG_TAG, "valid signature: " + valid);
+                        if(SMileCrypto.DEBUG) {
+                            Log.d(SMileCrypto.LOG_TAG, "valid signature: " + valid);
+                        }
 
                         valid &= checkSigner(cert, sender);
                         if (valid) {
@@ -454,7 +458,9 @@ public class VerifyMail {
                             return SMimeApi.RESULT_SIGNATURE_INVALID_EXPIRED;
                         }
 
-                        Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);
+                        if(SMileCrypto.DEBUG) {
+                            Log.d(SMileCrypto.LOG_TAG, "valid signer: " + valid);
+                        }
                         Date signTime = checkSignatureTime(usedParameters, signer, cert);
                         usedParameters.setDate(signTime);
                         List<CertStore> userCertStores = new ArrayList<>();
@@ -470,7 +476,9 @@ public class VerifyMail {
                             status = SMimeApi.RESULT_SIGNATURE_SIGNED_UNCOFIRMED;
                         }
 
-                        Log.d(SMileCrypto.LOG_TAG, "valid certificate path: " + valid);
+                        if(SMileCrypto.DEBUG) {
+                            Log.d(SMileCrypto.LOG_TAG, "valid certificate path: " + valid);
+                        }
                     }
                 }
             } catch (Exception e) {

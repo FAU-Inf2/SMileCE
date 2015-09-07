@@ -80,7 +80,9 @@ public class SMimeService extends Service {
         } catch (IOException | GeneralSecurityException | CertPathReviewerException | CMSException |
                 OperatorCreationException | SMIMEException | ExecutionException | InterruptedException | MessagingException e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
-            Log.e(SMileCrypto.LOG_TAG, "Exception while doing crypto stuff", e);
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception while doing crypto stuff", e);
+            }
         } finally {
             if (operation != null) {
                 try {

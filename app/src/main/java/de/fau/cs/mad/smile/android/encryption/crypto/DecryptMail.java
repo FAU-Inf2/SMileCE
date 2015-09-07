@@ -61,7 +61,9 @@ public class DecryptMail {
             CertificateException, IOException, SMIMEException, UnrecoverableEntryException {
 
         if (mimeBodyPart == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
             return null;
         }
@@ -107,7 +109,9 @@ public class DecryptMail {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
             return null;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            }
             e.printStackTrace();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
@@ -118,7 +122,9 @@ public class DecryptMail {
         try {
             final KeyStore.PrivateKeyEntry privateKey = keyManagement.getPrivateKeyEntry(alias, passphrase);
             if (privateKey == null) {
-                Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
+                }
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
                 return null;
             }
@@ -127,7 +133,9 @@ public class DecryptMail {
 
             return decryptMailSynchronous(mimeMessage, privateKey.getPrivateKey(), cert);
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            }
             e.printStackTrace();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
@@ -143,14 +151,18 @@ public class DecryptMail {
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
             if (dec == null) {
-                Log.d(SMileCrypto.LOG_TAG, "Decrypted MimeBodyPart is null.");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Decrypted MimeBodyPart is null.");
+                }
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_DECRYPTION_FAILED;
             } else {
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             }
             return dec;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
+            }
             e.printStackTrace();
             if (e.getMessage().contains("CMS processing failure"))
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE;
@@ -164,7 +176,9 @@ public class DecryptMail {
         try {
             return new AsyncDecryptEncodeMail(pathToFile, alias, passphrase).execute().get();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
             return null;
         }
@@ -177,7 +191,9 @@ public class DecryptMail {
             File file = new File(pathToFile);
             return new MimeMessage(session, new FileInputStream(file));
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception while reading encrypted mail: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception while reading encrypted mail: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE_IN_FILE;
             return null;
         }
@@ -209,7 +225,9 @@ public class DecryptMail {
         try {
             return mimeMessage.getAllRecipients();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error while getting all recipients: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error while getting all recipients: " + e.getMessage());
+            }
             return null;
         }
     }
@@ -220,11 +238,18 @@ public class DecryptMail {
 
     public MimeMessage decodeMimeBodyParts(String decryptedPart, Boolean decodeBase64Parts, String multipartContentType) {
         try {
-            Log.d(SMileCrypto.LOG_TAG, "Try to decode MimeBodyPart…");
-            if (decodeBase64Parts)
-                Log.d(SMileCrypto.LOG_TAG, "Will decode base64-text-parts if such parts exist.");
-            else
-                Log.d(SMileCrypto.LOG_TAG, "Will not decode base64-text-parts.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Try to decode MimeBodyPart…");
+            }
+            if (decodeBase64Parts) {
+                if (SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Will decode base64-text-parts if such parts exist.");
+                }
+            } else {
+                if (SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Will not decode base64-text-parts.");
+                }
+            }
 
             Properties props = System.getProperties();
             Session session = Session.getDefaultInstance(props, null);
@@ -247,25 +272,39 @@ public class DecryptMail {
             for (String line : lines) {
                 line = line.replace("\r", "");
                 //i++;
-                //Log.d(SMileCrypto.LOG_TAG, i + ". LINE is: " + line + "\n\n");
+                //if(SMileCrypto.DEBUG) {
+                    //Log.d(SMileCrypto.LOG_TAG, i + ". LINE is: " + line + "\n\n");
+                //}
                 if (line.startsWith("------") || line.startsWith("--Apple-Mail=")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". First case!" + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". First case!" + "\n\n");
+                    //}
                     if (headers != null && newContent != null) {
                         MimeBodyPart bodyPart;
-                        //Log.d(SMileCrypto.LOG_TAG, i + ". headers: " + headers.getAllHeaderLines().nextElement());
+                        //if(SMileCrypto.DEBUG) {
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". headers: " + headers.getAllHeaderLines().nextElement());
+                        //}
                         if (convert && decodeBase64Parts) {
-                            //Log.d(SMileCrypto.LOG_TAG, i + ". Convert: " + newContent);
+                            //if(SMileCrypto.DEBUG) {
+                                //Log.d(SMileCrypto.LOG_TAG, i + ". Convert: " + newContent);
+                            //}
                             byte[] decoded = Base64.decode(newContent, 0);
-                            //Log.d(SMileCrypto.LOG_TAG, i + ". DECODED: " + new String(decoded));
+                            //if(SMileCrypto.DEBUG) {
+                                //Log.d(SMileCrypto.LOG_TAG, i + ". DECODED: " + new String(decoded));
+                            //}
 
                             bodyPart = new MimeBodyPart(headers, decoded);
                         } else {
-                            //Log.d(SMileCrypto.LOG_TAG, i + ". not convert: " + newContent);
+                            //if(SMileCrypto.DEBUG) {
+                                //Log.d(SMileCrypto.LOG_TAG, i + ". not convert: " + newContent);
+                            //}
                             if (newContent.equals(""))
                                 newContent = "\n";
                             bodyPart = new MimeBodyPart(headers, newContent.getBytes());
                         }
-                        //Log.d(SMileCrypto.LOG_TAG, i + ". clear all" + "\n\n");
+                        //if(SMileCrypto.DEBUG) {
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". clear all" + "\n\n");
+                        //}
                         multipart.addBodyPart(bodyPart);
                         headers = null;
                         convert = false;
@@ -274,7 +313,9 @@ public class DecryptMail {
                         isAttachment = false;
                         headerPossible = true;
                     } else {
-                        //Log.d(SMileCrypto.LOG_TAG, i + ". header null -- continue!" + "\n\n");
+                        //if(SMileCrypto.DEBUG) {
+                            //Log.d(SMileCrypto.LOG_TAG, i + ". header null -- continue!" + "\n\n");
+                        //}
                         headerPossible = true;
                     }
                 } else if (line.contains("boundary=\"---")) {
@@ -286,54 +327,74 @@ public class DecryptMail {
                         continue; //ignore
 
                     headers = new InternetHeaders();
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //}
                     headers.addHeaderLine(line);
                 } else if (headerPossible && line.startsWith("Content-Transfer-Encoding")) {
                     if (line.contains("base64")) {
                         if (possibleConvert && decodeBase64Parts) {
                             convert = true;
                             headers.addHeaderLine("Content-Transfer-Encoding: quoted-printable");
-                            //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + "Content-Transfer-Encoding: quoted-printable" + "\n\n");
+                            //if(SMileCrypto.DEBUG) {
+                                //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + "Content-Transfer-Encoding: quoted-printable" + "\n\n");
+                            //}
                             continue;
                         }
                     }
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //}
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (headerPossible && line.startsWith("Content-Disposition")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //}
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                     if (line.contains("attachment"))
                         isAttachment = true;
                 } else if (headerPossible && line.startsWith("Content-Description")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //}
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (headerPossible && line.contains("charset")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //}
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (headerPossible && isAttachment && (line.contains("filename=") || line.contains("name="))) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". add header line: " + line + "\n\n");
+                    //}
                     if (headers == null)
                         headers = new InternetHeaders();
                     headers.addHeaderLine(line);
                 } else if (line.equals("\n") || line.equals("\r")) {
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". empty line" + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". empty line" + "\n\n");
+                    //}
                     continue;
                 } else {
                     headerPossible = false;
                     line = line.replaceAll("[\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}]", "");
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". old content " + newContent + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". old content " + newContent + "\n\n");
+                    //}
                     if (newContent == null)
                         newContent = "";
                     newContent += line + "\n";
-                    //Log.d(SMileCrypto.LOG_TAG, i + ". new content " + newContent + "\n\n");
+                    //if(SMileCrypto.DEBUG) {
+                        //Log.d(SMileCrypto.LOG_TAG, i + ". new content " + newContent + "\n\n");
+                    //}
                 }
             }
             newMimeMessage.setContent(multipart);
@@ -352,16 +413,21 @@ public class DecryptMail {
                         }
                         baos.write(c);
                     }
-
-                Log.e(SMileCrypto.LOG_TAG, "Decrypt Content: " + new String(baos.toByteArray()));
-                Log.e(SMileCrypto.LOG_TAG, "Decrypt toString: " + b.toString());
-                Log.e(SMileCrypto.LOG_TAG, "Decrypt getDescription: " + b.getDescription());
+                if(SMileCrypto.DEBUG) {
+                    Log.e(SMileCrypto.LOG_TAG, "Decrypt Content: " + new String(baos.toByteArray()));
+                    Log.e(SMileCrypto.LOG_TAG, "Decrypt toString: " + b.toString());
+                    Log.e(SMileCrypto.LOG_TAG, "Decrypt getDescription: " + b.getDescription());
+                }
 
             }*/
-            Log.d(SMileCrypto.LOG_TAG, "… finished decoding MimeBodyPart.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "… finished decoding MimeBodyPart.");
+            }
             return newMimeMessage;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             e.printStackTrace();
             return null;
@@ -372,7 +438,9 @@ public class DecryptMail {
         try {
             return decodeMimeBodyParts(convertMimeBodyPartToString(mimeBodyPart), decodeBase64Parts, null);
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
@@ -390,7 +458,9 @@ public class DecryptMail {
 
             return baos.toString();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error converting MimeBodyPart to String: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error converting MimeBodyPart to String: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
         }
@@ -414,7 +484,9 @@ public class DecryptMail {
             ((Multipart) mimeMessage.getContent()).writeTo(bytes);
             return result + bytes.toString();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
+            }
             e.printStackTrace();
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
             return null;
@@ -447,14 +519,18 @@ public class DecryptMail {
                         }
                         return new String(baos.toByteArray());
                     } else {
-                        Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                        if(SMileCrypto.DEBUG) {
+                            Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                        }
                         SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
                         return null;
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
         return null;
@@ -486,14 +562,18 @@ public class DecryptMail {
                         }
                         return new String(baos.toByteArray());
                     } else {
-                        Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                        if(SMileCrypto.DEBUG) {
+                            Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
+                        }
                         SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
                         return null;
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
         return null;
@@ -506,17 +586,25 @@ public class DecryptMail {
 
         try {
             int i = 0;
-            Log.d(SMileCrypto.LOG_TAG, "Add headers from encrypted MimeMessage.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Add headers from encrypted MimeMessage.");
+            }
             Enumeration allHeaders = encryptedMimeMessage.getAllHeaders();
             while (allHeaders.hasMoreElements()) {
                 Header header = (Header) allHeaders.nextElement();
-                //Log.d(SMileCrypto.LOG_TAG, "Headername + value: " + header.getName() + " "+ header.getValue());
+                //if(SMileCrypto.DEBUG) {
+                    //Log.d(SMileCrypto.LOG_TAG, "Headername + value: " + header.getName() + " "+ header.getValue());
+                //}
                 newMimeMessage.addHeader(header.getName(), header.getValue());
                 i++;
             }
-            Log.d(SMileCrypto.LOG_TAG, "Added " + i + " headers from encrypted MimeMessage.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Added " + i + " headers from encrypted MimeMessage.");
+            }
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Exception in addOldHeaders:" + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Exception in addOldHeaders:" + e.getMessage());
+            }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
         }
         return newMimeMessage;

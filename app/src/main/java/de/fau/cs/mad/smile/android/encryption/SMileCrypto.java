@@ -58,7 +58,6 @@ public class SMileCrypto extends Application {
     /**
      * If this is enabled there will be additional logging information sent to
      * Log.d, including protocol dumps.
-     * TODO: Use this flag.
      */
 
     public static boolean DEBUG = false;

@@ -76,17 +76,23 @@ public class CertificateCreationActivity extends ActionBarActivity {
             DateTime tmp = DateTime.now();
             DateTime now = DateTime.now();
             ++monthOfYear; // DatePicker starts with 0
-            Log.d(SMileCrypto.LOG_TAG, "Today: " + now.getDayOfMonth() + "." + now.getMonthOfYear() + "." + now.getYear());
-            Log.d(SMileCrypto.LOG_TAG, "Got date: " + dayOfMonth + "." + monthOfYear + "." + year);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Today: " + now.getDayOfMonth() + "." + now.getMonthOfYear() + "." + now.getYear());
+                Log.d(SMileCrypto.LOG_TAG, "Got date: " + dayOfMonth + "." + monthOfYear + "." + year);
+            }
             valid = tmp.withDate(year, monthOfYear, dayOfMonth);
             date.setText(format.print(valid));
             if(valid.getMillis() <= now.getMillis()) {
-                Log.d(SMileCrypto.LOG_TAG, "Date invalid");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Date invalid");
+                }
                 dateOk = false;
                 date.setBackgroundColor(Color.RED);
                 wrongDate.setVisibility(View.VISIBLE);
             } else {
-                Log.d(SMileCrypto.LOG_TAG, "Date valid");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Date valid");
+                }
                 wrongDate.setVisibility(View.GONE);
                 dateOk = true;
                 date.setBackgroundColor(Color.GREEN);
@@ -110,7 +116,9 @@ public class CertificateCreationActivity extends ActionBarActivity {
         if (bar != null) {
             bar.setDisplayHomeAsUpEnabled(true);
         } else {
-            Log.d(SMileCrypto.LOG_TAG, "Failed to set home as up in CertificateCreationActivity");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Failed to set home as up in CertificateCreationActivity");
+            }
         }
 
         name = (EditText) findViewById(R.id.name);

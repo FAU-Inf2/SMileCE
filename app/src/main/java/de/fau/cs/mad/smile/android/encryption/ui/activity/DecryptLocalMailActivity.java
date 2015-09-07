@@ -75,7 +75,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         mTextView.setTextSize(12);
         mTextView.setMovementMethod(new ScrollingMovementMethod());
 
-        Log.d(SMileCrypto.LOG_TAG, "Started DecryptLocalMailActivity.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Started DecryptLocalMailActivity.");
+        }
         showFileChooser();
     }
 
@@ -120,10 +122,14 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
                     String path = PathConverter.getPath(this, uri);
-                    Log.d(SMileCrypto.LOG_TAG, "Path to selected file: " + path);
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Path to selected file: " + path);
+                    }
 
                     if (path.endsWith(".eml")) {
-                        Log.d(SMileCrypto.LOG_TAG, " " + path);
+                        if(SMileCrypto.DEBUG) {
+                            Log.d(SMileCrypto.LOG_TAG, " " + path);
+                        }
                         mTextView.setText(getString(R.string.decrypt_file_show_path) + path);
 
                         SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
@@ -180,13 +186,17 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
 
         try {
-            Log.d(SMileCrypto.LOG_TAG, "Call file manager to choose decrypted mail.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Call file manager to choose decrypted mail.");
+            }
             startActivityForResult(Intent.createChooser(intent,
                             getResources().getString(R.string.import_decrypted_file)),
                     DLMA_FILE_CHOOSER_REQUEST_CODE);
 
         } catch (android.content.ActivityNotFoundException anfe) {
-            Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "No file manager installed. " + anfe.getMessage());
+            }
             Toast.makeText(this,
                     getResources().getString(R.string.no_file_manager),
                     Toast.LENGTH_SHORT).show();
@@ -233,20 +243,28 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         }
 
         String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-        Log.d(SMileCrypto.LOG_TAG, "Passphrase: <sensitive>");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Passphrase: <sensitive>");
+        }
 
         String passphrase;
         try {
-            Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
+            }
             passphrase = PasswordEncryption.decryptString(encryptedPassphrase);
 
             if (passphrase == null) {
-                Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Decrypted passphrase was null.");
+                }
                 showPassphrasePrompt(pathToFile, alias);
                 return;
             }
 
-            Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Got decrypted passphrase.");
+            }
         } catch (Exception e) {
             showPassphrasePrompt(pathToFile, alias);
             return;
@@ -261,7 +279,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
     }
 
     public void selectCertificate(final String pathToFile, final ArrayList<KeyInfo> keyInfos) {
-        Log.d(SMileCrypto.LOG_TAG, "More than one certificate found for this mail address, show dialog to select certificate.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "More than one certificate found for this mail address, show dialog to select certificate.");
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.title_select_certificate));
         //R.string.multiple_certificates?
@@ -279,7 +299,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                     "\nThumbprint: " + keyInfo.getThumbprint();
             stringArray[i] = info;
         }
-        Log.d(SMileCrypto.LOG_TAG, size + " certificates to decide.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, size + " certificates to decide.");
+        }
         ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2,
                 android.R.id.text1, stringArray);
         modeList.setAdapter(modeAdapter);
@@ -288,9 +310,13 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         modeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(SMileCrypto.LOG_TAG, "Selected certificate at position: " + position);
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Selected certificate at position: " + position);
+                }
                 String alias = keyInfos.get(position).getAlias();
-                Log.d(SMileCrypto.LOG_TAG, "Selected alias is: " + alias);
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Selected alias is: " + alias);
+                }
                 passphraseDecryptOrPromptAlias(alias, pathToFile);
                 dialog.dismiss();
             }
@@ -336,7 +362,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                                 showErrorPrompt();
                                 return;
                             }
-                            Log.d(SMileCrypto.LOG_TAG, "Maybe wrong passphrase. Show passphrase prompt again.");
+                            if (SMileCrypto.DEBUG) {
+                                Log.d(SMileCrypto.LOG_TAG, "Maybe wrong passphrase. Show passphrase prompt again.");
+                            }
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(DecryptLocalMailActivity.this);
                             builder.setTitle(getResources().getString(R.string.error));
@@ -377,7 +405,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
         } else if (SMileCrypto.EXIT_STATUS == SMileCrypto.STATUS_DECRYPTION_FAILED) {
             builder.setMessage(getResources().getString(R.string.decryption_failed));
         } else {
-            Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+            }
             builder.setMessage(getResources().getString(R.string.internal_error));
         }
         builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -415,7 +445,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             texthtml = getString(R.string.containsNoSuchPart);
         }
 
-        Log.d(SMileCrypto.LOG_TAG, "Decrypted text: " + mimeBodyPartsString);
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Decrypted text: " + mimeBodyPartsString);
+        }
         return true;
     }
 
@@ -447,7 +479,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                Log.d(SMileCrypto.LOG_TAG, "nothing selected");
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "nothing selected");
+                }
             }
 
         });
@@ -463,13 +497,19 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             if (preferences.contains("last-encrypted-file-path")) {
                 String path = preferences.getString("last-encrypted-file-path", null);
-                Log.d(SMileCrypto.LOG_TAG, "Path: " + path);
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "Path: " + path);
+                }
                 path = path.substring(0, path.length() - 4);
                 path += "_decrypted.eml";
-                Log.d(SMileCrypto.LOG_TAG, "New path to save MimeMessage: " + path);
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "New path to save MimeMessage: " + path);
+                }
 
                 if (!isExternalStorageWritable()) {
-                    Log.e(SMileCrypto.LOG_TAG, "External storage is not writable!");
+                    if(SMileCrypto.DEBUG) {
+                        Log.e(SMileCrypto.LOG_TAG, "External storage is not writable!");
+                    }
                     return null;
                 }
 
@@ -481,7 +521,9 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                 return path;
             }
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error saving file: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error saving file: " + e.getMessage());
+            }
         }
         return null;
     }

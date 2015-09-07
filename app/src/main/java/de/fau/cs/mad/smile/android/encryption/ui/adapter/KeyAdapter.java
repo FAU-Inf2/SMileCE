@@ -78,7 +78,9 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
+        }
         if (key.equals("pref_key_direction") || key.equals("pref_key_type")) {
             ArrayList<KeyInfo> kis = new ArrayList<KeyInfo>(keylist.size());
             for (int i = 0; i < getItemCount(); ++i) {
@@ -299,10 +301,12 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 contactLookup.close();
             }
         }
-        Log.d(SMileCrypto.LOG_TAG, "mail: " + email);
-        Log.d(SMileCrypto.LOG_TAG, "thumb: " + thumb);
-        Log.d(SMileCrypto.LOG_TAG, "name: " + name);
-        Log.d(SMileCrypto.LOG_TAG, "key: " + lookUpKey);
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "mail: " + email);
+            Log.d(SMileCrypto.LOG_TAG, "thumb: " + thumb);
+            Log.d(SMileCrypto.LOG_TAG, "name: " + name);
+            Log.d(SMileCrypto.LOG_TAG, "key: " + lookUpKey);
+        }
 
         final Uri lookupUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookUpKey);
 
@@ -311,9 +315,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             Bitmap bmp = Utils.getCroppedBitmap(BitmapFactory.decodeStream(input));
             BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), bmp);
             holder.contactimage.setBackground(bdrawable);
-            Log.d(SMileCrypto.LOG_TAG, "Thumbnail found.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Thumbnail found.");
+            }
         } else {
-            Log.d(SMileCrypto.LOG_TAG, "Thumbnail not found.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Thumbnail not found.");
+            }
 
             String initial = "A";
             if (name.length() > 0) {
@@ -345,7 +353,9 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     private void printError() {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(App.getContext().getResources().getString(R.string.error));
-        Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        if(SMileCrypto.DEBUG) {
+            Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        }
         builder.setMessage(App.getContext().getResources().getString(R.string.internal_error));
         builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override

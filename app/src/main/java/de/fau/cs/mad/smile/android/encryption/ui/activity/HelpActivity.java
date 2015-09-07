@@ -80,17 +80,23 @@ public class HelpActivity extends ActionBarActivity {
     private void prepareListData() {
         listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, List<Pair<Integer, String[]>>>();
-        Log.d(SMileCrypto.LOG_TAG, "Help:");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Help:");
+        }
         Resources resources = getResources();
         Collections.addAll(listDataHeader, resources.getStringArray(R.array.faq_questions));
         int headerIndex = 0;
         for (String key : resources.getStringArray(R.array.faq_key_array)) {
-            Log.d(SMileCrypto.LOG_TAG, "\tProcessing key: " + key);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "\tProcessing key: " + key);
+            }
             List<TypedArray> helpItems = Utils.getMultiTypedArray(this, key);
             List<Pair<Integer, String[]>> result = new ArrayList<>();
             for (TypedArray item : helpItems) {
                 int size = item.length() - 1;
-                Log.d(SMileCrypto.LOG_TAG, "\t\tLength of data: " + size);
+                if(SMileCrypto.DEBUG) {
+                    Log.d(SMileCrypto.LOG_TAG, "\t\tLength of data: " + size);
+                }
                 int type = item.getInt(0, 0);
                 String[] helpText = new String[size];
                 for (int i = 0; i < size; ++i) {
@@ -101,7 +107,9 @@ public class HelpActivity extends ActionBarActivity {
                     } else {
                         description = item.getString(i + 1);
                     }
-                    Log.d(SMileCrypto.LOG_TAG, "\t\tDescription: " + description);
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "\t\tDescription: " + description);
+                    }
                     helpText[i] = description;
                 }
                 Pair<Integer, String[]> value = Pair.create(type, helpText);

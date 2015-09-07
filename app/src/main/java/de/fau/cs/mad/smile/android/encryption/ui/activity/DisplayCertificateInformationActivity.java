@@ -58,18 +58,26 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(SMileCrypto.LOG_TAG, "Started DisplayCertificateInformationActivity.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Started DisplayCertificateInformationActivity.");
+        }
         Bundle extras = getIntent().getExtras();
         if (extras == null) {
-            Log.e(SMileCrypto.LOG_TAG, "intent was null.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "intent was null.");
+            }
             showErrorPrompt();
         }
         this.alias = extras.getString("Alias");
         if (this.alias == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Called without alias.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Called without alias.");
+            }
             finish();
         }
-        Log.d(SMileCrypto.LOG_TAG, "Called with alias: " + alias);
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Called with alias: " + alias);
+        }
         this.name = extras.getString("Name");
 
         setContentView(R.layout.activity_display_certificate_information);
@@ -85,7 +93,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
 
         //TODO: workaround to prevent crash
         if (listDataHeader == null || listDataChild == null) {
-            Log.e(SMileCrypto.LOG_TAG, "ListDataHeader/ListDataChild was null.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "ListDataHeader/ListDataChild was null.");
+            }
             finish();
         } else {
             listAdapter = new ExpandableCertificateListAdapter(this, listDataHeader, listDataChild);
@@ -126,7 +136,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             this.keyInfo = keyInfo;
             extractCertificateInformation(keyInfo);
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
+            }
             showErrorPrompt();
         }
     }
@@ -138,7 +150,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private void extractCertificateInformation(KeyInfo keyInfo) {
         if (this.name == null) {
             this.name = keyInfo.getContact();
-            Log.d(SMileCrypto.LOG_TAG, "Name was null, set name to: " + this.name);
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Name was null, set name to: " + this.name);
+            }
             toolbar.setTitle(this.name);
             setSupportActionBar(toolbar);
         }
@@ -157,11 +171,15 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
      * @param keyInfo The key info representing the certificate
      */
     private void generatePersonalInformation(KeyInfo keyInfo) {
-        Log.d(SMileCrypto.LOG_TAG, "Setting personal information");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Setting personal information");
+        }
         LinkedHashMap<String, String[]> data = new LinkedHashMap<>();
         X509Certificate certificate = keyInfo.getCertificate();
         if (certificate == null) {
-            Log.e(SMileCrypto.LOG_TAG, "Certificate was null -- abort.");
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Certificate was null -- abort.");
+            }
             return;
         }
         X500Name x500name = null;
@@ -174,7 +192,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             pers.add(persI);
             listDataChild.put(listDataHeader.get(0), pers);
         } catch (CertificateEncodingException e) {
-            Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+            }
             Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
         }
     }
@@ -184,7 +204,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
      * @param keyInfo The key info representing the certificate
      */
     private void generateCryptographicInformation(KeyInfo keyInfo) {
-        Log.d(SMileCrypto.LOG_TAG, "Setting cryptographic information");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Setting cryptographic information");
+        }
         listDataHeader.add(getString(R.string.cryptographic));
         HashMap<String, String> cryptographicInfo = new HashMap<>();
         PublicKey publicKey = keyInfo.getCertificate().getPublicKey();
@@ -198,7 +220,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             cryptographicInfo.put("Signature Algorithm", keyInfo.getCertificate().getSigAlgName());
             cryptographicInfo.put("Signature", new BigInteger(keyInfo.getCertificate().getSignature()).toString(16));
         } else {
-            Log.d(SMileCrypto.LOG_TAG, "Not an instance of RSAPublicKey.");
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Not an instance of RSAPublicKey.");
+            }
             cryptographicInfo.put("Public Key", keyInfo.getCertificate().getPublicKey().toString());
             cryptographicInfo.put("Signature Algorithm", keyInfo.getCertificate().getSigAlgName());
             cryptographicInfo.put("Signature", new BigInteger(keyInfo.getCertificate().getSignature()).toString(16));
@@ -215,7 +239,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
      * @param keyInfo The key info representing the certificate
      */
     private void generatingCertificateInformation(KeyInfo keyInfo) {
-        Log.d(SMileCrypto.LOG_TAG, "Setting certificate information");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Setting certificate information");
+        }
         listDataHeader.add(getString(R.string.certificate));
         HashMap<String, String> certificateInfo = new HashMap<>();
         certificateInfo.put("Thumbprint", keyInfo.getThumbprint());
@@ -234,7 +260,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
      * @param keyInfo The key info representing the certificate
      */
     private void generateValidityInformation(KeyInfo keyInfo) {
-        Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
+        }
         DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
         listDataHeader.add(getString(R.string.validity));
         HashMap<String, String> validity = new HashMap<>();
@@ -253,7 +281,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
      */
     private void generateCaInformation(KeyInfo keyInfo) {
         X500Name x500name;
-        Log.d(SMileCrypto.LOG_TAG, "Setting ca information");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Setting ca information");
+        }
         X509Certificate certificate = keyInfo.getCertificate();
         listDataHeader.add(getString(R.string.CA));
         LinkedHashMap<String, String[]> cadata = new LinkedHashMap<>();
@@ -267,7 +297,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             pers.add(persI);
             listDataChild.put(listDataHeader.get(1), pers);
         } catch (CertificateEncodingException e) {
-            Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+            }
             Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
         }
     }
@@ -353,14 +385,18 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
      * Export a certificate.
      */
     private void exportCertificate() {
-        Log.d(SMileCrypto.LOG_TAG, "Try to export certificate.");
+        if(SMileCrypto.DEBUG) {
+            Log.d(SMileCrypto.LOG_TAG, "Try to export certificate.");
+        }
         if (this.alias.contains("_own_")) {
             exportOwnCertificate();
         } else if (this.alias.contains("_other_")) {
             exportOtherCertificate();
         } else {
             //this should not happen
-            Log.e(SMileCrypto.LOG_TAG, "Tried to export certificate with invalid alias: " + alias);
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Tried to export certificate with invalid alias: " + alias);
+            }
         }
     }
 
@@ -414,7 +450,9 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     private void showErrorPrompt() {
         AlertDialog.Builder builder = new AlertDialog.Builder(DisplayCertificateInformationActivity.this);
         builder.setTitle(getResources().getString(R.string.error));
-        Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        if(SMileCrypto.DEBUG) {
+            Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        }
         builder.setMessage(getResources().getString(R.string.internal_error));
         builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override

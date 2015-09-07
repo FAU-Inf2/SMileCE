@@ -59,7 +59,9 @@ public class App extends Application {
             gen.initialize(spec);
             gen.generateKeyPair();
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "ERROR: " + e.getMessage());
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "ERROR: " + e.getMessage());
+            }
             e.printStackTrace();
         }
     }

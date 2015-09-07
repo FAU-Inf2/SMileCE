@@ -61,8 +61,10 @@ public class AsyncEncryptMessage extends AsyncTask<Void, Void, MimeMessage> {
 
             return result;
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessage: " + e.getMessage());
-            e.printStackTrace();
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessage: " + e.getMessage());
+            }
+            //e.printStackTrace();
             return null;
         }
     }

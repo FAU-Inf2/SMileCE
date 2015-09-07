@@ -47,7 +47,9 @@ public class PasswordEncryption {
 
             return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, Log.getStackTraceString(e));
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, Log.getStackTraceString(e));
+            }
             return null;
         }
     }
@@ -87,7 +89,9 @@ public class PasswordEncryption {
 
             return new String(bytes, 0, bytes.length, "UTF-8");
         } catch (Exception e) {
-            Log.e(SMileCrypto.LOG_TAG, Log.getStackTraceString(e));
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, Log.getStackTraceString(e));
+            }
             return null;
         }
     }
