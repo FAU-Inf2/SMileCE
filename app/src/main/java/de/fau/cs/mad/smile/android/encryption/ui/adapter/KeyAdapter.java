@@ -19,18 +19,15 @@ import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 
@@ -56,6 +53,11 @@ import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.ui.activity.DisplayCertificateInformationActivity;
+import de.fau.cs.mad.smile.android.encryption.ui.listener.DeleteRevealListener;
+import de.fau.cs.mad.smile.android.encryption.ui.listener.ExecuteSwipe;
+import de.fau.cs.mad.smile.android.encryption.ui.listener.ShareRevealListener;
+import de.fau.cs.mad.smile.android.encryption.ui.listener.onClickCreatePopup;
+import de.fau.cs.mad.smile.android.encryption.utilities.KeyListCallback;
 import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 
 
@@ -132,92 +134,13 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         }
     }
 
-    private class onClickCreatePopup implements PopupMenu.OnMenuItemClickListener, View.OnClickListener {
-        private KeyInfo keyInfo;
-
-        public onClickCreatePopup(KeyInfo keyInfo) {
-            this.keyInfo = keyInfo;
-        }
-
-        @Override
-        public void onClick(View v) {
-            PopupMenu popup = new PopupMenu(App.getContext(), v);
-
-            // This activity implements OnMenuItemClickListener
-            popup.setOnMenuItemClickListener(this);
-            popup.inflate(R.menu.card_context);
-            popup.show();
-        }
-
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            int id = item.getItemId();
-            boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
-            if (id == R.id.delete) {
-                if (own) {
-                    deleteOwnCertificate(keyInfo);
-                } else {
-                    deleteOtherCertificate(keyInfo);
-                }
-            } else if (id == R.id.export) {
-                if (own) {
-                    exportOwnCertificate(keyInfo);
-                } else {
-                    exportOtherCertificate(keyInfo);
-                }
-            }
-            return true;
-        }
-    }
-
     public KeyAdapter(Activity activity) {
         this(activity, null);
     }
 
     public KeyAdapter(Activity activity, List<KeyInfo> keyInfoList) {
         this.activity = activity;
-        this.keylist = new SortedList<KeyInfo>(KeyInfo.class, new SortedList.Callback<KeyInfo>() {
-            @Override
-            public int compare(KeyInfo o1, KeyInfo o2) {
-                return o1.compareTo(o2);
-            }
-
-            @Override
-            public void onInserted(int position, int count) {
-                notifyItemRangeInserted(position, count);
-            }
-
-            @Override
-            public void onRemoved(int position, int count) {
-                notifyItemRangeRemoved(position, count);
-            }
-
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                notifyItemMoved(fromPosition, toPosition);
-            }
-
-            @Override
-            public void onChanged(int position, int count) {
-                notifyItemRangeChanged(position, count);
-            }
-
-            @Override
-            public boolean areContentsTheSame(KeyInfo oldItem, KeyInfo newItem) {
-                if(oldItem == null || newItem == null) {
-                    return false;
-                }
-                int contact = oldItem.compareName(newItem);
-                int email = oldItem.compareMail(newItem);
-                int date = oldItem.compareTermination(newItem);
-                return contact == 0 && email == 0 && date == 0;
-            }
-
-            @Override
-            public boolean areItemsTheSame(KeyInfo item1, KeyInfo item2) {
-                return item1.equals(item2);
-            }
-        });
+        this.keylist = new SortedList<KeyInfo>(KeyInfo.class, new KeyListCallback(this));
         if (keyInfoList != null) {
             addKey(keyInfoList);
         }
@@ -301,12 +224,12 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             }
         });
 
-        holder.contextButton.setOnClickListener(new onClickCreatePopup(keyInfo));
+        holder.contextButton.setOnClickListener(new onClickCreatePopup(this, keyInfo));
 
         holder.swipe.removeSwipeListener(holder.swipeListener);
 
 
-        holder.swipeListener = new ExecuteSwipe(keyInfo);
+        holder.swipeListener = new ExecuteSwipe(this, keyInfo);
         holder.swipe.addSwipeListener(holder.swipeListener);
         holder.swipe.addRevealListener(R.id.delete, new DeleteRevealListener());
         holder.swipe.addRevealListener(R.id.share, new ShareRevealListener());
@@ -315,6 +238,15 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    /**
+     * Returns items position in the list.
+     * @param item The Key info to search.
+     * @return The index in the list.
+     */
+    private int getPosition(KeyInfo item) {
+        return keylist.indexOf(item);
     }
 
     @Override
@@ -409,6 +341,31 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         });
     }
 
+
+    private void printError() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(App.getContext().getResources().getString(R.string.error));
+        Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
+        builder.setMessage(App.getContext().getResources().getString(R.string.internal_error));
+        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // Do nothing
+            }
+        });
+        builder.create().show();
+    }
+
+    public void deleteCertificate(KeyInfo keyInfo) {
+        if(keyInfo != null) {
+            if (keyInfo.getHasPrivateKey()) {
+                deleteOwnCertificate(keyInfo);
+            } else {
+                deleteOtherCertificate(keyInfo);
+            }
+        }
+    }
+
     private void deleteOwnCertificate(final KeyInfo keyInfo) {
         final int position = getPosition(keyInfo);
         final KeyManagement keyManagement;
@@ -444,20 +401,6 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         alertDialog.show();
     }
 
-    private void printError() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(App.getContext().getResources().getString(R.string.error));
-        Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
-        builder.setMessage(App.getContext().getResources().getString(R.string.internal_error));
-        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // Do nothing
-            }
-        });
-        builder.create().show();
-    }
-
     private void deleteOtherCertificate(final KeyInfo keyInfo) {
         final int position = getPosition(keyInfo);
         final KeyManagement keyManagement;
@@ -489,6 +432,16 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         alertDialog.show();
 
+    }
+
+    public void exportCertificate(KeyInfo keyInfo) {
+        if(keyInfo != null) {
+            if (keyInfo.getHasPrivateKey()) {
+                exportOwnCertificate(keyInfo);
+            } else {
+                exportOtherCertificate(keyInfo);
+            }
+        }
     }
 
     private void exportOwnCertificate(final KeyInfo keyInfo) {
@@ -526,6 +479,16 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         } else {
             Toast.makeText(activity,
                     App.getContext().getString(R.string.certificate_export_success) + dst, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void shareCertificate(KeyInfo keyInfo) {
+        if(keyInfo != null) {
+            if (keyInfo.getHasPrivateKey()) {
+                shareOwnCertificate(keyInfo);
+            } else {
+                shareOtherCertificate(keyInfo);
+            }
         }
     }
 
@@ -573,89 +536,6 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             Uri uri = Uri.fromFile(new File((dst)));
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             activity.startActivity(shareIntent);
-        }
-    }
-
-    /**
-     * Returns items position in the list.
-     * @param item The Key info to search.
-     * @return The index in the list.
-     */
-    private int getPosition(KeyInfo item) {
-        return keylist.indexOf(item);
-    }
-
-    /**
-     * Detect share swipe.
-     */
-    private class ShareRevealListener implements SwipeLayout.OnRevealListener {
-
-        @Override
-        public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
-            View share_icon = view.findViewById(R.id.share_icon);
-            float shareDistance = sharedPreferences.getInt("share_distance", 20) / 100.0f;
-            if (dragEdge != SwipeLayout.DragEdge.Left) {
-                return;
-            }
-            if (v <= shareDistance && share_icon.isShown()) {
-                share_icon.setVisibility(View.INVISIBLE);
-            } else if (v > shareDistance && !share_icon.isShown()) {
-                share_icon.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    /**
-     * Detect delete swipe
-     */
-    private class DeleteRevealListener implements SwipeLayout.OnRevealListener {
-
-        @Override
-        public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
-            View delete_icon = view.findViewById(R.id.delete_icon);
-            float deleteDistance = sharedPreferences.getInt("delete_distance", 30) / 100.0f;
-            if (dragEdge != SwipeLayout.DragEdge.Right) {
-                return;
-            }
-            if (v <= deleteDistance && delete_icon.isShown()) {
-                delete_icon.setVisibility(View.INVISIBLE);
-            } else if (v > deleteDistance && !delete_icon.isShown()) {
-                delete_icon.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    private class ExecuteSwipe extends SimpleSwipeListener {
-        private KeyInfo keyInfo;
-
-        public ExecuteSwipe(KeyInfo keyInfo) {
-            this.keyInfo = keyInfo;
-        }
-
-        @Override
-        public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
-            layout.setDragDistance(0);
-            boolean own = keyInfo.getAlias().startsWith("SMile_crypto_own");
-            View delete_icon = layout.findViewById(R.id.delete_icon);
-            View share_icon = layout.findViewById(R.id.share_icon);
-            if (delete_icon.isShown()) {
-                delete_icon.setVisibility(View.INVISIBLE);
-                if (own) {
-                    deleteOwnCertificate(keyInfo);
-                } else {
-                    deleteOtherCertificate(keyInfo);
-                }
-            }
-
-            if (share_icon.isShown()) {
-                share_icon.setVisibility(View.INVISIBLE);
-                if (own) {
-                    shareOwnCertificate(keyInfo);
-                } else {
-                    shareOtherCertificate(keyInfo);
-                }
-            }
-            super.onHandRelease(layout, xvel, yvel);
         }
     }
 }
