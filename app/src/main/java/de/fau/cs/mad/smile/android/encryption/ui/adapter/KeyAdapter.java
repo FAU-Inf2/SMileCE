@@ -106,6 +106,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
         protected ImageView delete_icon;
         protected RelativeLayout share;
         protected ImageView share_icon;
+        private SwipeLayout.SwipeListener swipeListener;
 
 
         public KeyViewHolder(final View itemView) {
@@ -299,8 +300,14 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 activity.startActivity(i);
             }
         });
+
         holder.contextButton.setOnClickListener(new onClickCreatePopup(keyInfo));
-        holder.swipe.addSwipeListener(new ExecuteSwipe(keyInfo));
+
+        holder.swipe.removeSwipeListener(holder.swipeListener);
+
+
+        holder.swipeListener = new ExecuteSwipe(keyInfo);
+        holder.swipe.addSwipeListener(holder.swipeListener);
         holder.swipe.addRevealListener(R.id.delete, new DeleteRevealListener());
         holder.swipe.addRevealListener(R.id.share, new ShareRevealListener());
     }
