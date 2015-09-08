@@ -71,6 +71,10 @@ public class SMimeService extends Service {
                 case SMimeApi.ACTION_VERIFY:
                     operation = cryptoOperationBuilder.createVerifyOperation();
                     break;
+                default:
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Unknown operation " + action);
+                    }
             }
 
             if (operation != null) {

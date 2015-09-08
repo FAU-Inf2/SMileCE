@@ -59,7 +59,12 @@ public abstract class CryptoOperation<T> implements Closeable {
         identity = data.getStringExtra(SMimeApi.EXTRA_IDENTITY);
 
         String[] tmp = data.getStringArrayExtra(SMimeApi.EXTRA_OTHERPARTY);
-        otherParty = Arrays.asList(tmp);
+        if(tmp == null) {
+            otherParty = null;
+        } else {
+            otherParty = Arrays.asList(tmp);
+        }
+
         inputStream = new ParcelFileDescriptor.AutoCloseInputStream(input);
 
         if (output != null) {
