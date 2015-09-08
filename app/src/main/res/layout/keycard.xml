@@ -126,7 +126,7 @@
                     android:id="@+id/valid_label"
                     android:text="@string/valid_label"
                     android:layout_toEndOf="@id/badge"
-                    android:layout_below="@id/email_label"
+                    android:layout_below="@id/email"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp" />
 
