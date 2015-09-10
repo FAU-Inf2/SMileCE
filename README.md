@@ -21,3 +21,10 @@ Tools and Libraries that we used:
 - [aFileChooser](https://github.com/iPaulPro/aFileChooser), License: Apache License 2.0
 - [joda-time-android](https://github.com/dlew/joda-time-android), License: Apache License 2.0
 - [Android Swipe Layout](https://github.com/daimajia/AndroidSwipeLayout), License: MIT 
+
+How-To use SMileCE with SMile
+--------------------------------
+- Open SMile
+- Settings → Account Settings → Cryptographic
+- S/MIME App → Select "SMile Cryptographic Extension"
+- SMile and SMileCE are now connected
