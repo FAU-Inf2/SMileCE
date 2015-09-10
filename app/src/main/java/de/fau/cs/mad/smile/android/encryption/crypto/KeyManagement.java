@@ -560,7 +560,7 @@ public class KeyManagement {
         String filename = alias + ".p12";
         File src = new File(certDirectory, filename);
 
-        File dstDirectory = new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
+        File dstDirectory = new File(Environment.getExternalStorageDirectory(), "SMileCE/export/");
         dstDirectory.mkdirs(); // create folder if it does not exist yet
 
         File dst = new File(dstDirectory, filename);
@@ -586,7 +586,7 @@ public class KeyManagement {
         }
 
         String filename = alias + ".crt";
-        File dstDirectory = new File(Environment.getExternalStorageDirectory(), "SMile-crypto/export/");
+        File dstDirectory = new File(Environment.getExternalStorageDirectory(), "SMileCE/export/");
         dstDirectory.mkdirs(); // create folder if it does not exist yet
 
         File dst = new File(dstDirectory, filename);

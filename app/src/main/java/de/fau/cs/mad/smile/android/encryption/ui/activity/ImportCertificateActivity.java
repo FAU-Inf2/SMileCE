@@ -59,6 +59,14 @@ public class ImportCertificateActivity extends ActionBarActivity {
         final Intent intent = getIntent();
         final String action = intent.getAction();
 
+        try {
+            keyManagement = KeyManagement.getInstance();
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
+            Toast.makeText(this, R.string.open_keystore_failed, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         if (Intent.ACTION_VIEW.equals(action)) {
             if(SMileCrypto.DEBUG) {
                 Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
@@ -77,14 +85,6 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
             }
             showFileChooser();
-        }
-
-        try {
-            keyManagement = KeyManagement.getInstance();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | NoSuchProviderException | CertificateException e) {
-            Toast.makeText(this, R.string.open_keystore_failed, Toast.LENGTH_SHORT);
-            finish();
-            return;
         }
     }
 
@@ -147,9 +147,8 @@ public class ImportCertificateActivity extends ActionBarActivity {
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
                     if(SMileCrypto.DEBUG) {
-                        Log.d(SMileCrypto.LOG_TAG, "Uri: " + uri);
+                        Log.d(SMileCrypto.LOG_TAG, "Uri was: " + uri);
                     }
-
                     String path = PathConverter.getPath(this, uri);
                     if(SMileCrypto.DEBUG) {
                         Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
