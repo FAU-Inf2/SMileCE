@@ -296,8 +296,9 @@ public class KeyManagement {
     }
 
     public final String getPassphraseForAlias(final String alias) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext().
-                getApplicationContext());
+        final Context context = App.getContext().getApplicationContext();
+        final String preferenceFileName = context.getPackageName() + "_preferences";
+        SharedPreferences preferences = context.getSharedPreferences(preferenceFileName, Context.MODE_MULTI_PROCESS);
 
         if (preferences.contains(alias + "-passphrase")) {
             String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
