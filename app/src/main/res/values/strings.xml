@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">SMile Cryptographic Extension</string>
-    <string name="app_name_short">SMile CE</string>
+    <string name="app_name_short">SMileCE</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="error">Error</string>
@@ -142,8 +142,8 @@
     <string name="valid_label">Valid until:</string>
     <string name="certificate_deleted">Certificate was deleted.</string>
 
-    <string name="faq_author">Who is the author of SMile?</string>
-    <string name="faq_license">Which license does SMile have?</string>
+    <string name="faq_author">Who is the author of SMileCE?</string>
+    <string name="faq_license">Which license does SMileCE have?</string>
     <string name="faq_other_projects">Which other projects are used by this app?</string>
 
     <string name="faq_import_cert_q">How can I import my S/MIME-certificate?</string>
