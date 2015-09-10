@@ -213,9 +213,12 @@ public class KeyManagement {
     }
 
     public List<KeyInfo> getAllCertificates() {
-        if (certificates.size() == 0) {
+        /*if (certificates.size() == 0) {
             loadCertificates();
-        }
+        }*/
+
+        //FIXME: do not always reload certs
+        loadCertificates();
 
         return certificates;
     }
