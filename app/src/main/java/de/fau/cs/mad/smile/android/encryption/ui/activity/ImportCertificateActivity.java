@@ -21,7 +21,9 @@ import android.widget.Toast;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.FileNameMap;
 import java.net.URLConnection;
@@ -71,19 +73,14 @@ public class ImportCertificateActivity extends ActionBarActivity {
             if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Intent contains path to file.");
             }
-            Uri uri = intent.getData();
-            String path = PathConverter.getPath(this, uri);
-            TextView textView = (TextView) findViewById(R.id.import_text_view);
-            textView.setText(getString(R.string.import_certificate_show_path) + path);
-            if(SMileCrypto.isDEBUG()) {
-                Log.d(SMileCrypto.LOG_TAG, "Path to file is " + path);
-            }
-            handleFile(path);
+
+            handleFileImport(intent);
         } else {
             if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Intent was something else: " + action);
                 Log.d(SMileCrypto.LOG_TAG, "Show file chooser.");
             }
+
             showFileChooser();
         }
     }
@@ -144,24 +141,28 @@ public class ImportCertificateActivity extends ActionBarActivity {
             case FILE_CHOOSER_REQUEST_CODE:
                 //receive result from file manager (--> uri of certificate)
                 if (resultCode == RESULT_OK) {
-                    // Get the Uri of the selected file
-                    Uri uri = data.getData();
-                    if(SMileCrypto.isDEBUG()) {
-                        Log.d(SMileCrypto.LOG_TAG, "Uri was: " + uri);
-                    }
-                    String path = PathConverter.getPath(this, uri);
-                    if(SMileCrypto.isDEBUG()) {
-                        Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
-                    }
-                    TextView textView = (TextView) this.findViewById(R.id.import_text_view);
-                    textView.setText(getString(R.string.import_certificate_show_path) + path);
-                    handleFile(path);
+                    handleFileImport(data);
                 } else {
                     noFileSelected();
                 }
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void handleFileImport(Intent data) {
+        if(data == null) {
+            return;
+        }
+
+        // Get the Uri of the selected file
+        Uri uri = data.getData();
+        if(SMileCrypto.isDEBUG()) {
+            Log.d(SMileCrypto.LOG_TAG, "Uri was: " + uri);
+        }
+
+        PathConverter.FileInformation fileInformation = PathConverter.getFileInformation(this, uri);
+        handleFile(fileInformation);
     }
 
     private void noFileSelected() {
@@ -184,10 +185,143 @@ public class ImportCertificateActivity extends ActionBarActivity {
         builder.create().show();
     }
 
+    private void handleFile(PathConverter.FileInformation fileInformation) {
+        if(fileInformation == null) {
+            return;
+        }
+
+        TextView textView = (TextView) this.findViewById(R.id.import_text_view);
+        textView.setText(getString(R.string.import_certificate_show_path) + fileInformation.getDisplayName());
+
+        String mimeType = fileInformation.getMimeType();
+        if (mimeType == null) {
+            if(SMileCrypto.isDEBUG()) {
+                Log.e(SMileCrypto.LOG_TAG, "MimeType was null.");
+                Log.e(SMileCrypto.LOG_TAG, "Filename was: " + fileInformation.getDisplayName());
+            }
+
+            importError(getResources().getString(R.string.unknown_filetype));
+            return;
+        }
+
+        switch (mimeType) {
+            case "application/x-pkcs12":
+                if(SMileCrypto.isDEBUG()) {
+                    Log.d(SMileCrypto.LOG_TAG, "File is a .p12-file, show passphrase prompt.");
+                }
+                showPassphrasePrompt(fileInformation);
+
+                break;
+            case "application/x-x509-ca-cert":
+            case "application/x-x509-user-cert":
+                if(SMileCrypto.isDEBUG()) {
+                    Log.d(SMileCrypto.LOG_TAG, "File is a .crt/.cer-file, get certificate.");
+                }
+
+                X509Certificate certificate = getCertificate(fileInformation.getFile());
+
+                if (certificate == null) {
+                    importError(getResources().getString(R.string.error_reading_certificate));
+                }
+
+                if (keyManagement.addFriendsCertificate(certificate)) {
+                    importSuccessful();
+                } else {
+                    importError(getResources().getString(R.string.internal_error));
+                }
+                break;
+            default:
+                if(SMileCrypto.isDEBUG()) {
+                    Log.e(SMileCrypto.LOG_TAG, "Unknown mime type: " + mimeType);
+                    Log.e(SMileCrypto.LOG_TAG, "Filename was: " + fileInformation.getDisplayName());
+                }
+                importError(getResources().getString(R.string.unknown_filetype));
+                break;
+        }
+    }
+
+    private void showPassphrasePrompt(final PathConverter.FileInformation fileInformation) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View passphrasePromptView = layoutInflater.inflate(R.layout.passphrase_prompt, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(passphrasePromptView);
+
+        final EditText passphraseUserInput = (EditText) passphrasePromptView.
+                findViewById(R.id.passphraseUserInput);
+        passphraseUserInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        passphraseUserInput.setTransformationMethod(new PasswordTransformationMethod());
+
+        alertDialogBuilder.setCancelable(false).setPositiveButton(getResources().getString(R.string.go),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String passphrase = passphraseUserInput.getText().toString();
+                        if (!keyManagement.addPrivateKeyFromP12ToKeyStore(fileInformation.getFile(), passphrase)) {
+                            wrongPassphrase(fileInformation);
+                        } else {
+                            importSuccessful();
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //dialog.dismiss();
+                                finish();
+                            }
+                        }
+                );
+        alertDialogBuilder.create().show();
+    }
+
+    private X509Certificate getCertificate(File file) {
+        try {
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            X509Certificate x509cert;
+            FileInputStream fileInputStream = new FileInputStream(file);
+            BufferedInputStream buf = new BufferedInputStream(fileInputStream);
+            x509cert = (X509Certificate) factory.generateCertificate(buf);
+            return x509cert;
+        } catch (CertificateException | FileNotFoundException e) {
+            if(SMileCrypto.isDEBUG()) {
+                Log.e(SMileCrypto.LOG_TAG, "CertificateException: " + e.getMessage());
+            }
+            return null;
+        }
+    }
+
+    private void wrongPassphrase(final PathConverter.FileInformation fileInformation) {
+        if(SMileCrypto.isDEBUG()) {
+            Log.d(SMileCrypto.LOG_TAG, "Wrong passphrase. Show passphrase prompt again.");
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ImportCertificateActivity.this);
+        builder.setTitle(getResources().getString(R.string.error));
+        builder.setMessage(getResources().getString(R.string.enter_passphrase_wrong) +
+                "\n" + getResources().getString(R.string.try_again));
+
+        builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                showPassphrasePrompt(fileInformation);
+            }
+        });
+
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+
+        builder.create().show();
+    }
+
     private void handleFile(String pathToFile) {
         if(pathToFile == null) {
             return;
         }
+
+        TextView textView = (TextView) this.findViewById(R.id.import_text_view);
+        textView.setText(getString(R.string.import_certificate_show_path) + pathToFile);
 
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(pathToFile);

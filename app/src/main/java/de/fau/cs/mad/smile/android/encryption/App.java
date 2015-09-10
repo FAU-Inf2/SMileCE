@@ -8,6 +8,7 @@ import android.util.Log;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -37,6 +38,11 @@ public class App extends Application {
         final String preferenceFileName = context.getPackageName() + "_preferences";
         SharedPreferences preferences = context.getSharedPreferences(preferenceFileName, Context.MODE_MULTI_PROCESS);
         return preferences;
+    }
+
+    public static File getCertificateDirectory() {
+        Context appContext = App.getContext().getApplicationContext();
+        return appContext.getDir("smime-certificates", Context.MODE_PRIVATE);
     }
 
     private void generateKeyPair() {

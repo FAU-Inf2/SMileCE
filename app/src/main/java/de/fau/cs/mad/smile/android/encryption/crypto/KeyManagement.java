@@ -7,7 +7,9 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
@@ -16,6 +18,7 @@ import org.spongycastle.asn1.x500.style.IETFUtils;
 import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -112,6 +115,46 @@ public class KeyManagement {
         }
 
         return savePassphrase(new_alias, passphrase);
+    }
+
+    public Boolean addPrivateKeyFromP12ToKeyStore(final File file, final String passphrase) {
+        try {
+            char[] passphraseChared = passphrase.toCharArray();
+            KeyStore keyFileStore = KeyStore.getInstance("pkcs12");
+            keyFileStore.load(new FileInputStream(file), passphraseChared);
+            Enumeration e = keyFileStore.aliases();
+            while (e.hasMoreElements()) {
+                String alias = (String) e.nextElement();
+                if (!keyFileStore.isKeyEntry(alias)) {
+                    continue;
+                }
+
+                X509Certificate certificate = (X509Certificate) keyFileStore.getCertificate(alias);
+                if(SMileCrypto.isDEBUG()) {
+                    Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
+                    Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + certificate.getSubjectDN().getName());
+                    Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + certificate.getIssuerDN().getName());
+                }
+
+                // TODO: collect certificate chain and store
+                final PrivateKey privateKey = (PrivateKey) keyFileStore.getKey(alias, passphraseChared);
+                final String new_alias = addCertificateToKeyStore(privateKey, certificate);
+                if (new_alias == null) {
+                    return false;
+                }
+
+                addKeyInfo(new_alias);
+
+                copyP12ToInternalDir(file, new_alias);
+                return savePassphrase(new_alias, passphrase);
+            }
+            return true;
+        } catch (Exception e) {
+            if(SMileCrypto.isDEBUG()) {
+                Log.e(SMileCrypto.LOG_TAG, "Error while loading keyStore: " + e.getMessage());
+            }
+            return false;
+        }
     }
 
     public Boolean addPrivateKeyFromP12ToKeyStore(final String pathToFile, final String passphrase) {
@@ -530,6 +573,25 @@ public class KeyManagement {
         }
 
         return new String(hexChars);
+    }
+
+    private static Boolean copyP12ToInternalDir(File file, String alias) {
+        File certDirectory = App.getCertificateDirectory();
+        String filename = alias + ".p12";
+        File dst = new File(certDirectory, filename);
+
+        try {
+            FileUtils.copyFile(file, dst);
+            if(SMileCrypto.isDEBUG()) {
+                Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);
+            }
+            return true;
+        } catch (IOException e) {
+            if(SMileCrypto.isDEBUG()) {
+                Log.e(SMileCrypto.LOG_TAG, "Error copying .p12 to internal storage: " + e.getMessage());
+            }
+            return false;
+        }
     }
 
     private static Boolean copyP12ToInternalDir(String pathToFile, String alias) {

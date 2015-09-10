@@ -40,7 +40,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="file" />
                 <data android:mimeType="application/x-x509-user-cert" />
                 <data android:mimeType="application/x-x509-ca-cert" />
                 <data android:mimeType="application/x-pkcs12" />
