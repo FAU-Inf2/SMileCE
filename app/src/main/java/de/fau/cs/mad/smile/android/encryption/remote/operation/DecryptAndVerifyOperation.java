@@ -49,6 +49,7 @@ public class DecryptAndVerifyOperation extends MimeBodyCryptoOperation {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
         } else {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+            // TODO: malformed message
         }
 
         return decryptedPart;

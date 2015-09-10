@@ -435,6 +435,7 @@ public class KeyManagement {
             if (rdn_email.length > 0) {
                 email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
             }
+
             if(SMileCrypto.DEBUG) {
                 Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
             }

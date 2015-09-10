@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import korex.mail.MessagingException;
 import korex.mail.internet.MimeBodyPart;
 
@@ -18,8 +19,12 @@ public class MimeBodyLoaderTask extends ContentLoaderTask<MimeBodyPart> {
     @Override
     protected MimeBodyPart doInBackground(Void... params) {
         try {
-            inputFile = copyToFile(getInputStream());
-            return new MimeBodyPart(new FileInputStream(inputFile));
+            InputStream inputStream = getInputStream();
+            if(SMileCrypto.DEBUG) {
+                inputFile = copyToFile(inputStream);
+                inputStream = new FileInputStream(inputFile);
+            }
+            return new MimeBodyPart(inputStream);
         } catch (MessagingException | IOException e) {
             return null;
         }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import de.fau.cs.mad.smile.android.encryption.App;
+import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.CryptoParams;
 import de.fau.cs.mad.smile.android.encryption.crypto.CryptoParamsLoaderTask;
 import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
@@ -133,6 +135,9 @@ public abstract class CryptoOperation<T> implements Closeable {
     public abstract void execute() throws MessagingException, IOException, GeneralSecurityException, OperatorCreationException, SMIMEException, CMSException, CertPathReviewerException, ExecutionException, InterruptedException;
 
     protected void copyHeaders(MimeMessage source, MimeMessage target) throws MessagingException {
+        Log.d(SMileCrypto.LOG_TAG, "source message: " + source);
+        Log.d(SMileCrypto.LOG_TAG, "target message: " + target);
+
         Enumeration enumeration = source.getAllHeaderLines();
         while (enumeration.hasMoreElements()) {
             String headerLine = (String) enumeration.nextElement();

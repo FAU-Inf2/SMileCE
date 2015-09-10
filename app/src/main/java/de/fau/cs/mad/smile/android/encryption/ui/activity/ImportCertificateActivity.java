@@ -182,6 +182,10 @@ public class ImportCertificateActivity extends ActionBarActivity {
     }
 
     private void handleFile(String pathToFile) {
+        if(pathToFile == null) {
+            return;
+        }
+
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(pathToFile);
         if (mimeType == null) {
