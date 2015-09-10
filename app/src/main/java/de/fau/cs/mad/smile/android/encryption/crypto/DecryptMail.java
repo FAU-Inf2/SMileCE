@@ -61,7 +61,7 @@ public class DecryptMail {
             CertificateException, IOException, SMIMEException, UnrecoverableEntryException {
 
         if (mimeBodyPart == null) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Called decryptMail with empty mimeMessage.");
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -69,7 +69,7 @@ public class DecryptMail {
         }
 
         if(cryptoParams == null) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Called DecryptMail.decryptMail with no CryptoParams");
             }
 
@@ -77,7 +77,7 @@ public class DecryptMail {
         }
 
         if(cryptoParams.getIdentity() == null) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Called DecryptMail.decryptMail with no identity in CryptoParams");
             }
 
@@ -125,7 +125,7 @@ public class DecryptMail {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_CERTIFICATE_FOUND;
             return null;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             }
             e.printStackTrace();
@@ -138,7 +138,7 @@ public class DecryptMail {
         try {
             final KeyStore.PrivateKeyEntry privateKey = keyManagement.getPrivateKeyEntry(alias, passphrase);
             if (privateKey == null) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.e(SMileCrypto.LOG_TAG, "Could not find private key!");
                 }
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_CERTIFICATE_STORED;
@@ -149,7 +149,7 @@ public class DecryptMail {
 
             return decryptMailSynchronous(mimeMessage, privateKey.getPrivateKey(), cert);
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             }
             e.printStackTrace();
@@ -167,7 +167,7 @@ public class DecryptMail {
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
 
             if (dec == null) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Decrypted MimeBodyPart is null.");
                 }
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_DECRYPTION_FAILED;
@@ -176,7 +176,7 @@ public class DecryptMail {
             }
             return dec;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in DecryptMail: " + e.getMessage());
             }
             e.printStackTrace();
@@ -192,7 +192,7 @@ public class DecryptMail {
         try {
             return new AsyncDecryptEncodeMail(pathToFile, alias, passphrase).execute().get();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error while waiting for AsyncTask: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -207,7 +207,7 @@ public class DecryptMail {
             File file = new File(pathToFile);
             return new MimeMessage(session, new FileInputStream(file));
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception while reading encrypted mail: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_NO_VALID_MIMEMESSAGE_IN_FILE;
@@ -241,7 +241,7 @@ public class DecryptMail {
         try {
             return mimeMessage.getAllRecipients();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error while getting all recipients: " + e.getMessage());
             }
             return null;
@@ -254,15 +254,15 @@ public class DecryptMail {
 
     public MimeMessage decodeMimeBodyParts(String decryptedPart, Boolean decodeBase64Parts, String multipartContentType) {
         try {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Try to decode MimeBodyPart…");
             }
             if (decodeBase64Parts) {
-                if (SMileCrypto.DEBUG) {
+                if (SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Will decode base64-text-parts if such parts exist.");
                 }
             } else {
-                if (SMileCrypto.DEBUG) {
+                if (SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Will not decode base64-text-parts.");
                 }
             }
@@ -436,12 +436,12 @@ public class DecryptMail {
                 }
 
             }*/
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "… finished decoding MimeBodyPart.");
             }
             return newMimeMessage;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -454,7 +454,7 @@ public class DecryptMail {
         try {
             return decodeMimeBodyParts(convertMimeBodyPartToString(mimeBodyPart), decodeBase64Parts, null);
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception decoding parts: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -474,7 +474,7 @@ public class DecryptMail {
 
             return baos.toString();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error converting MimeBodyPart to String: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -500,7 +500,7 @@ public class DecryptMail {
             ((Multipart) mimeMessage.getContent()).writeTo(bytes);
             return result + bytes.toString();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error converting MimeMessage to String: " + e.getMessage());
             }
             e.printStackTrace();
@@ -535,7 +535,7 @@ public class DecryptMail {
                         }
                         return new String(baos.toByteArray());
                     } else {
-                        if(SMileCrypto.DEBUG) {
+                        if(SMileCrypto.isDEBUG()) {
                             Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
                         }
                         SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -544,7 +544,7 @@ public class DecryptMail {
                 }
             }
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -578,7 +578,7 @@ public class DecryptMail {
                         }
                         return new String(baos.toByteArray());
                     } else {
-                        if(SMileCrypto.DEBUG) {
+                        if(SMileCrypto.isDEBUG()) {
                             Log.d(SMileCrypto.LOG_TAG, "b.getContent was instance of: " + b.getContentType());
                         }
                         SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -587,7 +587,7 @@ public class DecryptMail {
                 }
             }
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error extracting text/plain from MimeMessage: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;
@@ -602,7 +602,7 @@ public class DecryptMail {
 
         try {
             int i = 0;
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Add headers from encrypted MimeMessage.");
             }
             Enumeration allHeaders = encryptedMimeMessage.getAllHeaders();
@@ -614,11 +614,11 @@ public class DecryptMail {
                 newMimeMessage.addHeader(header.getName(), header.getValue());
                 i++;
             }
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Added " + i + " headers from encrypted MimeMessage.");
             }
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception in addOldHeaders:" + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_UNKNOWN_ERROR;

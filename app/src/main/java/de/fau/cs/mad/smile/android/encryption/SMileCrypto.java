@@ -55,16 +55,24 @@ public class SMileCrypto extends Application {
     //unknown error -- status code is the answer ;-)
     public static final int STATUS_UNKNOWN_ERROR = 42;
 
+    private static boolean DEBUG = false;
+
+    static {
+        SharedPreferences sharedPreferences = App.getPreferences();
+        DEBUG = sharedPreferences.getBoolean("pref_key_debug", false);
+    }
+
     /**
      * If this is enabled there will be additional logging information sent to
      * Log.d, including protocol dumps.
      */
+    public static boolean isDEBUG() {
+        SharedPreferences sharedPreferences = App.getPreferences();
+        return sharedPreferences.getBoolean("pref_key_debug", false);
+    }
 
-    public static boolean DEBUG = false;
-
-    static {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-        DEBUG = sharedPreferences.getBoolean("pref_key_debug", false);
+    public static void setDEBUG(boolean DEBUG) {
+        SMileCrypto.DEBUG = DEBUG;
     }
 
 }

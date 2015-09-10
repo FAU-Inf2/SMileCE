@@ -78,7 +78,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Settings changed: Key " + key);
         }
         if (key.equals("pref_key_direction") || key.equals("pref_key_type")) {
@@ -301,7 +301,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
                 contactLookup.close();
             }
         }
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "mail: " + email);
             Log.d(SMileCrypto.LOG_TAG, "thumb: " + thumb);
             Log.d(SMileCrypto.LOG_TAG, "name: " + name);
@@ -315,11 +315,11 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
             Bitmap bmp = Utils.getCroppedBitmap(BitmapFactory.decodeStream(input));
             BitmapDrawable bdrawable = new BitmapDrawable(App.getContext().getResources(), bmp);
             holder.contactimage.setBackground(bdrawable);
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Thumbnail found.");
             }
         } else {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Thumbnail not found.");
             }
 
@@ -353,7 +353,7 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
     private void printError() {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(App.getContext().getResources().getString(R.string.error));
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.e(SMileCrypto.LOG_TAG, "EXIT_STATUS: " + SMileCrypto.EXIT_STATUS);
         }
         builder.setMessage(App.getContext().getResources().getString(R.string.internal_error));

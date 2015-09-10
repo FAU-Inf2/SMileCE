@@ -50,7 +50,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equalsIgnoreCase("pref_key_debug")) {
             Preference pref = findPreference(key);
-            SMileCrypto.DEBUG = sharedPreferences.getBoolean(key, false);
+            SMileCrypto.setDEBUG(sharedPreferences.getBoolean(key, false));
         } else if(key.equals("delete_distance")) {
             int value = sharedPreferences.getInt(key, 30);
             Preference pref = findPreference(key);

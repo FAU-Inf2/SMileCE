@@ -1,6 +1,5 @@
 package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
-import android.app.ActionBar;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -80,21 +79,21 @@ public class HelpActivity extends ActionBarActivity {
     private void prepareListData() {
         listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, List<Pair<Integer, String[]>>>();
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Help:");
         }
         Resources resources = getResources();
         Collections.addAll(listDataHeader, resources.getStringArray(R.array.faq_questions));
         int headerIndex = 0;
         for (String key : resources.getStringArray(R.array.faq_key_array)) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "\tProcessing key: " + key);
             }
             List<TypedArray> helpItems = Utils.getMultiTypedArray(this, key);
             List<Pair<Integer, String[]>> result = new ArrayList<>();
             for (TypedArray item : helpItems) {
                 int size = item.length() - 1;
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "\t\tLength of data: " + size);
                 }
                 int type = item.getInt(0, 0);
@@ -107,7 +106,7 @@ public class HelpActivity extends ActionBarActivity {
                     } else {
                         description = item.getString(i + 1);
                     }
-                    if(SMileCrypto.DEBUG) {
+                    if(SMileCrypto.isDEBUG()) {
                         Log.d(SMileCrypto.LOG_TAG, "\t\tDescription: " + description);
                     }
                     helpText[i] = description;

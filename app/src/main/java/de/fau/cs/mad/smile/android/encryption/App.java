@@ -2,6 +2,7 @@ package de.fau.cs.mad.smile.android.encryption;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.security.KeyPairGeneratorSpec;
 import android.util.Log;
 
@@ -29,6 +30,13 @@ public class App extends Application {
 
     public static Context getContext() {
         return mContext;
+    }
+
+    public static SharedPreferences getPreferences() {
+        final Context context = getContext().getApplicationContext();
+        final String preferenceFileName = context.getPackageName() + "_preferences";
+        SharedPreferences preferences = context.getSharedPreferences(preferenceFileName, Context.MODE_MULTI_PROCESS);
+        return preferences;
     }
 
     private void generateKeyPair() {
@@ -59,7 +67,7 @@ public class App extends Application {
             gen.initialize(spec);
             gen.generateKeyPair();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "ERROR: " + e.getMessage());
             }
             e.printStackTrace();

@@ -193,7 +193,7 @@ public class Utils {
                 counter++;
             } while (field != null);
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error accessing data: " + e.getMessage());
             }
         } finally {

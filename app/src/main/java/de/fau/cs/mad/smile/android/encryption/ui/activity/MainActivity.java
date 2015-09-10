@@ -65,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.toolbar_title_list_of_certs);
+        toolbar.setTitle(R.string.toolbar_default_title);
         setSupportActionBar(toolbar);
 
         try {
@@ -110,20 +110,20 @@ public class MainActivity extends ActionBarActivity {
         try {
             ownCertificates = KeyManagement.getInstance().getOwnCertificates();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error: " + e.getMessage());
             }
         }
 
         int i = 0;
-        while ((mName == null || mName.equals("")) && i < ownCertificates.size()) { // use first certificate with name set
+        while (mName == null && i < ownCertificates.size()) { // use first certificate with name set
             KeyInfo keyInfo = ownCertificates.get(i);
             mName = keyInfo.getContact();
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "mName: " + mName);
             }
             mEmail = keyInfo.getMail();
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "mEmail: " + mEmail);
             }
             i++;
@@ -160,16 +160,16 @@ public class MainActivity extends ActionBarActivity {
                     int position = recyclerView.getChildPosition(child);
                     String title;
                     if (position == 0)
-                        title = getResources().getString(R.string.toolbar_title_list_of_certs);
+                        title = getResources().getString(R.string.toolbar_default_title);
                     else
                         title = mTitles[position - 1];
 
-                    if(SMileCrypto.DEBUG) {
+                    if(SMileCrypto.isDEBUG()) {
                         Log.d(SMileCrypto.LOG_TAG, "Clicked on NavigationDrawerItem " + position + ": "
                                 + title);
                     }
                     //switch not possible here :-(
-                    if (title.equals(getResources().getString(R.string.toolbar_title_list_of_certs))) {
+                    if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);

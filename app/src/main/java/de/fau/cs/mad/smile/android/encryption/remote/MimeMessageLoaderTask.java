@@ -24,7 +24,7 @@ public class MimeMessageLoaderTask extends ContentLoaderTask<MimeMessage> {
         Session session = Session.getDefaultInstance(props, null);
         try {
             InputStream inputStream = getInputStream();
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 inputFile = copyToFile(inputStream);
                 inputStream = new FileInputStream(inputFile);
             }

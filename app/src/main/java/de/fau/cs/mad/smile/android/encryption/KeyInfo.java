@@ -180,7 +180,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
             case "3":
                 return comparePrivateKey(another);
             default:
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Sort by default not possible.");
                 }
                 throw new IllegalArgumentException("Sort by " + sharedPreferences.getString("pref_key_type", "0") + " not implemented.");
@@ -205,7 +205,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
         } else {
             erg = this.getContact().compareTo(another.getContact());
         }
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Sorted by: Name; Order: " + Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1")));
         }
         erg *= Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1"));
@@ -222,8 +222,8 @@ public class KeyInfo implements Comparable<KeyInfo> {
     public int compareMail(KeyInfo another) {
         int erg = 0;
         erg = this.getMail().compareTo(another.getMail());
-        if(SMileCrypto.DEBUG) {
-            if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Sorted by: Mail address; Order: " + Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1")));
             }
         }
@@ -241,7 +241,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
     public int compareTermination(KeyInfo another) {
         int erg = 0;
         erg = this.getTerminationDate().compareTo(another.getTerminationDate());
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Sorted by: Expiration date; Order: " + Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1")));
         }
         erg *= Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1"));
@@ -272,7 +272,7 @@ public class KeyInfo implements Comparable<KeyInfo> {
             }
         }
         erg = this.getTerminationDate().compareTo(another.getTerminationDate());
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Sorted by: Expiration date; Order: " + Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1")));
         }
         erg *= Integer.valueOf(sharedPreferences.getString("pref_key_direction", "1"));

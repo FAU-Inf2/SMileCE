@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
@@ -88,7 +87,7 @@ public class KeyManagement {
         try {
             addKeyInfo(new_alias);
         } catch (KeyStoreException | CertificateParsingException | NoSuchAlgorithmException | CertificateEncodingException e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Error while adding certificate. " + e.getMessage());
             }
             return false;
@@ -106,7 +105,7 @@ public class KeyManagement {
             ks.store(fos, password);
             fos.close();
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Error writing certificate´to internal storage. " + e.getMessage());
             }
             return false;
@@ -128,7 +127,7 @@ public class KeyManagement {
                 }
 
                 X509Certificate certificate = (X509Certificate) keyFileStore.getCertificate(alias);
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                     Log.d(SMileCrypto.LOG_TAG, "· SubjectDN: " + certificate.getSubjectDN().getName());
                     Log.d(SMileCrypto.LOG_TAG, "· IssuerDN: " + certificate.getIssuerDN().getName());
@@ -148,7 +147,7 @@ public class KeyManagement {
             }
             return true;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error while loading keyStore: " + e.getMessage());
             }
             return false;
@@ -170,7 +169,7 @@ public class KeyManagement {
         try {
             String thumbprint = getThumbprint(certificate);
             String alias = "SMile_crypto_other_" + thumbprint;
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Check whether certificate is stored for alias: " + alias);
             }
 
@@ -186,7 +185,7 @@ public class KeyManagement {
                 return true;
             }
 
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Alias is not there, import new certificate without private key.");
             }
             androidKeyStore.setCertificateEntry(alias, certificate);
@@ -194,7 +193,7 @@ public class KeyManagement {
 
             return androidKeyStore.containsAlias(alias);
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in x: " + e.getMessage());
             }
             return false;
@@ -225,14 +224,14 @@ public class KeyManagement {
 
     private void loadCertificates() {
         try {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Find all own certificates…");
             }
 
             Enumeration e = androidKeyStore.aliases();
             while (e.hasMoreElements()) {
                 String alias = (String) e.nextElement();
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Found certificate with alias: " + alias);
                 }
                 if (alias.equals(App.getContext().getString(R.string.smile_save_passphrases_certificate_alias))) {
@@ -242,7 +241,7 @@ public class KeyManagement {
                 addKeyInfo(alias);
             }
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error while finding certificate: " + e.getMessage());
             }
             e.printStackTrace();
@@ -264,7 +263,7 @@ public class KeyManagement {
 
         KeyStore p12 = KeyStore.getInstance("pkcs12");
         String pathTop12File = FilenameUtils.concat(certificateDirectory, alias + ".p12");
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "certificate file path: " + pathTop12File);
         }
         File p12File = new File(pathTop12File);
@@ -285,7 +284,7 @@ public class KeyManagement {
                 }
             }
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error, probably wrong passphrase: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_WRONG_PASSPHRASE;
@@ -296,23 +295,21 @@ public class KeyManagement {
     }
 
     public final String getPassphraseForAlias(final String alias) {
-        final Context context = App.getContext().getApplicationContext();
-        final String preferenceFileName = context.getPackageName() + "_preferences";
-        SharedPreferences preferences = context.getSharedPreferences(preferenceFileName, Context.MODE_MULTI_PROCESS);
+        SharedPreferences preferences = App.getPreferences();
 
         if (preferences.contains(alias + "-passphrase")) {
             String encryptedPassphrase = preferences.getString(alias + "-passphrase", null);
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 //Log.d(SMileCrypto.LOG_TAG, "Passphrase: " + encryptedPassphrase);
                 Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase found.");
             }
             try {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Decrypt passphrase for alias: " + alias);
                 }
                 return PasswordEncryption.decryptString(encryptedPassphrase);
             } catch (Exception e) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.e(SMileCrypto.LOG_TAG, "Error while decrypting passphrase: " + e.getMessage());
                 }
                 return null;
@@ -329,7 +326,7 @@ public class KeyManagement {
                 mailAddress = ((InternetAddress) emailAddress).getAddress();
             }
 
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "looking up alias for: " + mailAddress);
             }
 
@@ -343,7 +340,7 @@ public class KeyManagement {
 
             return null;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
             }
             e.printStackTrace();
@@ -360,7 +357,7 @@ public class KeyManagement {
                 mailAddress = ((InternetAddress) emailAddress).getAddress();
             }
 
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Looking up alias for: " + mailAddress);
             }
 
@@ -380,7 +377,7 @@ public class KeyManagement {
                 }
             }
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in getAliasByAddress:" + e.getMessage());
             }
             e.printStackTrace();
@@ -415,7 +412,7 @@ public class KeyManagement {
 
         KeyInfo keyInfo = new KeyInfo();
         keyInfo.setAlias(alias);
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "· Type: " + c.getType());
             Log.d(SMileCrypto.LOG_TAG, "· HashCode: " + c.hashCode());
         }
@@ -440,7 +437,7 @@ public class KeyManagement {
                 email = IETFUtils.valueToString(rdn_email[0].getFirst().getValue());
             }
 
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "· Email: " + email);
             }
 
@@ -485,7 +482,7 @@ public class KeyManagement {
 
     public boolean deleteKey(final String alias) {
         try {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Delete key with alias: " + alias);
             }
             KeyInfo keyInfo = getKeyInfo(alias);
@@ -506,7 +503,7 @@ public class KeyManagement {
             // just own keys have to be deleted from internal storage
             return deletePassphrase(alias) && deleteP12FromInternalDir(alias);
         } catch (CertificateEncodingException | CertificateParsingException | NoSuchAlgorithmException | KeyStoreException e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error while deleting key: " + e.getMessage());
             }
             return false;
@@ -543,12 +540,12 @@ public class KeyManagement {
 
         try {
             org.apache.commons.io.FileUtils.copyFile(src, dst);
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Copied p12 to interal storage, filename: " + filename);
             }
             return true;
         } catch (IOException e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error copying .p12 to internal storage: " + e.getMessage());
             }
             return false;
@@ -566,7 +563,7 @@ public class KeyManagement {
         File dst = new File(dstDirectory, filename);
         try {
             org.apache.commons.io.FileUtils.copyFile(src, dst);
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Copied p12 from interal storage to SD-card.");
             }
             return dst.getAbsolutePath();
@@ -579,7 +576,7 @@ public class KeyManagement {
     public static String copyCertificateToSDCard(X509Certificate certificate, String alias) {
         if (certificate == null || alias == null) {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Called copyCertificateToSDCard with invalid parameters.");
             }
             return null;
@@ -591,19 +588,19 @@ public class KeyManagement {
 
         File dst = new File(dstDirectory, filename);
         try {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Export certificate with alias: " + alias);
             }
             FileOutputStream fos = new FileOutputStream(dst);
             fos.write(certificate.getEncoded());
             fos.flush();
             fos.close();
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Exported certificate to SD-card.");
             }
             return dst.getAbsolutePath();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error exporting certificate to external storage: " + e.getMessage());
             }
             return null;
@@ -612,14 +609,14 @@ public class KeyManagement {
 
     private String addCertificateToKeyStore(final PrivateKey key, final X509Certificate certificate) {
         try {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Import certificate to keyStore.");
             }
 
             String alias = "SMile_crypto_own_" + getThumbprint(certificate);
             //Check whether cert is already there
             if (androidKeyStore.containsAlias(alias)) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Alias " + alias + " already exists.");
                 }
                 SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_CERTIFICATE_ALREADY_IMPORTED;
@@ -630,7 +627,7 @@ public class KeyManagement {
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_SUCCESS;
             return alias;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error while importing certificate: " + e.getMessage());
             }
             return null;
@@ -638,7 +635,7 @@ public class KeyManagement {
     }
 
     private static Boolean savePassphrase(final String alias, final String passphrase) {
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Encrypt passphrase for alias: " + alias);
         }
         String encryptedPassphrase = PasswordEncryption.encryptString(passphrase);
@@ -647,7 +644,7 @@ public class KeyManagement {
             return false;
         }
 
-        if(SMileCrypto.DEBUG) {
+        if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  <sensitive>");
         }
 

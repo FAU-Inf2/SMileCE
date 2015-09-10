@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import net.danlew.android.joda.DateUtils;
 import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.joda.time.DateTime;
@@ -76,21 +75,21 @@ public class CertificateCreationActivity extends ActionBarActivity {
             DateTime tmp = DateTime.now();
             DateTime now = DateTime.now();
             ++monthOfYear; // DatePicker starts with 0
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Today: " + now.getDayOfMonth() + "." + now.getMonthOfYear() + "." + now.getYear());
                 Log.d(SMileCrypto.LOG_TAG, "Got date: " + dayOfMonth + "." + monthOfYear + "." + year);
             }
             valid = tmp.withDate(year, monthOfYear, dayOfMonth);
             date.setText(format.print(valid));
             if(valid.getMillis() <= now.getMillis()) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Date invalid");
                 }
                 dateOk = false;
                 date.setBackgroundColor(Color.RED);
                 wrongDate.setVisibility(View.VISIBLE);
             } else {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Date valid");
                 }
                 wrongDate.setVisibility(View.GONE);
@@ -116,7 +115,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
         if (bar != null) {
             bar.setDisplayHomeAsUpEnabled(true);
         } else {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Failed to set home as up in CertificateCreationActivity");
             }
         }

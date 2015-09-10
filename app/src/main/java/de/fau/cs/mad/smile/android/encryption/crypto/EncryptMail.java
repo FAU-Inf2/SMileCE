@@ -40,7 +40,7 @@ public class EncryptMail {
 
             return new AsyncEncryptMessage(message, certificate).execute().get();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception in encryptMessage: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -83,7 +83,7 @@ public class EncryptMail {
 
                 return envelopedGenerator.generate(bodyPart, encryptor);
             } catch (Exception e) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.e(SMileCrypto.LOG_TAG, "Exception while encrypting MimeBodyPart: " + e.getMessage());
                 }
                 e.printStackTrace();

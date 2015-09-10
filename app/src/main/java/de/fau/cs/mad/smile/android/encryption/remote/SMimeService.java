@@ -72,7 +72,7 @@ public class SMimeService extends Service {
                     operation = cryptoOperationBuilder.createVerifyOperation();
                     break;
                 default:
-                    if(SMileCrypto.DEBUG) {
+                    if(SMileCrypto.isDEBUG()) {
                         Log.d(SMileCrypto.LOG_TAG, "Unknown operation " + action);
                     }
             }
@@ -84,7 +84,7 @@ public class SMimeService extends Service {
         } catch (IOException | GeneralSecurityException | CertPathReviewerException | CMSException |
                 OperatorCreationException | SMIMEException | ExecutionException | InterruptedException | MessagingException e) {
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception while doing crypto stuff", e);
             }
         } finally {

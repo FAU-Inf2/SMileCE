@@ -12,7 +12,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -153,7 +152,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 text.setText(data[1]);
                 break;
             default:
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "This case shouldn't occur. Check if you forgot to add a new case.");
                 }
         }

@@ -20,7 +20,7 @@ public class MimeBodyLoaderTask extends ContentLoaderTask<MimeBodyPart> {
     protected MimeBodyPart doInBackground(Void... params) {
         try {
             InputStream inputStream = getInputStream();
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 inputFile = copyToFile(inputStream);
                 inputStream = new FileInputStream(inputFile);
             }

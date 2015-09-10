@@ -7,7 +7,6 @@ import org.spongycastle.cms.CMSAlgorithm;
 import org.spongycastle.cms.RecipientInfoGenerator;
 import org.spongycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.spongycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.spongycastle.operator.OutputEncryptor;
 
@@ -61,7 +60,7 @@ public class AsyncEncryptMessage extends AsyncTask<Void, Void, MimeMessage> {
 
             return result;
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Error in encryptMessage: " + e.getMessage());
             }
             //e.printStackTrace();

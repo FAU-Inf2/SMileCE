@@ -30,7 +30,7 @@ public class SignMessage {
 
     public MimeMultipart sign(MimeBodyPart mimeBodyPart, KeyStore.PrivateKeyEntry privateKey) {
         if (mimeBodyPart == null) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Could not sign, mimeBodyPart was null.");
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -38,7 +38,7 @@ public class SignMessage {
         }
 
         if (privateKey == null) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Could not sign, privateKeyEntry was null.");
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_INVALID_PARAMETER;
@@ -48,7 +48,7 @@ public class SignMessage {
         try {
             return new AsyncSign(mimeBodyPart, privateKey).execute().get();
         } catch (Exception e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.e(SMileCrypto.LOG_TAG, "Exception in sign: " + e.getMessage());
             }
             SMileCrypto.EXIT_STATUS = SMileCrypto.STATUS_ERROR_ASYNC_TASK;
@@ -74,7 +74,7 @@ public class SignMessage {
             MimeMultipart signedMimeMultipart = null;
 
             try {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.d(SMileCrypto.LOG_TAG, "Sign mimeBodyPart.");
                 }
 
@@ -96,7 +96,7 @@ public class SignMessage {
 
                 signedMimeMultipart = gen.generate(mimeBodyPart);
             } catch (Exception e) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.e(SMileCrypto.LOG_TAG, "Error signing mimeBodyPart: " + e.getMessage());
                 }
                 e.printStackTrace();

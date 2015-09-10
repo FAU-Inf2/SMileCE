@@ -4,49 +4,38 @@ package de.fau.cs.mad.smile.android.encryption.crypto;
 import android.util.Log;
 
 import org.joda.time.DateTime;
-import org.spongycastle.asn1.DEROctetString;
 import org.spongycastle.asn1.x500.X500Name;
 import org.spongycastle.asn1.x500.X500NameBuilder;
 import org.spongycastle.asn1.x500.style.BCStyle;
 import org.spongycastle.asn1.x509.BasicConstraints;
 import org.spongycastle.asn1.x509.ExtendedKeyUsage;
 import org.spongycastle.asn1.x509.Extension;
-import org.spongycastle.asn1.x509.Extensions;
 import org.spongycastle.asn1.x509.GeneralName;
 import org.spongycastle.asn1.x509.GeneralNames;
 import org.spongycastle.asn1.x509.KeyPurposeId;
 import org.spongycastle.asn1.x509.KeyUsage;
 import org.spongycastle.asn1.x509.SubjectKeyIdentifier;
-import org.spongycastle.asn1.x509.X509Extension;
 import org.spongycastle.cert.X509CertificateHolder;
-import org.spongycastle.cert.X509ExtensionUtils;
-import org.spongycastle.cert.X509v1CertificateBuilder;
 import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.spongycastle.cert.jcajce.JcaX509ExtensionUtils;
-import org.spongycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.spongycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.operator.ContentSigner;
 import org.spongycastle.operator.OperatorCreationException;
 import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.spongycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +120,7 @@ public class SelfSignedCertificateCreator {
             try {
                 x500Name = new X500Name(expert);
             } catch (IllegalArgumentException iae) {
-                if(SMileCrypto.DEBUG) {
+                if(SMileCrypto.isDEBUG()) {
                     Log.e(SMileCrypto.LOG_TAG, "Wrong expert string: " + iae.getMessage());
                 }
                 return SMileCrypto.STATUS_EXPERT_WRONG_STRING;
@@ -196,7 +185,7 @@ public class SelfSignedCertificateCreator {
                 return SMileCrypto.STATUS_FAILED_SAVE_CERT;
             }
         } catch (NoSuchAlgorithmException | NoSuchProviderException | OperatorCreationException | InvalidAlgorithmParameterException | CertificateException | KeyStoreException | IOException e) {
-            if(SMileCrypto.DEBUG) {
+            if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Error creating self signed certificate. " + e.getMessage());
             }
             return SMileCrypto.STATUS_FAILED_SAVE_CERT;
