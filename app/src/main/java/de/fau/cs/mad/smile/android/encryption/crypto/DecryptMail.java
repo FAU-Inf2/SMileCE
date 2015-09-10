@@ -68,6 +68,22 @@ public class DecryptMail {
             return null;
         }
 
+        if(cryptoParams == null) {
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Called DecryptMail.decryptMail with no CryptoParams");
+            }
+
+            return null;
+        }
+
+        if(cryptoParams.getIdentity() == null) {
+            if(SMileCrypto.DEBUG) {
+                Log.e(SMileCrypto.LOG_TAG, "Called DecryptMail.decryptMail with no identity in CryptoParams");
+            }
+
+            return null;
+        }
+
         X509Certificate certificate = (X509Certificate) cryptoParams.getIdentity().getCertificate();
         PrivateKey privateKey = cryptoParams.getIdentity().getPrivateKey();
 
