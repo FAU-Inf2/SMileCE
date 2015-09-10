@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">SMile-crypto</string>
+    <string name="app_name">SMile Cryptographic Extension</string>
+    <string name="app_name_short">SMile CE</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="error">Error</string>
@@ -15,7 +16,8 @@
     <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
 
-    <string name="toolbar_default_title">SMile-crypto!</string>
+    <string name="toolbar_default_title">SMile Cryptographic Extension</string>
+    <string name="toolbar_title_list_of_certs">List of certificates</string>
 
     <string name="navigation_drawer_search">Search</string>
     <string name="navigation_drawer_info">Info</string>
@@ -166,7 +168,7 @@
         \"Import S/MIME-Certificate\" in the sidebar. Use the opened file browser to select the
         certificate (.crt-file) which you want to import.\n
         It is also possible to import a certificate by clicking on the file in your file browser
-    and selecting SMile-crypto in the list of \"Open with\".</string>
+    and selecting SMile CE in the list of \"Open with\".</string>
 
     <string name="faq_additional_certificate_info_q">How can I retrieve all information from the certificate?</string>
     <string name="faq_additional_certificate_info">Just tap on the card and the Activity, which
