@@ -146,6 +146,9 @@ public class ImportCertificateActivity extends ActionBarActivity {
                 if (resultCode == RESULT_OK) {
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
+                    if(SMileCrypto.DEBUG) {
+                        Log.d(SMileCrypto.LOG_TAG, "Uri was: " + uri);
+                    }
                     String path = PathConverter.getPath(this, uri);
                     if(SMileCrypto.DEBUG) {
                         Log.d(SMileCrypto.LOG_TAG, "Path to selected certificate: " + path);
