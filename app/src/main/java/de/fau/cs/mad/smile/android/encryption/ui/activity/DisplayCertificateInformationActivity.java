@@ -14,13 +14,16 @@ import android.widget.Toast;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
 import org.spongycastle.asn1.x500.RDN;
 import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x500.style.BCStyle;
 import org.spongycastle.asn1.x500.style.IETFUtils;
 import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
 
 import java.math.BigInteger;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -182,10 +185,8 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             }
             return;
         }
-        X500Name x500name = null;
         try {
-            x500name = new JcaX509CertificateHolder(certificate).getSubject();
-            parseX500Name(data, x500name);
+            parseX500Name(data, certificate, true);
             ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
             PersonalAndCAInformationItem persI = new PersonalAndCAInformationItem();
             persI.buildComplex(data);
@@ -263,7 +264,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         if(SMileCrypto.DEBUG) {
             Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
         }
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy HH:mm:ss");
         listDataHeader.add(getString(R.string.validity));
         HashMap<String, String> validity = new HashMap<>();
         validity.put("Startdate", keyInfo.getValidAfter().toString(fmt));
@@ -289,8 +290,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         LinkedHashMap<String, String[]> cadata = new LinkedHashMap<>();
 
         try {
-            x500name = new JcaX509CertificateHolder(certificate).getIssuer();
-            parseX500Name(cadata, x500name);
+            parseX500Name(cadata, certificate, false);
             ArrayList<AbstractCertificateInfoItem> pers = new ArrayList<>();
             PersonalAndCAInformationItem persI = new PersonalAndCAInformationItem();
             persI.buildComplex(cadata);
@@ -298,7 +298,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
             listDataChild.put(listDataHeader.get(1), pers);
         } catch (CertificateEncodingException e) {
             if(SMileCrypto.DEBUG) {
-                Log.d(SMileCrypto.LOG_TAG, "Error with certificate encoding: " + e.getMessage());
+                Log.e(SMileCrypto.LOG_TAG, "Error with certificate encoding: ", e);
             }
             Toast.makeText(App.getContext(), getString(R.string.failed_extract), Toast.LENGTH_SHORT).show();
         }
@@ -307,19 +307,45 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
     /**
      * Extracts data from a X500Name. The searched fields are defined in utils.
      * @param data The LinkedHashMap to fill with the extracted data.
-     * @param x500name The name to parse.
+     * @param certificate The certificate to parse.
+     * @param personal Is this a personal information.
      */
-    private void parseX500Name(LinkedHashMap<String, String[]> data, X500Name x500name) {
+    private void parseX500Name(LinkedHashMap<String, String[]> data, X509Certificate certificate, boolean personal) throws CertificateEncodingException {
         Resources res = getResources();
         String[] keys = res.getStringArray(R.array.info_keys);
         String[] entries = res.getStringArray(R.array.info_names);
+        X500Name x500name;
+        if(personal) {
+            x500name = new JcaX509CertificateHolder(certificate).getSubject();
+        } else {
+            x500name = new JcaX509CertificateHolder(certificate).getIssuer();
+        }
         for (int i = 0; i < Utils.asn1ObjectIdentifiers.length && i < keys.length && i < entries.length; ++i) {
-            RDN[] rdns = x500name.getRDNs(Utils.asn1ObjectIdentifiers[i]);
-            if (rdns.length > 0) {
-                String[] values = new String[2];
-                values[0] = entries[i];
-                values[1] = IETFUtils.valueToString(rdns[0].getFirst().getValue());
-                data.put(keys[i], values);
+            ASN1ObjectIdentifier identifier = Utils.asn1ObjectIdentifiers[i];
+            if(identifier.equals(BCStyle.E) && personal) {
+                List<String> emails = keyInfo.getMailAddresses();
+                String[] values = new String[emails.size() + 1];
+                int counter = 1;
+                for(String email : emails) {
+                    values[0] = entries[i];
+                    values[counter] = email;
+                    ++counter;
+                }
+                if (values.length > 1) {
+                    data.put(keys[i], values);
+                }
+            } else {
+                RDN[] rdns = x500name.getRDNs(identifier);
+                String[] values = new String[rdns.length + 1];
+                int counter = 1;
+                for (RDN rdn : rdns) {
+                    values[0] = entries[i];
+                    values[counter] = IETFUtils.valueToString(rdn.getFirst().getValue());
+                    ++counter;
+                }
+                if (values.length > 1) {
+                    data.put(keys[i], values);
+                }
             }
         }
     }

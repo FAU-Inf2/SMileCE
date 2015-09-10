@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">SMile-crypto</string>
+    <string name="app_name">SMile Cryptographic Extension</string>
+    <string name="app_name_short">SMileCE</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="error">Error</string>
@@ -15,7 +16,8 @@
     <string name="ask_try_again">Try it again?</string>
     <string name="action_settings">Settings</string>
 
-    <string name="toolbar_default_title">SMile-crypto!</string>
+    <string name="toolbar_default_title">SMile Cryptographic Extension</string>
+    <string name="toolbar_title_list_of_certs">List of certificates</string>
 
     <string name="navigation_drawer_search">Search</string>
     <string name="navigation_drawer_info">Info</string>
@@ -140,8 +142,8 @@
     <string name="valid_label">Valid until:</string>
     <string name="certificate_deleted">Certificate was deleted.</string>
 
-    <string name="faq_author">Who is the author of SMile?</string>
-    <string name="faq_license">Which license does SMile have?</string>
+    <string name="faq_author">Who is the author of SMileCE?</string>
+    <string name="faq_license">Which license does SMileCE have?</string>
     <string name="faq_other_projects">Which other projects are used by this app?</string>
 
     <string name="faq_import_cert_q">How can I import my S/MIME-certificate?</string>
@@ -166,7 +168,7 @@
         \"Import S/MIME-Certificate\" in the sidebar. Use the opened file browser to select the
         certificate (.crt-file) which you want to import.\n
         It is also possible to import a certificate by clicking on the file in your file browser
-    and selecting SMile-crypto in the list of \"Open with\".</string>
+    and selecting SMile CE in the list of \"Open with\".</string>
 
     <string name="faq_additional_certificate_info_q">How can I retrieve all information from the certificate?</string>
     <string name="faq_additional_certificate_info">Just tap on the card and the Activity, which
@@ -284,7 +286,7 @@
     <string name="open_keystore_failed">Could not open key store for import</string>
     <string name="title_activity_certificate_ceration">CertificateCerationActivity</string>
     <string name="create_certificate">Create Certificate</string>
-    <string name="navigation_drawer_create_certificate">Create self signed Certificate</string>
+    <string name="navigation_drawer_create_certificate">Create self-signed certificate</string>
     <string name="default_date">Tap to select a date.</string>
     <string name="passphrase">Passphrase:</string>
     <string name="passphrase_repeat">Repeat Passphrase:</string>
