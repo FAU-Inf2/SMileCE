@@ -172,6 +172,8 @@ public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> i
 
         if (keyInfo.getHasPrivateKey()) {
             holder.privateKey.setVisibility(View.VISIBLE);
+        } else {
+            holder.privateKey.setVisibility(View.INVISIBLE);
         }
 
         if (keyInfo.getTerminationDate() != null && keyInfo.getValidAfter() != null) {
