@@ -264,7 +264,7 @@ public class DisplayCertificateInformationActivity extends ActionBarActivity {
         if(SMileCrypto.DEBUG) {
             Log.d(SMileCrypto.LOG_TAG, "Setting validity information");
         }
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy - H:m:s");
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy HH:mm:ss");
         listDataHeader.add(getString(R.string.validity));
         HashMap<String, String> validity = new HashMap<>();
         validity.put("Startdate", keyInfo.getValidAfter().toString(fmt));
