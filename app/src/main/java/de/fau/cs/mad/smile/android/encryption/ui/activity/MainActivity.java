@@ -65,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.toolbar_default_title);
+        toolbar.setTitle(R.string.toolbar_title_list_of_certs);
         setSupportActionBar(toolbar);
 
         try {
@@ -116,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         int i = 0;
-        while (mName == null && i < ownCertificates.size()) { // use first certificate with name set
+        while ((mName == null || mName.equals("")) && i < ownCertificates.size()) { // use first certificate with name set
             KeyInfo keyInfo = ownCertificates.get(i);
             mName = keyInfo.getContact();
             if(SMileCrypto.isDEBUG()) {
@@ -160,7 +160,7 @@ public class MainActivity extends ActionBarActivity {
                     int position = recyclerView.getChildPosition(child);
                     String title;
                     if (position == 0)
-                        title = getResources().getString(R.string.toolbar_default_title);
+                        title = getResources().getString(R.string.toolbar_title_list_of_certs);
                     else
                         title = mTitles[position - 1];
 
@@ -169,7 +169,7 @@ public class MainActivity extends ActionBarActivity {
                                 + title);
                     }
                     //switch not possible here :-(
-                    if (title.equals(getResources().getString(R.string.toolbar_default_title))) {
+                    if (title.equals(getResources().getString(R.string.toolbar_title_list_of_certs))) {
                     } else if (title.equals(getResources().getString(R.string.navigation_drawer_import_certificate))) {
                         Intent i = new Intent(MainActivity.this, ImportCertificateActivity.class);
                         startActivity(i);
