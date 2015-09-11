@@ -47,7 +47,7 @@
     <string name="author_text">Created in project \"Mobile Application Delevopement\" at
     Friedrich-Alexander-University Erlangen-Nuremberg, 2015. \n\n
         · More information about MAD: \n\t<a href="https://mad.cs.fau.de/">https://mad.cs.fau.de/</a>\n
-        · Sourcecode on Github: \n\t<a href="https://github.com/FAU-Inf2/SMile-encryption">https://github.com/FAU-Inf2/SMile-encryption</a></string>
+        · Sourcecode on Github: \n\t<a href="https://github.com/FAU-Inf2/SMileCE">https://github.com/FAU-Inf2/SMileCE</a></string>
     <string name="apache">Copyright 2015 SMile\n\n
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.\n\n
@@ -168,7 +168,7 @@
         \"Import S/MIME-Certificate\" in the sidebar. Use the opened file browser to select the
         certificate (.crt-file) which you want to import.\n
         It is also possible to import a certificate by clicking on the file in your file browser
-    and selecting SMile CE in the list of \"Open with\".</string>
+    and selecting SMileCE in the list of \"Open with\".</string>
 
     <string name="faq_additional_certificate_info_q">How can I retrieve all information from the certificate?</string>
     <string name="faq_additional_certificate_info">Just tap on the card and the Activity, which
@@ -196,6 +196,11 @@
     <string name="faq_public_key_saved">Public Key is imported.</string>
     <string name="faq_private_key_saved">Private Key is imported.</string>
 
+    <string name="faq_set_crypto_app_q">How can I configure SMileCE to decrypt S/MIME encrypted mails?</string>
+    <string name="faq_set_crypto_app">First of all install SMile, SMileCE and import your certificate to
+    SMileCE.\n Then open SMile and navigate to \"Settings\", \"Account Settings", \"Cryptographic\". Tap on
+    \"S/MIME App\" and select \"SMile Cryptographic Extension\". SMile and SMileCE are now connected, you're
+    emails will be decrypted automatically.</string>
 
     <string name="alert_header_start"> Do you want to delete&#160;</string>
     <string name="alert_header_end">\'s key?</string>

@@ -36,6 +36,7 @@
         <item>@string/faq_import_cert_q</item>
         <item>@string/faq_passphrase_saved_q</item>
         <item>@string/faq_import_other_cert_q</item>
+        <item>@string/faq_set_crypto_app_q</item>
         <item>@string/faq_meaning_colour_q</item>
         <item>@string/faq_meaning_coloured_keys_q</item>
         <item>@string/faq_additional_certificate_info_q</item>
@@ -50,6 +51,7 @@
         <item>import_cert</item>
         <item>passphrase_saved</item>
         <item>import_other</item>
+        <item>crypto_app</item>
         <item>meaning_colour</item>
         <item>meaning_coloured_keys</item>
         <item>additional_info</item>
@@ -170,6 +172,11 @@
     <array name="additional_info_0">
         <item>0</item>
         <item>@string/faq_additional_certificate_info</item>
+    </array>
+
+    <array name="crypto_app_0">
+        <item>0</item>
+        <item>@string/faq_set_crypto_app</item>
     </array>
 
     <array name="delete_0">
