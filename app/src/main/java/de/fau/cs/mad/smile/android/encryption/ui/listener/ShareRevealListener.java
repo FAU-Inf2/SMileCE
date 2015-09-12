@@ -8,7 +8,6 @@ import com.daimajia.swipe.SwipeLayout;
 
 import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.R;
-import de.fau.cs.mad.smile.android.encryption.ui.adapter.KeyAdapter;
 
 /**
  * Detect share swipe.
