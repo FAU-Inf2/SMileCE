@@ -13,13 +13,13 @@ Included projects
 --------------------------------
 Tools and Libraries that we used:
 
-- [Javamail-Android](https://code.google.com/p/javamail-android/), License: GNU GPL v2
+- [kore-javamail](https://github.com/konradrenner/kore-javamail), License: GNU GPL v2
 - [Material Design Icons](https://www.google.com/design/icons/), License: CC BY 4.0
 - [Polygon Background](http://blog.spoongraphics.co.uk), License: CC BY 2.0
-- [Spongycastle](https://rtyley.github.io/spongycastle/), License: Adaption of MIT X11 License
-- [scmail](http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3), License: Adaption of MIT X11 License 
+- [Spongycastle](https://github.com/FAU-Inf2/spongycastle), License: Adaption of MIT X11 License
 - [aFileChooser](https://github.com/iPaulPro/aFileChooser), License: Apache License 2.0
 - [joda-time-android](https://github.com/dlew/joda-time-android), License: Apache License 2.0
+- [Apache Commons IO](https://commons.apache.org/proper/commons-io/), License: Apache License 20.
 - [Android Swipe Layout](https://github.com/daimajia/AndroidSwipeLayout), License: MIT 
 
 How-To use SMileCE with SMile
