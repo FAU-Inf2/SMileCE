@@ -19,7 +19,7 @@ Tools and Libraries that we used:
 - [Spongycastle](https://github.com/FAU-Inf2/spongycastle), License: Adaption of MIT X11 License
 - [aFileChooser](https://github.com/iPaulPro/aFileChooser), License: Apache License 2.0
 - [joda-time-android](https://github.com/dlew/joda-time-android), License: Apache License 2.0
-- [Apache Commons IO](https://commons.apache.org/proper/commons-io/), License: Apache License 20.
+- [Apache Commons IO](https://commons.apache.org/proper/commons-io/), License: Apache License 2.0
 - [Android Swipe Layout](https://github.com/daimajia/AndroidSwipeLayout), License: MIT 
 
 How-To use SMileCE with SMile
