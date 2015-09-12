@@ -63,9 +63,9 @@
     </string>
     <string name="other_projects_list">This application includes work from these projects: \n\n
 
-        · Javamail-Android:\n
+        · kore-javamail:\n
         \t License: GNU GPL v2 \n
-        \t Link: <a href="https://code.google.com/p/javamail-android/">https://code.google.com/p/javamail-android/</a> \n
+        \t Link: <a href="https://github.com/konradrenner/kore-javamail">https://github.com/konradrenner/kore-javamail</a> \n
         · Material Design Icons:\n
         \t License: CC BY 4.0 \n
        \t Link: <a href="https://www.google.com/design/icons/">https://www.google.com/design/icons/</a>\n
@@ -74,16 +74,16 @@
         \t Link: <a href="http://blog.spoongraphics.co.uk">http://blog.spoongraphics.co.uk</a>\n
         · Spongycastle:\n
         \t License: Adaption of MIT X11 License \n
-        \t Link: <a href="https://rtyley.github.io/spongycastle/">https://rtyley.github.io/spongycastle/</a>\n
-        · scmail:\n
-        \t License: Adaption of MIT X11 License \n
-        \t Link: <a href="http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3">http://mvnrepository.com/artifact/com.madgag/scmail-jdk15on/1.47.0.3</a>\n
+        \t Link: <a href="https://github.com/FAU-Inf2/spongycastle">https://github.com/FAU-Inf2/spongycastle</a>\n
         · aFileChooser:\n
         \t License: Apache License 2.0\n
         \t Link: <a href="https://github.com/iPaulPro/aFileChooser">https://github.com/iPaulPro/aFileChooser</a>\n
         · joda-time-android:\n
         \t License: Apache License 2.0\n
         \t Link: <a href="https://github.com/dlew/joda-time-android">https://github.com/dlew/joda-time-android</a>\n
+        · Apache Commons IO:\n
+        \t License: Apache License 2.0\n
+        \t Link: <a href="https://commons.apache.org/proper/commons-io/">https://commons.apache.org/proper/commons-io/</a>\n
         · Android Swipe Layout:\n
         \t License: The MIT License (MIT)\n
         \t Link: <a href="https://github.com/daimajia/AndroidSwipeLayout">https://github.com/daimajia/AndroidSwipeLayout</a>\n
