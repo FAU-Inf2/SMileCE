@@ -38,7 +38,8 @@ public class InfoActivity extends ActionBarActivity {
         try {
             pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
-            build.setText(getString(R.string.build) + " " + version);
+            build.setText(getString(R.string.current_version) + version + ".\n" +
+                    getString(R.string.build) + getString(R.string.BuildInfo_Git_CommitHash) + ".");
         } catch (PackageManager.NameNotFoundException e) {
             if(SMileCrypto.isDEBUG()) {
                 Log.d(SMileCrypto.LOG_TAG, "Cannot find package name: " + e.getMessage());

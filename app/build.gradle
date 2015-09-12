@@ -24,7 +24,10 @@ android {
         minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
-        versionName getVersionName()
+        versionName "1.0"
+
+        //resources generated during build
+        resValue "string", "BuildInfo_Git_CommitHash", getVersionName()
     }
 
     signingConfigs {
