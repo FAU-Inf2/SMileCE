@@ -1,11 +1,9 @@
 package de.fau.cs.mad.smile.android.encryption.remote.operation;
 
 import android.content.Intent;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import org.apache.commons.io.FilenameUtils;
 import org.spongycastle.cms.CMSException;
 import org.spongycastle.mail.smime.SMIMEException;
 import org.spongycastle.operator.OperatorCreationException;
@@ -21,7 +19,6 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.concurrent.ExecutionException;
 
-import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.CryptoParams;
 import de.fau.cs.mad.smile.android.encryption.remote.MimeBodyLoaderTaskBuilder;
