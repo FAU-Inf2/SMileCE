@@ -75,10 +75,18 @@ public class Utils {
      */
     public static ColorFilter getColorFilter(String color) {
         int iColor = Color.parseColor(color);
+        return getColorFilter(iColor);
+    }
 
-        int red = (iColor & 0xFF0000) / 0xFFFF;
-        int green = (iColor & 0xFF00) / 0xFF;
-        int blue = iColor & 0xFF;
+    /**
+     * Generate a color filter with a given color.
+     * @param color The color the filter represents.
+     * @return A color filter that can be used to set background colors of image views.
+     */
+    public static ColorFilter getColorFilter(int color) {
+        int red = (color & 0xFF0000) / 0xFFFF;
+        int green = (color & 0xFF00) / 0xFF;
+        int blue = color & 0xFF;
 
         float[] matrix = {0, 0, 0, 0, red
                 , 0, 0, 0, 0, green

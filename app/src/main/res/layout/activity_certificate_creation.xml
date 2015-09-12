@@ -34,8 +34,17 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_clear_black_24dp"
+                android:src="@drawable/ic_backspace_black_24dp"
                 android:layout_marginTop="8dp"/>
+
+            <ImageView
+                android:id="@+id/correct_name"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_toStartOf="@id/clear_name"
+                android:src="@drawable/ic_done_white_24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"/>
 
             <EditText
                 android:id="@+id/name"
@@ -69,8 +78,18 @@
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
                 android:layout_below="@id/name_wrong"
-                android:src="@drawable/ic_clear_black_24dp"
+                android:src="@drawable/ic_backspace_black_24dp"
                 android:layout_marginTop="8dp"/>
+
+            <ImageView
+                android:id="@+id/correct_email"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_toStartOf="@id/clear_email"
+                android:layout_below="@id/name_wrong"
+                android:src="@drawable/ic_done_white_24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"/>
 
             <EditText
                 android:id="@+id/email"
@@ -98,6 +117,16 @@
                 android:layout_below="@id/email_wrong"
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="18dp"/>
+
+            <ImageView
+                android:id="@+id/correct_valid"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/email_wrong"
+                android:src="@drawable/ic_done_white_24dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="32dp"/>
 
             <Button
                 android:id="@+id/valid"
@@ -130,9 +159,19 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_clear_black_24dp"
+                android:src="@drawable/ic_backspace_black_24dp"
                 android:layout_below="@id/valid_wrong"
                 android:layout_marginTop="8dp"/>
+
+            <ImageView
+                android:id="@+id/correct_passphrase"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_toStartOf="@id/clear_passphrase"
+                android:layout_below="@id/valid_wrong"
+                android:src="@drawable/ic_done_white_24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"/>
 
             <EditText
                 android:id="@+id/passphrase"
@@ -158,7 +197,7 @@
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
                 android:layout_below="@id/passphrase"
-                android:src="@drawable/ic_clear_black_24dp"
+                android:src="@drawable/ic_backspace_black_24dp"
                 android:layout_marginTop="8dp"/>
 
             <EditText
@@ -194,7 +233,7 @@
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
                 android:layout_below="@id/passphrase_wrong"
-                android:src="@drawable/ic_clear_black_24dp"
+                android:src="@drawable/ic_backspace_black_24dp"
                 android:visibility="gone"
                 android:layout_marginTop="8dp"/>
 

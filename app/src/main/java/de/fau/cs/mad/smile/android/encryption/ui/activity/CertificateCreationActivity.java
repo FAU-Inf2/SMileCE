@@ -1,7 +1,10 @@
 package de.fau.cs.mad.smile.android.encryption.ui.activity;
 
 import android.app.DatePickerDialog;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -31,6 +34,7 @@ import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.R;
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
 import de.fau.cs.mad.smile.android.encryption.crypto.SelfSignedCertificateCreator;
+import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 
 
 /**
@@ -55,6 +59,10 @@ public class CertificateCreationActivity extends ActionBarActivity {
     private ImageView clearPassphrase;
     private ImageView clearPassphraseRepeat;
     private ImageView clearExpert;
+    private ImageView correctName;
+    private ImageView correctEmail;
+    private ImageView correctDate;
+    private ImageView correctPassphrase;
     private ImageButton create;
     private boolean nameOk;
     private boolean emailOk;
@@ -62,7 +70,10 @@ public class CertificateCreationActivity extends ActionBarActivity {
     private boolean dateOk;
     private boolean expertMode;
     private DateTime valid;
-    DateTimeFormatter format = DateTimeFormat.forPattern("dd. MMMM yyyy");
+    private ColorFilter red;
+    private ColorFilter green;
+
+    private DateTimeFormatter format = DateTimeFormat.forPattern("dd. MMMM yyyy");
 
 
     /**
@@ -86,7 +97,6 @@ public class CertificateCreationActivity extends ActionBarActivity {
                     Log.d(SMileCrypto.LOG_TAG, "Date invalid");
                 }
                 dateOk = false;
-                date.setBackgroundColor(Color.RED);
                 wrongDate.setVisibility(View.VISIBLE);
             } else {
                 if(SMileCrypto.isDEBUG()) {
@@ -94,8 +104,8 @@ public class CertificateCreationActivity extends ActionBarActivity {
                 }
                 wrongDate.setVisibility(View.GONE);
                 dateOk = true;
-                date.setBackgroundColor(Color.GREEN);
             }
+            toggleBackground(correctDate, dateOk);
             booleanSet();
         }
     };
@@ -143,12 +153,22 @@ public class CertificateCreationActivity extends ActionBarActivity {
         clearPassphraseRepeat = (ImageView) findViewById(R.id.clear_passphrase_repeat);
         clearExpert = (ImageView) findViewById(R.id.clear_expert);
 
+        correctDate = (ImageView) findViewById(R.id.correct_valid);
+        correctName = (ImageView) findViewById(R.id.correct_name);
+        correctEmail = (ImageView) findViewById(R.id.correct_email);
+        correctPassphrase = (ImageView) findViewById(R.id.correct_passphrase);
+
+
         create = (ImageButton) findViewById(R.id.create);
 
         nameOk = false;
         emailOk = false;
         passphraseOk = false;
         dateOk = false;
+
+        Resources res = getResources();
+        red = Utils.getColorFilter(res.getColor(R.color.wrong));
+        green = Utils.getColorFilter(res.getColor(R.color.correct));
 
         // Clear listener
         clearName.setOnClickListener(new View.OnClickListener() {
@@ -202,6 +222,12 @@ public class CertificateCreationActivity extends ActionBarActivity {
 
         // OnClickListener
         create.setOnClickListener(new AsyncClickListener());
+
+        booleanSet();
+        toggleBackground(correctName, nameOk);
+        toggleBackground(correctEmail, emailOk);
+        toggleBackground(correctDate, dateOk);
+        toggleBackground(correctPassphrase, passphraseOk);
     }
 
     @Override
@@ -243,12 +269,28 @@ public class CertificateCreationActivity extends ActionBarActivity {
     }
 
     /**
+     * Change image an image color if user input is checked, to give the user feedback if values are correct.
+     * @param view       The ImageView holding the image
+     * @param correct    Is the input correct.
+     */
+    private void toggleBackground(ImageView view, boolean correct) {
+        if(correct) {
+            view.setImageResource(R.drawable.ic_done_white_24dp);
+            Drawable image = view.getDrawable().mutate();
+            image.setColorFilter(green);
+        } else {
+            view.setImageResource(R.drawable.ic_clear_white_24dp);
+            Drawable image = view.getDrawable().mutate();
+            image.setColorFilter(red);
+        }
+    }
+
+    /**
      * Check if the user choose a valid name.
      */
     private class NameWatcher implements TextWatcher {
         private void error() {
             wrongName.setVisibility(View.VISIBLE);
-            name.setBackgroundColor(Color.RED);
             nameOk = false;
         }
 
@@ -268,7 +310,6 @@ public class CertificateCreationActivity extends ActionBarActivity {
             switch (status) {
                 case SMileCrypto.STATUS_NAME_OK :
                     nameOk = true;
-                    name.setBackgroundColor(Color.GREEN);
                     wrongName.setVisibility(View.GONE);
                     break;
                 case  SMileCrypto.STATUS_NAME_EMPTY:
@@ -284,6 +325,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
                     error();
                     break;
             }
+            toggleBackground(correctName, nameOk);
             booleanSet();
         }
     }
@@ -294,7 +336,6 @@ public class CertificateCreationActivity extends ActionBarActivity {
     private class EmailWatcher implements TextWatcher {
         private void error() {
             wrongEmail.setVisibility(View.VISIBLE);
-            email.setBackgroundColor(Color.RED);
             emailOk = false;
         }
 
@@ -315,7 +356,6 @@ public class CertificateCreationActivity extends ActionBarActivity {
             switch (status) {
                 case SMileCrypto.STATUS_EMAIL_OK :
                     emailOk = true;
-                    email.setBackgroundColor(Color.GREEN);
                     wrongEmail.setVisibility(View.GONE);
                     break;
                 case  SMileCrypto.STATUS_EMAIL_EMPTY:
@@ -335,6 +375,7 @@ public class CertificateCreationActivity extends ActionBarActivity {
                     error();
                     break;
             }
+            toggleBackground(correctEmail, emailOk);
             booleanSet();
         }
     }
@@ -364,23 +405,18 @@ public class CertificateCreationActivity extends ActionBarActivity {
             if(passphraseText.length() > 0 && passphraseRepeatText.length() > 0) {
                 if(passphraseText.length() == passphraseRepeatText.length() && passphraseText.equals(passphraseRepeatText)) {
                     passphraseOk = true;
-                    passphrase.setBackgroundColor(Color.GREEN);
-                    passphraseRepeat.setBackgroundColor(Color.GREEN);
                     wrongPassphrase.setVisibility(View.GONE);
                 } else {
                     passphraseOk = false;
-                    passphrase.setBackgroundColor(Color.RED);
-                    passphraseRepeat.setBackgroundColor(Color.RED);
                     wrongPassphrase.setText(getString(R.string.passphrases_dont_match));
                     wrongPassphrase.setVisibility(View.VISIBLE);
                 }
             } else {
                 passphraseOk = false;
-                passphrase.setBackgroundColor(Color.RED);
-                passphraseRepeat.setBackgroundColor(Color.RED);
                 wrongPassphrase.setText(getString(R.string.passphrases_empty));
                 wrongPassphrase.setVisibility(View.VISIBLE);
             }
+            toggleBackground(correctPassphrase, passphraseOk);
             booleanSet();
         }
     }
@@ -480,6 +516,10 @@ public class CertificateCreationActivity extends ActionBarActivity {
             clearName.setVisibility(View.VISIBLE);
             wrongEmail.setVisibility(View.VISIBLE);
             wrongName.setVisibility(View.VISIBLE);
+            correctName.setVisibility(View.VISIBLE);
+            correctEmail.setVisibility(View.VISIBLE);
+            correctDate.setVisibility(View.VISIBLE);
+            correctPassphrase.setVisibility(View.VISIBLE);
             booleanSet();
         } else {
             expertMode = true;
@@ -494,8 +534,16 @@ public class CertificateCreationActivity extends ActionBarActivity {
             clearName.setVisibility(View.GONE);
             wrongEmail.setVisibility(View.GONE);
             wrongName.setVisibility(View.GONE);
+            correctName.setVisibility(View.GONE);
+            correctEmail.setVisibility(View.GONE);
+            correctDate.setVisibility(View.GONE);
+            correctPassphrase.setVisibility(View.GONE);
             booleanSet();
         }
+        toggleBackground(correctName, nameOk);
+        toggleBackground(correctEmail, emailOk);
+        toggleBackground(correctDate, dateOk);
+        toggleBackground(correctPassphrase, passphraseOk);
     }
 
 }
