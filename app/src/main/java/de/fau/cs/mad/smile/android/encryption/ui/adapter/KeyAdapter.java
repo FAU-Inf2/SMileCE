@@ -64,7 +64,7 @@ import de.fau.cs.mad.smile.android.encryption.utilities.Utils;
 public class KeyAdapter extends RecyclerSwipeAdapter<KeyAdapter.KeyViewHolder> implements SharedPreferences.OnSharedPreferenceChangeListener {
     private SortedList<KeyInfo> keylist;
     private Activity activity;
-    private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+    private static SharedPreferences sharedPreferences = App.getPreferences();
 
     public void switchCards(List<KeyInfo> cardsFiltered) {
         keylist.clear();

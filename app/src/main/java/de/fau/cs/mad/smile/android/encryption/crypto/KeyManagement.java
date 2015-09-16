@@ -709,22 +709,21 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  <sensitive>");
         }
 
-        SharedPreferences.Editor e = App.getPreferences().edit();
-        e.putString(alias + "-passphrase", encryptedPassphrase);
-        return e.commit();
+        SharedPreferences.Editor editor = App.getPreferences().edit();
+        editor.putString(alias + "-passphrase", encryptedPassphrase);
+        return editor.commit();
     }
 
     private Boolean deleteP12FromInternalDir(final String alias) {
-        File certDirectory = App.getContext().getApplicationContext().getDir("smime-certificates", Context.MODE_PRIVATE);
+        File certDirectory = App.getCertificateDirectory();
         String filename = alias + ".p12";
         File toBeDeleted = new File(certDirectory, filename);
         return toBeDeleted.delete();
     }
 
     private Boolean deletePassphrase(final String alias) {
-        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(App.getContext().getApplicationContext()).edit();
-        e.remove(alias + "-passphrase");
-        e.commit();
-        return true;
+        SharedPreferences.Editor editor = App.getPreferences().edit();
+        editor.remove(alias + "-passphrase");
+        return editor.commit();
     }
 }

@@ -41,6 +41,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
+import de.fau.cs.mad.smile.android.encryption.App;
 import de.fau.cs.mad.smile.android.encryption.KeyInfo;
 import de.fau.cs.mad.smile.android.encryption.PathConverter;
 import de.fau.cs.mad.smile.android.encryption.R;
@@ -132,7 +133,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
                         }
                         mTextView.setText(getString(R.string.decrypt_file_show_path) + path);
 
-                        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                        SharedPreferences.Editor e = App.getPreferences().edit();
                         e.putString("last-encrypted-file-path", path);
                         e.apply();
                         passphraseDecryptOrPrompt(path);
@@ -236,7 +237,7 @@ public class DecryptLocalMailActivity extends ActionBarActivity {
             return;
         }
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences preferences = App.getPreferences();
         if (!preferences.contains(alias + "-passphrase")) {
             showPassphrasePrompt(pathToFile, alias);
             return;

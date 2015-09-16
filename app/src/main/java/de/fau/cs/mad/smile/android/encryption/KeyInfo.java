@@ -13,7 +13,7 @@ import java.util.List;
 
 public class KeyInfo implements Comparable<KeyInfo> {
 
-    private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+    private static SharedPreferences sharedPreferences = App.getPreferences();
 
     private String alias;
     private String contact;

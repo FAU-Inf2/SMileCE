@@ -14,15 +14,16 @@ import de.fau.cs.mad.smile.android.encryption.R;
  */
 public class ShareRevealListener implements SwipeLayout.OnRevealListener {
 
-    private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-
     @Override
     public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+        SharedPreferences sharedPreferences = App.getPreferences();
         View share_icon = view.findViewById(R.id.share_icon);
+
         float shareDistance = sharedPreferences.getInt("share_distance", 20) / 100.0f;
         if (dragEdge != SwipeLayout.DragEdge.Left) {
             return;
         }
+
         if (v <= shareDistance && share_icon.isShown()) {
             share_icon.setVisibility(View.INVISIBLE);
         } else if (v > shareDistance && !share_icon.isShown()) {

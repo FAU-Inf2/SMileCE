@@ -14,10 +14,9 @@ import de.fau.cs.mad.smile.android.encryption.R;
  */
 public class DeleteRevealListener implements SwipeLayout.OnRevealListener {
 
-    private static SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-
     @Override
     public void onReveal(View view, SwipeLayout.DragEdge dragEdge, float v, int i) {
+        SharedPreferences sharedPreferences = App.getPreferences();
         View delete_icon = view.findViewById(R.id.delete_icon);
         float deleteDistance = sharedPreferences.getInt("delete_distance", 30) / 100.0f;
         if (dragEdge != SwipeLayout.DragEdge.Right) {
