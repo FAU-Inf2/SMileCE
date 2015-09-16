@@ -698,6 +698,7 @@ public class KeyManagement {
         if(SMileCrypto.isDEBUG()) {
             Log.d(SMileCrypto.LOG_TAG, "Encrypt passphrase for alias: " + alias);
         }
+
         String encryptedPassphrase = PasswordEncryption.encryptString(passphrase);
 
         if (encryptedPassphrase == null) {
@@ -708,11 +709,9 @@ public class KeyManagement {
             Log.d(SMileCrypto.LOG_TAG, "Encrypted passphrase will be saved in preferences:  <sensitive>");
         }
 
-        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(App.getContext().getApplicationContext()).edit();
+        SharedPreferences.Editor e = App.getPreferences().edit();
         e.putString(alias + "-passphrase", encryptedPassphrase);
-        e.commit();
-
-        return true;
+        return e.commit();
     }
 
     private Boolean deleteP12FromInternalDir(final String alias) {

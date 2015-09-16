@@ -56,7 +56,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             Preference pref = findPreference(key);
             String summary = getString(R.string.swipe_distance_summary, value);
             pref.setSummary(summary);
-        }else if(key.equals("share_distance")) {
+        } else if(key.equals("share_distance")) {
             int value = sharedPreferences.getInt(key, 20);
             Preference pref = findPreference(key);
             String summary = getString(R.string.swipe_distance_summary, value);
