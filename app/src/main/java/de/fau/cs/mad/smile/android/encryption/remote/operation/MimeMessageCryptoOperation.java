@@ -44,8 +44,10 @@ public abstract class MimeMessageCryptoOperation extends CryptoOperation<MimeMes
         if(processed != null && outputStream != null) {
             copyHeaders(source, processed);
             processed.saveChanges();
-            final File targetFile = getOutputFile();
-            processed.writeTo(new FileOutputStream(targetFile));
+            if(SMileCrypto.isDEBUG()) {
+                final File targetFile = getOutputFile();
+                processed.writeTo(new FileOutputStream(targetFile));
+            }
             processed.writeTo(outputStream);
             result.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
         } else {
