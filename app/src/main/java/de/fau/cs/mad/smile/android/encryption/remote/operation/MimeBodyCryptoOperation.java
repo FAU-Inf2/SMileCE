@@ -38,7 +38,10 @@ abstract class MimeBodyCryptoOperation extends CryptoOperation<MimeBodyPart> {
         final MimeBodyPart processed = process(source, cryptoParams);
         if (processed != null && outputStream != null) {
             final File targetFile = getOutputFile();
-            processed.writeTo(new FileOutputStream(targetFile));
+            if(SMileCrypto.isDEBUG()) {
+                processed.writeTo(new FileOutputStream(targetFile));
+            }
+
             processed.writeTo(outputStream);
         } else {
             Log.wtf(SMileCrypto.LOG_TAG, "processed or outputstream was null, cannot write to output");
