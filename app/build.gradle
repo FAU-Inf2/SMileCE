@@ -23,8 +23,8 @@ android {
         applicationId "de.fau.cs.mad.smile.android.encryption"
         minSdkVersion 19
         targetSdkVersion 22
-        versionCode 3
-        versionName "1.1"
+        versionCode 4
+        versionName "1.1.1"
 
         //resources generated during build
         resValue "string", "BuildInfo_Git_CommitHash", getVersionName()
