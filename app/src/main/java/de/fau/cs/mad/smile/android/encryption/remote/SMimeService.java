@@ -2,6 +2,7 @@ package de.fau.cs.mad.smile.android.encryption.remote;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -15,13 +16,20 @@ import org.spongycastle.x509.CertPathReviewerException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.ExecutionException;
 
 import de.fau.cs.mad.smile.android.encryption.SMileCrypto;
+import de.fau.cs.mad.smile.android.encryption.crypto.KeyManagement;
 import de.fau.cs.mad.smile.android.encryption.remote.operation.CryptoOperation;
 import de.fau.cs.mad.smime_api.ISMimeService;
 import de.fau.cs.mad.smime_api.SMimeApi;
 import korex.mail.MessagingException;
+import korex.mail.internet.AddressException;
+import korex.mail.internet.InternetAddress;
 
 public class SMimeService extends Service {
 
@@ -71,6 +79,10 @@ public class SMimeService extends Service {
                 case SMimeApi.ACTION_VERIFY:
                     operation = cryptoOperationBuilder.createVerifyOperation();
                     break;
+                case SMimeApi.HAS_PRIVATE_KEY:
+                    return checkPrivateKey(data);
+                case SMimeApi.HAS_PUBLIC_KEY:
+                    return checkPublicKey(data);
                 default:
                     if(SMileCrypto.isDEBUG()) {
                         Log.d(SMileCrypto.LOG_TAG, "Unknown operation " + action);
@@ -98,6 +110,37 @@ public class SMimeService extends Service {
         }
 
         return result;
+    }
+
+    private Intent checkPublicKey(Intent data) {
+        String address = data.getStringExtra(SMimeApi.EXTRA_IDENTITY);
+        return checkKey(address, false);
+    }
+
+    private Intent checkPrivateKey(Intent data) {
+        String address = data.getStringExtra(SMimeApi.EXTRA_IDENTITY);
+        return checkKey(address, true);
+
+    }
+
+    private Intent checkKey(String address, boolean includeOwn) {
+        Intent intent = new Intent();
+        try {
+            KeyManagement keyManagement = KeyManagement.getInstance();
+            InternetAddress email = new InternetAddress(address);
+            if(keyManagement.getKeyInfoByAddress(email, includeOwn).size() > 0) {
+                intent.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_SUCCESS);
+            }
+            intent.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+
+        } catch (CertificateException | NoSuchAlgorithmException | NoSuchProviderException | KeyStoreException | IOException e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error getting KeyManagement instance", e);
+            intent.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+        } catch (AddressException e) {
+            Log.e(SMileCrypto.LOG_TAG, "Error creating email address", e);
+            intent.putExtra(SMimeApi.EXTRA_RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+        }
+        return intent;
     }
 
 }
